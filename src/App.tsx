@@ -10,6 +10,7 @@ import { TaskList } from './components/TaskList';
 import { RoundProgress } from './components/RoundProgress';
 import { Settings } from './components/Settings';
 import { GuideButton } from './components/Guide';
+import { InstallPrompt } from './components/InstallPrompt';
 import { useTimer } from './hooks/useTimer';
 import type { TimerPhase } from './hooks/useTimer';
 import { ThemeProvider } from './hooks/useTheme';
@@ -166,6 +167,9 @@ function App() {
           <TodayStats records={todayRecords} />
           <TaskList records={todayRecords} onUpdate={handleUpdateRecord} onDelete={handleDeleteRecord} />
         </div>
+
+        {/* PWA 安装提示 */}
+        <InstallPrompt />
       </div>
     </ThemeProvider>
   );
