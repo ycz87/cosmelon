@@ -2,6 +2,29 @@
 
 ---
 
+## v0.1 — Tauri 桌面应用（2026-02-08）
+
+### 桌面应用
+- 通过 Tauri 2.x 将 Web 应用打包为原生桌面应用
+- 支持 Windows（.msi + .exe NSIS 安装包）和 Linux（.deb + .AppImage）
+- 体积远小于 Electron（Tauri 使用系统 WebView）
+- 窗口默认 420×780，可调整大小，最小 360×600
+- 系统托盘支持（托盘图标 + tooltip）
+- 桌面端功能与 Web 端完全一致
+
+### 自动构建 & 发布
+- GitHub Actions 矩阵构建：Windows + Linux 同时构建
+- 推送 `v*` tag 或手动触发自动构建
+- 构建产物自动发布到 GitHub Releases
+- Rust 编译缓存加速后续构建
+
+### Release 优化
+- LTO（Link-Time Optimization）减小二进制体积
+- 代码剥离（strip）移除调试符号
+- 单 codegen unit 最大化优化效果
+
+---
+
 ## v0.05 — 多语言支持（2026-02-08）
 
 ### 中英文双语

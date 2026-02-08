@@ -157,3 +157,24 @@
 - 主题名、音效名、生长阶段名等全部走 i18n
 - `stats.ts` 的 `formatMinutes` / `getWeekdayShort` 不再被组件直接调用，改用 `t.formatMinutes` / `t.weekdaysShort`
 - 17 files changed, 641 insertions(+), 138 deletions(-)
+
+---
+
+## v0.1 — Tauri 桌面应用 + CI 自动构建（2026-02-08）
+
+### commit: (pending — feature/tauri-v0.1)
+- Tauri 2.x 集成：手动搭建 `src-tauri` 项目结构
+- `Cargo.toml`：tauri 2.10.2 + tray-icon feature + release 优化（LTO、strip、codegen-units=1）
+- `tauri.conf.json`：窗口 420×780、系统托盘、NSIS + WiX (Windows)、deb + AppImage (Linux)
+- `src/lib.rs` + `src/main.rs`：最小 Rust 入口，opener 插件
+- `capabilities/default.json`：Tauri 2.x 权限系统
+- `vite.config.ts` 更新：Tauri dev server 配置（固定端口、HMR、忽略 src-tauri）
+- 图标生成：32x32、128x128、256x256、512x512 PNG + .ico (Windows)
+- GitHub Actions workflow（`.github/workflows/tauri-build.yml`）：
+  - 矩阵构建：ubuntu-22.04 + windows-latest
+  - push tag `v*` 或手动触发
+  - tauri-action 自动构建 + 发布到 GitHub Releases
+  - Rust 缓存加速后续构建
+- `.gitignore` 更新：排除 `src-tauri/target/`、`gen/`、`Cargo.lock`
+- `package.json` 新增 `tauri` 脚本
+
