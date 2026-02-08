@@ -4,12 +4,14 @@ import tailwindcss from '@tailwindcss/vite'
 import { VitePWA } from 'vite-plugin-pwa'
 
 const host = process.env.TAURI_DEV_HOST;
+const isTauri = !!process.env.TAURI_ENV_PLATFORM;
 
 export default defineConfig({
   plugins: [
     react(),
     tailwindcss(),
-    VitePWA({
+    // PWA only for web builds, skip for Tauri desktop
+    ...(!isTauri ? [VitePWA({
       registerType: 'autoUpdate',
       includeAssets: ['icon.svg', 'apple-touch-icon.png'],
       manifest: {
@@ -45,7 +47,6 @@ export default defineConfig({
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
         runtimeCaching: [
           {
-            // Cache Google Fonts stylesheets
             urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
             handler: 'CacheFirst',
             options: {
@@ -54,7 +55,6 @@ export default defineConfig({
             },
           },
           {
-            // Cache Google Fonts webfont files
             urlPattern: /^https:\/\/fonts\.gstatic\.com\/.*/i,
             handler: 'CacheFirst',
             options: {
@@ -65,7 +65,7 @@ export default defineConfig({
           },
         ],
       },
-    }),
+    })] : []),
   ],
 
   // Tauri dev server config
@@ -89,7 +89,6 @@ export default defineConfig({
   envPrefix: ['VITE_', 'TAURI_ENV_*'],
 
   build: {
-    // Tauri uses Chromium on Windows and WebKit on macOS/Linux
     target:
       process.env.TAURI_ENV_PLATFORM === 'windows'
         ? 'chrome105'

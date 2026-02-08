@@ -1,12 +1,9 @@
-#![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
-
 use tauri::Manager;
 
 pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
         .setup(|app| {
-            // Set window title from config
             if let Some(window) = app.get_webview_window("main") {
                 let _ = window.set_title("Watermelon Clock");
             }
