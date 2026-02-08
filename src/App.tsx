@@ -175,7 +175,7 @@ function App() {
         {/* Header */}
         <header className="w-full flex items-center justify-between px-3 sm:px-6 py-2 sm:py-4 shrink-0 z-40 relative">
           <div className="flex items-center gap-1.5 min-w-0">
-            <span className="text-base shrink-0">🍉</span>
+            <img src="/favicon-32x32.png" alt="" className="w-5 h-5 shrink-0" />
             <span className="text-sm font-medium tracking-wide truncate" style={{ color: theme.textMuted }}>{t.appName}</span>
             {streak.current > 0 && (
               <span className="text-xs font-medium shrink-0 ml-1" style={{ color: theme.accent }}>

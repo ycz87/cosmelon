@@ -11,6 +11,7 @@ import {
   CafeSound, FireplaceSound, KeyboardSound, LibrarySound,
   WhiteNoiseSound, PinkNoiseSound, BrownNoiseSound, BinauralBeatsSound,
   TickClassicSound, TickSoftSound, TickMechanicalSound, TickWoodenSound,
+  CampfireSound, SoftPianoSound, CatPurrSound, NightSound, TrainSound, UnderwaterSound,
 } from './ambience/sounds';
 
 export type AmbienceSoundId =
@@ -18,7 +19,8 @@ export type AmbienceSoundId =
   | 'birds' | 'wind' | 'crickets'
   | 'cafe' | 'fireplace' | 'keyboard' | 'library'
   | 'whiteNoise' | 'pinkNoise' | 'brownNoise' | 'binauralBeats'
-  | 'tickClassic' | 'tickSoft' | 'tickMechanical' | 'tickWooden';
+  | 'tickClassic' | 'tickSoft' | 'tickMechanical' | 'tickWooden'
+  | 'campfire' | 'softPiano' | 'catPurr' | 'night' | 'train' | 'underwater';
 
 export interface AmbienceSoundMeta {
   id: AmbienceSoundId;
@@ -51,6 +53,13 @@ export const ALL_AMBIENCE_SOUNDS: AmbienceSoundMeta[] = [
   { id: 'tickSoft', emoji: '🕑', category: 'clock' },
   { id: 'tickMechanical', emoji: '⚙️', category: 'clock' },
   { id: 'tickWooden', emoji: '🪵', category: 'clock' },
+  // Extra
+  { id: 'campfire', emoji: '🏕️', category: 'environment' },
+  { id: 'softPiano', emoji: '🎹', category: 'noise' },
+  { id: 'catPurr', emoji: '🐱', category: 'environment' },
+  { id: 'night', emoji: '🌙', category: 'nature' },
+  { id: 'train', emoji: '🚂', category: 'environment' },
+  { id: 'underwater', emoji: '🫧', category: 'nature' },
 ];
 
 /** Factory for creating sound instances */
@@ -75,6 +84,12 @@ function createSound(id: AmbienceSoundId): AmbienceSound {
     case 'tickSoft': return new TickSoftSound();
     case 'tickMechanical': return new TickMechanicalSound();
     case 'tickWooden': return new TickWoodenSound();
+    case 'campfire': return new CampfireSound();
+    case 'softPiano': return new SoftPianoSound();
+    case 'catPurr': return new CatPurrSound();
+    case 'night': return new NightSound();
+    case 'train': return new TrainSound();
+    case 'underwater': return new UnderwaterSound();
   }
 }
 
