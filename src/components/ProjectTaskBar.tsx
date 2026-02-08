@@ -1,21 +1,17 @@
 /**
  * ProjectTaskBar — 项目模式计时时显示在 Timer 上方的任务信息条
- * 显示：项目名 + 当前任务名 + 进度 + 超时提示
+ * 显示：项目名 + 当前任务名 + 进度
  */
 import { useTheme } from '../hooks/useTheme';
-import { useI18n } from '../i18n';
 import type { ProjectTimerView } from '../hooks/useProjectTimer';
 
 interface Props {
   projectName: string;
   view: ProjectTimerView;
-  onComplete: () => void;
-  onContinueOvertime: () => void;
 }
 
-export function ProjectTaskBar({ projectName, view, onComplete, onContinueOvertime }: Props) {
+export function ProjectTaskBar({ projectName, view }: Props) {
   const theme = useTheme();
-  const t = useI18n();
 
   return (
     <div className="w-full max-w-xs sm:max-w-sm flex flex-col items-center gap-2">
@@ -38,26 +34,6 @@ export function ProjectTaskBar({ projectName, view, onComplete, onContinueOverti
       {view.phase === 'work' && (
         <div className="text-sm font-medium truncate max-w-full" style={{ color: theme.text }}>
           {view.taskName}
-        </div>
-      )}
-
-      {/* Overtime prompt */}
-      {view.showOvertimePrompt && (
-        <div className="flex items-center gap-2 mt-1">
-          <span className="text-xs px-2 py-0.5 rounded-full animate-pulse"
-            style={{ backgroundColor: '#ef444420', color: '#ef4444' }}>
-            ⏰ {t.projectOvertime}
-          </span>
-          <button onClick={onContinueOvertime}
-            className="text-xs px-2 py-0.5 rounded-full cursor-pointer transition-colors"
-            style={{ backgroundColor: theme.inputBg, color: theme.textMuted }}>
-            {t.projectContinue}
-          </button>
-          <button onClick={onComplete}
-            className="text-xs px-2 py-0.5 rounded-full cursor-pointer transition-colors font-medium"
-            style={{ backgroundColor: `${theme.accent}20`, color: theme.accent }}>
-            ✓ {t.projectMarkDone}
-          </button>
         </div>
       )}
     </div>

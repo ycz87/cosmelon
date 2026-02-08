@@ -26,9 +26,14 @@ interface TimerProps {
   onChangeWorkMinutes: (minutes: number) => void;
   /** Overtime mode: show elapsed time counting up with red styling */
   overtime?: { seconds: number };
+  /** Project mode: replace skip/abandon with ✓/✗ buttons */
+  projectControls?: {
+    onComplete: () => void;
+    onSkipTask: () => void;
+  };
 }
 
-export function Timer({ timeLeft, totalDuration, phase, status, celebrating, celebrationStage, celebrationIsRipe, workMinutes, onCelebrationComplete, onStart, onPause, onResume, onSkip, onAbandon, onChangeWorkMinutes, overtime }: TimerProps) {
+export function Timer({ timeLeft, totalDuration, phase, status, celebrating, celebrationStage, celebrationIsRipe, workMinutes, onCelebrationComplete, onStart, onPause, onResume, onSkip, onAbandon, onChangeWorkMinutes, overtime, projectControls }: TimerProps) {
   const isWork = phase === 'work';
   const isOvertime = !!overtime;
   const progress = isOvertime ? 1 : (totalDuration > 0 ? (totalDuration - timeLeft) / totalDuration : 0);
@@ -183,7 +188,7 @@ export function Timer({ timeLeft, totalDuration, phase, status, celebrating, cel
       {/* Controls — 使用主题色 */}
       <div className="flex flex-col items-center gap-2">
         <div className="flex items-center gap-3 sm:gap-4 h-16">
-        {status === 'idle' && (
+        {status === 'idle' && !projectControls && (
           <button onClick={onStart}
             className="w-14 h-14 rounded-full flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95 cursor-pointer"
             style={{ background: `linear-gradient(135deg, ${colors.from}, ${colors.to})`, boxShadow: `0 4px 24px ${colors.from}66` }}>
@@ -214,7 +219,26 @@ export function Timer({ timeLeft, totalDuration, phase, status, celebrating, cel
           </button>
         )}
 
-        {status !== 'idle' && (
+        {/* Project mode: ✗ skip + ✓ complete */}
+        {projectControls && status !== 'idle' && (
+          <>
+            <button onClick={projectControls.onSkipTask}
+              className="w-11 h-11 rounded-full flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95 cursor-pointer text-base"
+              style={{ backgroundColor: `${theme.textMuted}15`, color: theme.textMuted }}
+              title={t.projectSkipped}>
+              ✗
+            </button>
+            <button onClick={projectControls.onComplete}
+              className="w-11 h-11 rounded-full flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95 cursor-pointer text-base font-bold"
+              style={{ backgroundColor: `${theme.accent}20`, color: theme.accent }}
+              title={t.projectMarkDone}>
+              ✓
+            </button>
+          </>
+        )}
+
+        {/* Normal mode: skip button */}
+        {!projectControls && status !== 'idle' && (
           <button onClick={onSkip}
             className="w-11 h-11 rounded-full flex items-center justify-center transition-all duration-200 cursor-pointer"
             style={{ backgroundColor: `${colors.from}15`, color: `${colors.from}99` }}>
@@ -226,8 +250,8 @@ export function Timer({ timeLeft, totalDuration, phase, status, celebrating, cel
         )}
         </div>
 
-        {/* Abandon button — visible but secondary, hover turns red */}
-        {status !== 'idle' && (
+        {/* Abandon button — only in normal pomodoro mode */}
+        {!projectControls && status !== 'idle' && (
           <button
             onClick={onAbandon}
             className="px-3.5 py-1.5 rounded-full text-xs font-semibold border transition-all duration-200 cursor-pointer hover:border-red-400/60 hover:text-red-400/90 hover:bg-red-400/15 active:scale-95"

@@ -126,11 +126,7 @@ function App() {
     playAlertRepeated(settings.alertSound, settings.alertRepeatCount);
   }, [setProjectRecords, settings.alertSound, settings.alertRepeatCount, t]);
 
-  const handleProjectOvertime = useCallback(() => {
-    playAlertRepeated(settings.alertSound, 1);
-  }, [settings.alertSound]);
-
-  const project = useProjectTimer(handleProjectTaskComplete, handleProjectComplete, handleProjectOvertime);
+  const project = useProjectTimer(handleProjectTaskComplete, handleProjectComplete);
 
   // Determine if any timer is active (for disabling mode switch)
   const isAnyTimerActive = timer.status !== 'idle' || (project.state !== null && project.state.phase !== 'setup' && project.state.phase !== 'summary');
@@ -284,8 +280,6 @@ function App() {
                   <ProjectTaskBar
                     projectName={project.state.name}
                     view={pv}
-                    onComplete={project.completeCurrentTask}
-                    onContinueOvertime={project.continueOvertime}
                   />
 
                   {/* Reuse the Timer component */}
@@ -302,10 +296,14 @@ function App() {
                     onStart={() => {}}
                     onPause={project.pause}
                     onResume={project.resume}
-                    onSkip={project.skipCurrentTask}
-                    onAbandon={project.abandonProject}
+                    onSkip={() => {}}
+                    onAbandon={() => {}}
                     onChangeWorkMinutes={() => {}}
                     overtime={pv.isOvertime ? { seconds: pv.overtimeSeconds } : undefined}
+                    projectControls={{
+                      onComplete: project.completeCurrentTask,
+                      onSkipTask: project.skipCurrentTask,
+                    }}
                   />
                 </div>
 

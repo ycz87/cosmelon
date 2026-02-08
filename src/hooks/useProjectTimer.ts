@@ -52,8 +52,6 @@ export interface ProjectTimerView {
   progressFraction: number;
   /** Is in overtime (past estimated time) */
   isOvertime: boolean;
-  /** Show the overtime prompt (first time entering overtime, before user dismisses) */
-  showOvertimePrompt: boolean;
   /** Overtime seconds elapsed beyond estimate */
   overtimeSeconds: number;
 }
@@ -79,7 +77,6 @@ export interface UseProjectTimerReturn {
   // Task actions
   completeCurrentTask: () => void;
   skipCurrentTask: () => void;
-  continueOvertime: () => void;
 
   // Mid-execution edits
   insertTask: (afterIndex: number, task: ProjectTask) => void;
@@ -93,17 +90,14 @@ export interface UseProjectTimerReturn {
 export function useProjectTimer(
   onTaskComplete: (result: ProjectTaskResult) => void,
   onProjectComplete: (record: ProjectRecord) => void,
-  onOvertime: () => void,
 ): UseProjectTimerReturn {
   const [state, setState] = useState<ProjectState | null>(null);
   const [hasSavedProject, setHasSavedProject] = useState(false);
   const onTaskCompleteRef = useRef(onTaskComplete);
   const onProjectCompleteRef = useRef(onProjectComplete);
-  const onOvertimeRef = useRef(onOvertime);
 
   useEffect(() => { onTaskCompleteRef.current = onTaskComplete; }, [onTaskComplete]);
   useEffect(() => { onProjectCompleteRef.current = onProjectComplete; }, [onProjectComplete]);
-  useEffect(() => { onOvertimeRef.current = onOvertime; }, [onOvertime]);
 
   // Check for saved project on mount
   useEffect(() => {
@@ -135,9 +129,8 @@ export function useProjectTimer(
           const newTimeLeft = prev.timeLeft - 1;
 
           if (newTimeLeft <= 0) {
-            // Time's up — enter overtime
-            onOvertimeRef.current();
-            return { ...prev, timeLeft: 0, elapsedSeconds: newElapsed, phase: 'overtime', overtimeDismissed: false, lastTickAt: now };
+            // Time's up — enter overtime (silent, just keep counting)
+            return { ...prev, timeLeft: 0, elapsedSeconds: newElapsed, phase: 'overtime', lastTickAt: now };
           }
           return { ...prev, timeLeft: newTimeLeft, elapsedSeconds: newElapsed, lastTickAt: now };
         }
@@ -215,7 +208,6 @@ export function useProjectTimer(
       progressLabel: `${completedCount + (isBreak ? 1 : 0)}/${totalCount}`,
       progressFraction: totalCount > 0 ? completedCount / totalCount : 0,
       isOvertime,
-      showOvertimePrompt: isOvertime && !state.overtimeDismissed,
       overtimeSeconds,
     };
   })();
@@ -232,7 +224,6 @@ export function useProjectTimer(
       phase: 'setup',
       timeLeft: tasks[0]?.estimatedMinutes * 60 || 0,
       elapsedSeconds: 0,
-      overtimeDismissed: false,
       lastTickAt: new Date().toISOString(),
       startedAt: '',
     };
@@ -384,14 +375,6 @@ export function useProjectTimer(
     });
   }, [recordTaskResult]);
 
-  const continueOvertime = useCallback(() => {
-    setState((prev) => {
-      if (!prev || prev.phase !== 'overtime') return prev;
-      // Just dismiss the prompt — stay in overtime phase, timer keeps ticking
-      return { ...prev, overtimeDismissed: true };
-    });
-  }, []);
-
   // ─── Mid-execution edits ───
 
   const insertTask = useCallback((afterIndex: number, task: ProjectTask) => {
@@ -453,7 +436,6 @@ export function useProjectTimer(
     resume,
     completeCurrentTask,
     skipCurrentTask,
-    continueOvertime,
     insertTask,
     removeTask,
     finishProject,

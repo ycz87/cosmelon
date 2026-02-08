@@ -35,8 +35,6 @@ export interface ProjectState {
   timeLeft: number;
   /** Seconds elapsed on current task (for overtime tracking) */
   elapsedSeconds: number;
-  /** Whether the overtime prompt has been dismissed (user chose "continue") */
-  overtimeDismissed: boolean;
   /** Timestamp when timer was last ticked — for recovery delta calc */
   lastTickAt: string;
   startedAt: string;

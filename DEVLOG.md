@@ -2,6 +2,33 @@
 
 ---
 
+## v0.3.1 — 项目模式交互优化（2026-02-08）
+
+### 需求背景
+Charles 反馈：超时弹窗打断心流，按钮布局不够直观。
+
+### 改动 1：超时默认继续计时
+- 删除超时提示弹窗（"继续计时"和"标记完成"按钮）
+- 删除 `overtimeDismissed` 字段（ProjectState 类型 + useProjectTimer）
+- 删除 `showOvertimePrompt` 逻辑
+- 保留：进度环变红 + 数字变红 "+MM:SS"（用户仍可感知超时）
+
+### 改动 2：项目模式按钮改造
+- 原"跳过"按钮 → 圆形 **✓ 按钮**（绿色/accent，调用 `completeCurrentTask`）
+- 新增圆形 **✗ 按钮**（灰色，调用 `skipCurrentTask`）
+- 两个按钮在计时器下方左右对称
+- 删除底部"放弃本次"按钮（项目模式下，通过 `!projectControls` 条件控制）
+- 普通番茄钟模式完全不受影响
+
+### 涉及文件
+- `src/types/project.ts` — 删除 `overtimeDismissed` 字段
+- `src/hooks/useProjectTimer.ts` — 删除 `overtimeDismissed` 赋值
+- `src/components/Timer.tsx` — 新增 `projectControls` prop，✓/✗ 按钮，条件隐藏放弃按钮
+- `src/components/ProjectTaskBar.tsx` — 清理超时提示
+- `src/App.tsx` — 传递 `projectControls` 给 Timer
+
+---
+
 ## v0.3 — 项目计时模式（2026-02-08）
 
 ### commit: 39ebdfd → cc104d1 → (fix/overtime-bugs)
