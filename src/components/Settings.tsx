@@ -109,7 +109,10 @@ export function Settings({ settings, onChange, disabled, onExport }: SettingsPro
   useEffect(() => {
     if (!isOpen) return;
     const handleClick = (e: MouseEvent) => {
-      if (panelRef.current && !panelRef.current.contains(e.target as Node)) setIsOpen(false);
+      // Don't close settings if clicking inside a modal overlay (z-[100])
+      const target = e.target as HTMLElement;
+      if (target.closest?.('[data-modal-overlay]')) return;
+      if (panelRef.current && !panelRef.current.contains(target)) setIsOpen(false);
     };
     document.addEventListener('mousedown', handleClick);
     return () => document.removeEventListener('mousedown', handleClick);

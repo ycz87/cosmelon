@@ -91,6 +91,12 @@ export const zh: Messages = {
     tickSoft: '轻柔滴答',
     tickMechanical: '机械钟表',
     tickWooden: '木质钟声',
+    campfire: '篝火',
+    softPiano: '轻音乐',
+    catPurr: '猫咪呼噜',
+    night: '夜晚',
+    train: '火车',
+    underwater: '水下',
   },
 
   // Alert sound names

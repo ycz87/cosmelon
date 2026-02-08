@@ -501,7 +501,7 @@ export class CricketsSound extends AmbienceSound {
 
 // ─── 🏠 Environment sounds ───
 
-/** Café — murmuring voices (filtered noise) + occasional clinks */
+/** Café — layered: crowd murmur + cup/saucer clinks + espresso machine hiss + distant music */
 export class CafeSound extends AmbienceSound {
   create(dest: AudioNode): GainNode {
     const ctx = getCtx();
@@ -509,52 +509,108 @@ export class CafeSound extends AmbienceSound {
     gain.connect(dest);
     this.nodes.push(gain);
 
-    // Background murmur
+    // Layer 1: crowd murmur — two bandpass noise layers for voice-like texture
     const buf = noiseBuffer(ctx, 4);
     const src = ctx.createBufferSource();
     src.buffer = buf;
     src.loop = true;
-
-    const bp = ctx.createBiquadFilter();
-    bp.type = 'bandpass';
-    bp.frequency.value = 400;
-    bp.Q.value = 0.8;
-
-    const lp = ctx.createBiquadFilter();
-    lp.type = 'lowpass';
-    lp.frequency.value = 1200;
-
+    const bp1 = ctx.createBiquadFilter();
+    bp1.type = 'bandpass';
+    bp1.frequency.value = 350;
+    bp1.Q.value = 1.2;
+    const bp2 = ctx.createBiquadFilter();
+    bp2.type = 'bandpass';
+    bp2.frequency.value = 800;
+    bp2.Q.value = 0.8;
     const murmurGain = ctx.createGain();
-    murmurGain.gain.value = 0.5;
-
-    src.connect(bp);
-    bp.connect(lp);
-    lp.connect(murmurGain);
+    murmurGain.gain.value = 0.25;
+    // Slow modulation for natural crowd ebb and flow
+    const lfo = ctx.createOscillator();
+    lfo.type = 'sine';
+    lfo.frequency.value = 0.07;
+    const lfoG = ctx.createGain();
+    lfoG.gain.value = 0.08;
+    lfo.connect(lfoG);
+    lfoG.connect(murmurGain.gain);
+    src.connect(bp1);
+    src.connect(bp2);
+    bp1.connect(murmurGain);
+    bp2.connect(murmurGain);
     murmurGain.connect(gain);
+    lfo.start();
     src.start();
+    this.sources.push(src, lfo);
+    this.nodes.push(bp1, bp2, murmurGain, lfoG);
 
-    this.sources.push(src);
-    this.nodes.push(bp, lp, murmurGain);
+    // Layer 2: higher murmur layer (female voices)
+    const buf2 = noiseBuffer(ctx, 4);
+    const src2 = ctx.createBufferSource();
+    src2.buffer = buf2;
+    src2.loop = true;
+    const bp3 = ctx.createBiquadFilter();
+    bp3.type = 'bandpass';
+    bp3.frequency.value = 1200;
+    bp3.Q.value = 1.5;
+    const hiMurmur = ctx.createGain();
+    hiMurmur.gain.value = 0.08;
+    src2.connect(bp3);
+    bp3.connect(hiMurmur);
+    hiMurmur.connect(gain);
+    src2.start();
+    this.sources.push(src2);
+    this.nodes.push(bp3, hiMurmur);
 
-    // Occasional cup clinks
+    // Cup/saucer clinks — ceramic resonance
     const clink = () => {
       if (!this._running) return;
       const now = ctx.currentTime;
-      const freq = 3000 + Math.random() * 2000;
+      const freq = 2500 + Math.random() * 2500;
       const osc = ctx.createOscillator();
       osc.type = 'sine';
       osc.frequency.value = freq;
       const g = ctx.createGain();
-      g.gain.setValueAtTime(0.04 + Math.random() * 0.03, now);
-      g.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
-      osc.connect(g);
-      g.connect(gain);
-      osc.start(now);
-      osc.stop(now + 0.08);
+      g.gain.setValueAtTime(0.06 + Math.random() * 0.04, now);
+      g.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
+      // Add a second harmonic for ceramic ring
+      const osc2 = ctx.createOscillator();
+      osc2.type = 'sine';
+      osc2.frequency.value = freq * 2.4;
+      const g2 = ctx.createGain();
+      g2.gain.setValueAtTime(0.02, now);
+      g2.gain.exponentialRampToValueAtTime(0.001, now + 0.06);
+      osc.connect(g); g.connect(gain);
+      osc2.connect(g2); g2.connect(gain);
+      osc.start(now); osc.stop(now + 0.12);
+      osc2.start(now); osc2.stop(now + 0.06);
+    };
+
+    // Espresso machine hiss — short burst of filtered noise
+    const espresso = () => {
+      if (!this._running) return;
+      const now = ctx.currentTime;
+      const dur = 1.5 + Math.random() * 2;
+      const eBuf = noiseBuffer(ctx, dur);
+      const eSrc = ctx.createBufferSource();
+      eSrc.buffer = eBuf;
+      const hp = ctx.createBiquadFilter();
+      hp.type = 'highpass';
+      hp.frequency.value = 3000;
+      const eGain = ctx.createGain();
+      eGain.gain.setValueAtTime(0, now);
+      eGain.gain.linearRampToValueAtTime(0.06, now + 0.3);
+      eGain.gain.setValueAtTime(0.06, now + dur - 0.5);
+      eGain.gain.linearRampToValueAtTime(0, now + dur);
+      eSrc.connect(hp);
+      hp.connect(eGain);
+      eGain.connect(gain);
+      eSrc.start(now);
+      eSrc.stop(now + dur);
     };
 
     this.loopTimer = setInterval(() => {
-      if (Math.random() < 0.06) clink();
+      const r = Math.random();
+      if (r < 0.05) clink();
+      else if (r < 0.07) espresso();
     }, 500);
 
     return gain;
@@ -894,10 +950,10 @@ export class TickClassicSound extends AmbienceSound {
       osc.type = 'sine';
       osc.frequency.setValueAtTime(800, now);
       osc.frequency.exponentialRampToValueAtTime(400, now + 0.03);
-      g.gain.setValueAtTime(0.08, now);
-      g.gain.exponentialRampToValueAtTime(0.001, now + 0.06);
+      g.gain.setValueAtTime(0.3, now);
+      g.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
       osc.connect(g); g.connect(gain);
-      osc.start(now); osc.stop(now + 0.06);
+      osc.start(now); osc.stop(now + 0.08);
     };
     tick();
     this.loopTimer = setInterval(tick, 1000);
@@ -920,10 +976,10 @@ export class TickSoftSound extends AmbienceSound {
       const g = ctx.createGain();
       osc.type = 'sine';
       osc.frequency.value = 1200;
-      g.gain.setValueAtTime(0.04, now);
-      g.gain.exponentialRampToValueAtTime(0.001, now + 0.04);
+      g.gain.setValueAtTime(0.15, now);
+      g.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
       osc.connect(g); g.connect(gain);
-      osc.start(now); osc.stop(now + 0.04);
+      osc.start(now); osc.stop(now + 0.05);
     };
     tick();
     this.loopTimer = setInterval(tick, 1000);
@@ -947,19 +1003,19 @@ export class TickMechanicalSound extends AmbienceSound {
       osc.type = 'square';
       osc.frequency.setValueAtTime(600, now);
       osc.frequency.exponentialRampToValueAtTime(200, now + 0.02);
-      g.gain.setValueAtTime(0.06, now);
-      g.gain.exponentialRampToValueAtTime(0.001, now + 0.04);
+      g.gain.setValueAtTime(0.2, now);
+      g.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
       osc.connect(g); g.connect(gain);
-      osc.start(now); osc.stop(now + 0.04);
+      osc.start(now); osc.stop(now + 0.05);
 
       const osc2 = ctx.createOscillator();
       const g2 = ctx.createGain();
       osc2.type = 'sine';
       osc2.frequency.value = 1500;
-      g2.gain.setValueAtTime(0.02, now + 0.01);
-      g2.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
+      g2.gain.setValueAtTime(0.08, now + 0.01);
+      g2.gain.exponentialRampToValueAtTime(0.001, now + 0.06);
       osc2.connect(g2); g2.connect(gain);
-      osc2.start(now + 0.01); osc2.stop(now + 0.05);
+      osc2.start(now + 0.01); osc2.stop(now + 0.06);
     };
     tick();
     this.loopTimer = setInterval(tick, 1000);
@@ -989,13 +1045,348 @@ export class TickWoodenSound extends AmbienceSound {
       bp.frequency.value = 1000;
       bp.Q.value = 2;
       const g = ctx.createGain();
-      g.gain.setValueAtTime(0.12, now);
-      g.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
+      g.gain.setValueAtTime(0.4, now);
+      g.gain.exponentialRampToValueAtTime(0.001, now + 0.06);
       src.connect(bp); bp.connect(g); g.connect(gain);
-      src.start(now); src.stop(now + 0.05);
+      src.start(now); src.stop(now + 0.06);
     };
     tick();
     this.loopTimer = setInterval(tick, 1000);
+    return gain;
+  }
+}
+
+// ─── 🆕 Additional ambience sounds ───
+
+/** Campfire — crackling + warm low rumble (outdoor feel) */
+export class CampfireSound extends AmbienceSound {
+  create(dest: AudioNode): GainNode {
+    const ctx = getCtx();
+    const gain = ctx.createGain();
+    gain.connect(dest);
+    this.nodes.push(gain);
+
+    const buf = noiseBuffer(ctx, 4);
+    const src = ctx.createBufferSource();
+    src.buffer = buf;
+    src.loop = true;
+    const lp = ctx.createBiquadFilter();
+    lp.type = 'lowpass';
+    lp.frequency.value = 250;
+    const baseG = ctx.createGain();
+    baseG.gain.value = 0.35;
+    const lfo = ctx.createOscillator();
+    lfo.type = 'sine';
+    lfo.frequency.value = 0.1;
+    const lfoG = ctx.createGain();
+    lfoG.gain.value = 0.1;
+    lfo.connect(lfoG);
+    lfoG.connect(baseG.gain);
+    src.connect(lp);
+    lp.connect(baseG);
+    baseG.connect(gain);
+    lfo.start();
+    src.start();
+    this.sources.push(src, lfo);
+    this.nodes.push(lp, baseG, lfoG);
+
+    const crackle = () => {
+      if (!this._running) return;
+      const now = ctx.currentTime;
+      const count = 1 + Math.floor(Math.random() * 3);
+      for (let i = 0; i < count; i++) {
+        const t = now + Math.random() * 0.05;
+        const dur = 0.015 + Math.random() * 0.03;
+        const cBuf = ctx.createBuffer(1, Math.floor(ctx.sampleRate * dur), ctx.sampleRate);
+        const data = cBuf.getChannelData(0);
+        for (let j = 0; j < data.length; j++) data[j] = (Math.random() * 2 - 1) * Math.exp(-j / (data.length * 0.2));
+        const cSrc = ctx.createBufferSource();
+        cSrc.buffer = cBuf;
+        const hp = ctx.createBiquadFilter();
+        hp.type = 'highpass';
+        hp.frequency.value = 800 + Math.random() * 2000;
+        const g = ctx.createGain();
+        g.gain.setValueAtTime(0.15 + Math.random() * 0.2, t);
+        g.gain.exponentialRampToValueAtTime(0.001, t + dur + 0.03);
+        cSrc.connect(hp); hp.connect(g); g.connect(gain);
+        cSrc.start(t); cSrc.stop(t + dur + 0.04);
+      }
+    };
+
+    const pop = () => {
+      if (!this._running) return;
+      const now = ctx.currentTime;
+      const osc = ctx.createOscillator();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(300 + Math.random() * 200, now);
+      osc.frequency.exponentialRampToValueAtTime(80, now + 0.05);
+      const g = ctx.createGain();
+      g.gain.setValueAtTime(0.2, now);
+      g.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
+      osc.connect(g); g.connect(gain);
+      osc.start(now); osc.stop(now + 0.08);
+    };
+
+    this.loopTimer = setInterval(() => {
+      if (Math.random() < 0.4) crackle();
+      if (Math.random() < 0.04) pop();
+    }, 80);
+
+    return gain;
+  }
+}
+
+/** Soft Piano — gentle ambient notes */
+export class SoftPianoSound extends AmbienceSound {
+  create(dest: AudioNode): GainNode {
+    const ctx = getCtx();
+    const gain = ctx.createGain();
+    gain.connect(dest);
+    this.nodes.push(gain);
+    const notes = [261.63, 293.66, 329.63, 392, 440, 523.25, 587.33, 659.25];
+    const playNote = () => {
+      if (!this._running) return;
+      const now = ctx.currentTime;
+      const freq = notes[Math.floor(Math.random() * notes.length)];
+      const octave = Math.random() < 0.3 ? 0.5 : 1;
+      const osc = ctx.createOscillator();
+      osc.type = 'sine';
+      osc.frequency.value = freq * octave;
+      const osc2 = ctx.createOscillator();
+      osc2.type = 'sine';
+      osc2.frequency.value = freq * octave * 2;
+      const g = ctx.createGain();
+      g.gain.setValueAtTime(0, now);
+      g.gain.linearRampToValueAtTime(0.06, now + 0.02);
+      g.gain.exponentialRampToValueAtTime(0.001, now + 2.5);
+      const g2 = ctx.createGain();
+      g2.gain.setValueAtTime(0.02, now);
+      g2.gain.exponentialRampToValueAtTime(0.001, now + 0.8);
+      osc.connect(g); g.connect(gain);
+      osc2.connect(g2); g2.connect(gain);
+      osc.start(now); osc.stop(now + 2.5);
+      osc2.start(now); osc2.stop(now + 0.8);
+    };
+    this.loopTimer = setInterval(() => { if (Math.random() < 0.3) playNote(); }, 800);
+    return gain;
+  }
+}
+
+/** Cat Purr — low-frequency oscillation */
+export class CatPurrSound extends AmbienceSound {
+  create(dest: AudioNode): GainNode {
+    const ctx = getCtx();
+    const gain = ctx.createGain();
+    gain.connect(dest);
+    this.nodes.push(gain);
+    const osc = ctx.createOscillator();
+    osc.type = 'sawtooth';
+    osc.frequency.value = 25;
+    const lp = ctx.createBiquadFilter();
+    lp.type = 'lowpass';
+    lp.frequency.value = 150;
+    const lfo = ctx.createOscillator();
+    lfo.type = 'sine';
+    lfo.frequency.value = 0.4;
+    const lfoG = ctx.createGain();
+    lfoG.gain.value = 0.15;
+    const purrGain = ctx.createGain();
+    purrGain.gain.value = 0.3;
+    lfo.connect(lfoG);
+    lfoG.connect(purrGain.gain);
+    osc.connect(lp);
+    lp.connect(purrGain);
+    purrGain.connect(gain);
+    const osc2 = ctx.createOscillator();
+    osc2.type = 'sine';
+    osc2.frequency.value = 50;
+    const g2 = ctx.createGain();
+    g2.gain.value = 0.08;
+    osc2.connect(g2);
+    g2.connect(purrGain);
+    osc.start(); osc2.start(); lfo.start();
+    this.sources.push(osc, osc2, lfo);
+    this.nodes.push(lp, lfoG, purrGain, g2);
+    return gain;
+  }
+}
+
+/** Night Ambience — gentle wind + distant crickets + occasional owl */
+export class NightSound extends AmbienceSound {
+  create(dest: AudioNode): GainNode {
+    const ctx = getCtx();
+    const gain = ctx.createGain();
+    gain.connect(dest);
+    this.nodes.push(gain);
+    const buf = noiseBuffer(ctx, 4);
+    const src = ctx.createBufferSource();
+    src.buffer = buf;
+    src.loop = true;
+    const lp = ctx.createBiquadFilter();
+    lp.type = 'lowpass';
+    lp.frequency.value = 300;
+    const windG = ctx.createGain();
+    windG.gain.value = 0.15;
+    const lfo = ctx.createOscillator();
+    lfo.type = 'sine';
+    lfo.frequency.value = 0.06;
+    const lfoG = ctx.createGain();
+    lfoG.gain.value = 0.06;
+    lfo.connect(lfoG);
+    lfoG.connect(windG.gain);
+    src.connect(lp);
+    lp.connect(windG);
+    windG.connect(gain);
+    lfo.start(); src.start();
+    this.sources.push(src, lfo);
+    this.nodes.push(lp, windG, lfoG);
+
+    const cricket = () => {
+      if (!this._running) return;
+      const now = ctx.currentTime;
+      const freq = 4200 + Math.random() * 800;
+      const burstLen = 2 + Math.floor(Math.random() * 3);
+      for (let p = 0; p < burstLen; p++) {
+        const t = now + p * 0.04;
+        const osc = ctx.createOscillator();
+        osc.type = 'sine';
+        osc.frequency.value = freq;
+        const g = ctx.createGain();
+        g.gain.setValueAtTime(0, t);
+        g.gain.linearRampToValueAtTime(0.02, t + 0.005);
+        g.gain.linearRampToValueAtTime(0, t + 0.025);
+        osc.connect(g); g.connect(gain);
+        osc.start(t); osc.stop(t + 0.03);
+      }
+    };
+
+    const owl = () => {
+      if (!this._running) return;
+      const now = ctx.currentTime;
+      const osc = ctx.createOscillator();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(380, now);
+      osc.frequency.linearRampToValueAtTime(340, now + 0.4);
+      const g = ctx.createGain();
+      g.gain.setValueAtTime(0, now);
+      g.gain.linearRampToValueAtTime(0.05, now + 0.05);
+      g.gain.setValueAtTime(0.05, now + 0.3);
+      g.gain.exponentialRampToValueAtTime(0.001, now + 0.5);
+      osc.connect(g); g.connect(gain);
+      osc.start(now); osc.stop(now + 0.5);
+    };
+
+    this.loopTimer = setInterval(() => {
+      if (Math.random() < 0.15) cricket();
+      if (Math.random() < 0.008) owl();
+    }, 500);
+    return gain;
+  }
+}
+
+/** Train — rhythmic rail clacking + low rumble */
+export class TrainSound extends AmbienceSound {
+  create(dest: AudioNode): GainNode {
+    const ctx = getCtx();
+    const gain = ctx.createGain();
+    gain.connect(dest);
+    this.nodes.push(gain);
+    const buf = noiseBuffer(ctx, 4);
+    const src = ctx.createBufferSource();
+    src.buffer = buf;
+    src.loop = true;
+    const lp = ctx.createBiquadFilter();
+    lp.type = 'lowpass';
+    lp.frequency.value = 200;
+    const rumbleG = ctx.createGain();
+    rumbleG.gain.value = 0.3;
+    src.connect(lp);
+    lp.connect(rumbleG);
+    rumbleG.connect(gain);
+    src.start();
+    this.sources.push(src);
+    this.nodes.push(lp, rumbleG);
+
+    let beat = 0;
+    const clack = () => {
+      if (!this._running) return;
+      const now = ctx.currentTime;
+      const isDouble = beat % 2 === 0;
+      beat++;
+      const hit = (t: number) => {
+        const dur = 0.02;
+        const cBuf = ctx.createBuffer(1, Math.floor(ctx.sampleRate * dur), ctx.sampleRate);
+        const data = cBuf.getChannelData(0);
+        for (let i = 0; i < data.length; i++) data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (data.length * 0.15));
+        const cSrc = ctx.createBufferSource();
+        cSrc.buffer = cBuf;
+        const bp = ctx.createBiquadFilter();
+        bp.type = 'bandpass';
+        bp.frequency.value = 600 + Math.random() * 400;
+        bp.Q.value = 3;
+        const g = ctx.createGain();
+        g.gain.setValueAtTime(0.15 + Math.random() * 0.05, t);
+        g.gain.exponentialRampToValueAtTime(0.001, t + 0.04);
+        cSrc.connect(bp); bp.connect(g); g.connect(gain);
+        cSrc.start(t); cSrc.stop(t + 0.05);
+      };
+      hit(now);
+      if (isDouble) hit(now + 0.12);
+    };
+    this.loopTimer = setInterval(clack, 600);
+    return gain;
+  }
+}
+
+/** Underwater — deep filtered noise + bubble pops */
+export class UnderwaterSound extends AmbienceSound {
+  create(dest: AudioNode): GainNode {
+    const ctx = getCtx();
+    const gain = ctx.createGain();
+    gain.connect(dest);
+    this.nodes.push(gain);
+    const buf = noiseBuffer(ctx, 4);
+    const src = ctx.createBufferSource();
+    src.buffer = buf;
+    src.loop = true;
+    const lp = ctx.createBiquadFilter();
+    lp.type = 'lowpass';
+    lp.frequency.value = 500;
+    const lp2 = ctx.createBiquadFilter();
+    lp2.type = 'lowpass';
+    lp2.frequency.value = 300;
+    const waterG = ctx.createGain();
+    waterG.gain.value = 0.4;
+    const lfo = ctx.createOscillator();
+    lfo.type = 'sine';
+    lfo.frequency.value = 0.08;
+    const lfoG = ctx.createGain();
+    lfoG.gain.value = 100;
+    lfo.connect(lfoG);
+    lfoG.connect(lp.frequency);
+    src.connect(lp);
+    lp.connect(lp2);
+    lp2.connect(waterG);
+    waterG.connect(gain);
+    lfo.start(); src.start();
+    this.sources.push(src, lfo);
+    this.nodes.push(lp, lp2, waterG, lfoG);
+
+    const bubble = () => {
+      if (!this._running) return;
+      const now = ctx.currentTime;
+      const freq = 200 + Math.random() * 600;
+      const osc = ctx.createOscillator();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(freq, now);
+      osc.frequency.exponentialRampToValueAtTime(freq * 2, now + 0.08);
+      const g = ctx.createGain();
+      g.gain.setValueAtTime(0.04 + Math.random() * 0.03, now);
+      g.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
+      osc.connect(g); g.connect(gain);
+      osc.start(now); osc.stop(now + 0.1);
+    };
+    this.loopTimer = setInterval(() => { if (Math.random() < 0.15) bubble(); }, 300);
     return gain;
   }
 }

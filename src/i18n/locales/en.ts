@@ -91,6 +91,12 @@ export const en: Messages = {
     tickSoft: 'Soft Tick',
     tickMechanical: 'Mechanical',
     tickWooden: 'Wooden',
+    campfire: 'Campfire',
+    softPiano: 'Soft Piano',
+    catPurr: 'Cat Purr',
+    night: 'Night',
+    train: 'Train',
+    underwater: 'Underwater',
   },
 
   // Alert sound names
