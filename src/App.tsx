@@ -14,6 +14,7 @@ import { InstallPrompt } from './components/InstallPrompt';
 import { HistoryPanel } from './components/HistoryPanel';
 import { ModeSwitch } from './components/ModeSwitch';
 import { ProjectMode } from './components/ProjectMode';
+import { ProjectTaskBar } from './components/ProjectTaskBar';
 import { ProjectRecoveryModal } from './components/ProjectRecoveryModal';
 import { useTimer } from './hooks/useTimer';
 import type { TimerPhase } from './hooks/useTimer';
@@ -125,7 +126,11 @@ function App() {
     playAlertRepeated(settings.alertSound, settings.alertRepeatCount);
   }, [setProjectRecords, settings.alertSound, settings.alertRepeatCount, t]);
 
-  const project = useProjectTimer(handleProjectTaskComplete, handleProjectComplete);
+  const handleProjectOvertime = useCallback(() => {
+    playAlertRepeated(settings.alertSound, 1);
+  }, [settings.alertSound]);
+
+  const project = useProjectTimer(handleProjectTaskComplete, handleProjectComplete, handleProjectOvertime);
 
   // Determine if any timer is active (for disabling mode switch)
   const isAnyTimerActive = timer.status !== 'idle' || (project.state !== null && project.state.phase !== 'setup' && project.state.phase !== 'summary');
@@ -264,38 +269,91 @@ function App() {
         </header>
 
         {/* 主内容 */}
-        {mode === 'pomodoro' ? (
-          <>
-            <div className="flex-1 flex flex-col items-center justify-center gap-5 sm:gap-7 w-full px-4">
-              <Timer
-                timeLeft={timer.timeLeft} totalDuration={totalDuration}
-                phase={timer.phase} status={timer.status}
-                celebrating={timer.celebrating}
-                celebrationStage={celebrationGrowthStage}
-                celebrationIsRipe={celebrationIsRipe}
-                workMinutes={settings.workMinutes}
-                onCelebrationComplete={timer.dismissCelebration}
-                onStart={timer.start} onPause={timer.pause}
-                onResume={timer.resume} onSkip={timer.skip}
-                onAbandon={timer.abandon}
-                onChangeWorkMinutes={handleChangeWorkMinutes}
-              />
-              <RoundProgress current={timer.roundProgress} total={settings.pomodorosPerRound} idle={timer.status === 'idle'} />
-              <TaskInput value={currentTask} onChange={setCurrentTask} disabled={timer.status !== 'idle'} />
-            </div>
+        {(() => {
+          // Project execution: use the same Timer component
+          const pv = project.timerView;
+          const isProjectExecuting = pv !== null && mode === 'project';
 
-            {/* 底部 */}
-            <div className="flex flex-col items-center gap-5 w-full max-w-xs sm:max-w-sm px-4 pt-4 sm:pt-6 pb-6">
-              <TodayStats records={todayRecords} />
-              <TaskList records={todayRecords} onUpdate={handleUpdateRecord} onDelete={handleDeleteRecord} />
-            </div>
-          </>
-        ) : (
-          <ProjectMode
-            project={project}
-            onSwitchToPomodoro={() => setMode('pomodoro')}
-          />
-        )}
+          if (isProjectExecuting && project.state) {
+            const projWorkMinutes = project.state.tasks[project.state.currentTaskIndex]?.estimatedMinutes || 25;
+            const projGrowthStage: GrowthStage | null = null; // no celebration in project mode mid-task
+            return (
+              <>
+                <div className="flex-1 flex flex-col items-center justify-center gap-4 sm:gap-6 w-full px-4">
+                  {/* Project task bar above timer */}
+                  <ProjectTaskBar
+                    projectName={project.state.name}
+                    view={pv}
+                    onComplete={project.completeCurrentTask}
+                    onContinueOvertime={project.continueOvertime}
+                  />
+
+                  {/* Reuse the Timer component */}
+                  <Timer
+                    timeLeft={pv.isOvertime ? 0 : pv.timeLeft}
+                    totalDuration={pv.totalDuration}
+                    phase={pv.phase}
+                    status={pv.status}
+                    celebrating={false}
+                    celebrationStage={projGrowthStage}
+                    celebrationIsRipe={false}
+                    workMinutes={projWorkMinutes}
+                    onCelebrationComplete={() => {}}
+                    onStart={() => {}}
+                    onPause={project.pause}
+                    onResume={project.resume}
+                    onSkip={project.skipCurrentTask}
+                    onAbandon={project.abandonProject}
+                    onChangeWorkMinutes={() => {}}
+                  />
+                </div>
+
+                {/* Bottom stats still visible */}
+                <div className="flex flex-col items-center gap-5 w-full max-w-xs sm:max-w-sm px-4 pt-4 sm:pt-6 pb-6">
+                  <TodayStats records={todayRecords} />
+                </div>
+              </>
+            );
+          }
+
+          if (mode === 'pomodoro') {
+            return (
+              <>
+                <div className="flex-1 flex flex-col items-center justify-center gap-5 sm:gap-7 w-full px-4">
+                  <Timer
+                    timeLeft={timer.timeLeft} totalDuration={totalDuration}
+                    phase={timer.phase} status={timer.status}
+                    celebrating={timer.celebrating}
+                    celebrationStage={celebrationGrowthStage}
+                    celebrationIsRipe={celebrationIsRipe}
+                    workMinutes={settings.workMinutes}
+                    onCelebrationComplete={timer.dismissCelebration}
+                    onStart={timer.start} onPause={timer.pause}
+                    onResume={timer.resume} onSkip={timer.skip}
+                    onAbandon={timer.abandon}
+                    onChangeWorkMinutes={handleChangeWorkMinutes}
+                  />
+                  <RoundProgress current={timer.roundProgress} total={settings.pomodorosPerRound} idle={timer.status === 'idle'} />
+                  <TaskInput value={currentTask} onChange={setCurrentTask} disabled={timer.status !== 'idle'} />
+                </div>
+
+                {/* 底部 */}
+                <div className="flex flex-col items-center gap-5 w-full max-w-xs sm:max-w-sm px-4 pt-4 sm:pt-6 pb-6">
+                  <TodayStats records={todayRecords} />
+                  <TaskList records={todayRecords} onUpdate={handleUpdateRecord} onDelete={handleDeleteRecord} />
+                </div>
+              </>
+            );
+          }
+
+          // Project mode: setup or summary
+          return (
+            <ProjectMode
+              project={project}
+              onSwitchToPomodoro={() => setMode('pomodoro')}
+            />
+          );
+        })()}
 
         {/* PWA 安装提示 */}
         <InstallPrompt />

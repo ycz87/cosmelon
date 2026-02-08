@@ -143,7 +143,7 @@ src/
 │   ├── AlertPickerModal.tsx   # 提醒音效选择弹窗
 │   ├── ModeSwitch.tsx         # 番茄钟/项目模式切换
 │   ├── ProjectSetup.tsx       # 项目创建 + 子任务编辑
-│   ├── ProjectExecution.tsx   # 项目执行视图（计时 + 任务列表）
+│   ├── ProjectTaskBar.tsx     # 项目计时信息条（任务名 + 进度）
 │   ├── ProjectSummary.tsx     # 项目完成总结
 │   ├── ProjectRecoveryModal.tsx # 中断恢复弹窗
 │   ├── ProjectMode.tsx        # 项目模式容器

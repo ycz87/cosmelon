@@ -4,65 +4,38 @@
 
 ## v0.3 — 项目计时模式（2026-02-08）
 
-### commit: (feature/project-timer-v0.3)
+### commit: 39ebdfd + (fix/project-reuse-timer)
 
-### 新功能：项目计时模式（Project Timer）
-在番茄钟基础上新增"项目模式"——用户可以规划一整段工作流，拆成多个子任务按顺序执行。
+### 重构：项目模式计时复用番茄钟 Timer
+Charles 反馈项目模式和番茄钟是两个完全不同的界面，体验割裂。重构为：
+- **项目编排**（ProjectSetup）→ 独立界面（保持不变）
+- **计时执行** → **复用番茄钟 Timer 组件**（进度环、西瓜生长、背景音全部保留）
+- **完成总结**（ProjectSummary）→ 独立界面（保持不变）
 
-#### 核心流程
-1. 创建项目（输入名称）→ 添加子任务（名称 + 预计时间 + 休息时间）
-2. 开始执行 → 按顺序自动推进：子任务1 → 休息 → 子任务2 → 休息 → ...
-3. 超时提醒 → 用户选择"继续计时"或"标记完成"
-4. 全部完成 → 总结页面：预计 vs 实际时间对比
+#### 改动
+- 删除 `ProjectExecution.tsx`（独立计时界面）
+- 新增 `ProjectTaskBar.tsx`（轻量信息条：项目名 + 进度条 + 当前任务 + 超时提示）
+- 重写 `useProjectTimer.ts`：新增 `timerView` 输出，映射项目状态到 Timer 兼容的 phase/status/timeLeft
+- 重写 `App.tsx` 主内容区：项目执行时渲染 Timer + ProjectTaskBar，而非 ProjectMode
+- `ProjectMode.tsx` 简化为只处理 setup 和 summary
 
-#### 新增文件
-- `src/types/project.ts` — 项目类型定义（ProjectTask, ProjectState, ProjectRecord, AppMode）
-- `src/hooks/useProjectTimer.ts` — 项目计时核心逻辑（~400 行）
-  - 状态机：setup → running → break → overtime → paused → summary
-  - localStorage 持久化 + 中断恢复（计算时间差）
-  - 支持：暂停/恢复、完成/跳过、插入/删除/重排子任务
-- `src/components/ModeSwitch.tsx` — 番茄钟/项目模式切换按钮
-- `src/components/ProjectSetup.tsx` — 项目创建 + 子任务编辑
-  - 任务名称 + 预计时间 + 休息时间（可单独调整）
-  - 上下移动、删除、添加
-- `src/components/ProjectExecution.tsx` — 执行视图
-  - 进度条 + 当前任务 + 倒计时/正计时
-  - 超时提示（红色脉冲动画）
-  - 任务列表（已完成/当前/未来，含预计 vs 实际时间）
-  - 中途插入新任务、删除未来任务
-  - 放弃确认（二次确认）
-- `src/components/ProjectSummary.tsx` — 完成总结
-  - 总预计 vs 总实际 + 提前/超出百分比
-  - 每个子任务的时间对比条形图
-  - 完成/跳过统计
-- `src/components/ProjectRecoveryModal.tsx` — 中断恢复弹窗
-- `src/components/ProjectMode.tsx` — 模式容器（路由 setup/execution/summary）
+#### 技术方案
+`useProjectTimer` 新增 `ProjectTimerView` 接口：
+```typescript
+interface ProjectTimerView {
+  timeLeft: number;        // 映射到 Timer
+  totalDuration: number;   // 映射到 Timer
+  phase: TimerPhase;       // 'work' | 'shortBreak'
+  status: TimerStatus;     // 'running' | 'paused'
+  taskName: string;        // 显示在 ProjectTaskBar
+  progressLabel: string;   // "2/5"
+  progressFraction: number;// 进度条
+  isOvertime: boolean;     // 超时状态
+  overtimeSeconds: number; // 超时秒数
+}
+```
 
-#### App.tsx 改动
-- 新增 `mode` 状态（pomodoro | project）
-- 条件渲染番茄钟 vs 项目模式
-- 背景音在项目工作阶段也播放
-- 页面标题显示项目计时状态
-- 项目子任务完成时生成 PomodoroRecord（计入今日统计 + 西瓜生长）
-- 项目完成时生成 ProjectRecord（存入独立历史）
-- 恢复弹窗在 App 启动时检测
-
-#### HistoryPanel 扩展
-- 接受 `projectRecords` prop
-- 选中日期时显示该日的项目记录（名称、任务数、预计/实际时间）
-
-#### i18n
-- 新增 52 个翻译 key（中英文完整覆盖）
-- 涵盖：模式切换、项目设置、执行控制、总结页面、恢复弹窗、历史记录
-
-#### 技术决策
-- **不复用 useTimer hook**：项目模式的流程（顺序任务 + 可变时长 + 超时正计时）与番茄钟差异较大，独立实现更清晰
-- **状态持久化**：每次 state 变化写入 localStorage，恢复时计算时间差补偿
-- **西瓜生长系统复用**：子任务完成时按实际时长生成 PomodoroRecord，自然融入现有统计
-
-#### 改动统计
-13 files changed, 1564 insertions(+), 29 deletions(-)
-构建产物：JS 323KB（+29KB），gzip 93KB
+构建产物：JS 319KB（比独立界面版 323KB 还小 4KB）
 
 ---
 

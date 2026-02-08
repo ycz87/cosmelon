@@ -1,10 +1,12 @@
 /**
  * useProjectTimer — 项目计时模式核心逻辑
  *
+ * 驱动与番茄钟相同的 Timer 组件：输出 timeLeft, totalDuration, phase, status
  * 管理项目的创建、执行、暂停、恢复、跳过、插入子任务等。
  * 状态持久化到 localStorage 以支持中断恢复。
  */
 import { useState, useEffect, useCallback, useRef } from 'react';
+import type { TimerPhase, TimerStatus } from './useTimer';
 import type {
   ProjectTask, ProjectTaskResult, ProjectState, ProjectRecord, ProjectPhase,
 } from '../types/project';
@@ -36,9 +38,29 @@ function loadState(): ProjectState | null {
 
 // ─── Hook ───
 
+export interface ProjectTimerView {
+  /** Timer-compatible fields for driving the Timer component */
+  timeLeft: number;
+  totalDuration: number;
+  phase: TimerPhase;
+  status: TimerStatus;
+  /** Current task name (shown above timer) */
+  taskName: string;
+  /** Progress label e.g. "2/5" */
+  progressLabel: string;
+  /** Progress fraction 0-1 */
+  progressFraction: number;
+  /** Is overtime (timer counting up) */
+  isOvertime: boolean;
+  /** Overtime seconds (only when isOvertime) */
+  overtimeSeconds: number;
+}
+
 export interface UseProjectTimerReturn {
   /** Current project state (null = no active project) */
   state: ProjectState | null;
+  /** Timer-compatible view for rendering */
+  timerView: ProjectTimerView | null;
   /** Is there a saved project that can be recovered? */
   hasSavedProject: boolean;
 
@@ -55,13 +77,11 @@ export interface UseProjectTimerReturn {
   // Task actions
   completeCurrentTask: () => void;
   skipCurrentTask: () => void;
-  /** Continue timing after overtime prompt */
   continueOvertime: () => void;
 
   // Mid-execution edits
   insertTask: (afterIndex: number, task: ProjectTask) => void;
   removeTask: (index: number) => void;
-  reorderTasks: (fromIndex: number, toIndex: number) => void;
 
   // Finish
   finishProject: () => ProjectRecord;
@@ -71,14 +91,17 @@ export interface UseProjectTimerReturn {
 export function useProjectTimer(
   onTaskComplete: (result: ProjectTaskResult) => void,
   onProjectComplete: (record: ProjectRecord) => void,
+  onOvertime: () => void,
 ): UseProjectTimerReturn {
   const [state, setState] = useState<ProjectState | null>(null);
   const [hasSavedProject, setHasSavedProject] = useState(false);
   const onTaskCompleteRef = useRef(onTaskComplete);
   const onProjectCompleteRef = useRef(onProjectComplete);
+  const onOvertimeRef = useRef(onOvertime);
 
   useEffect(() => { onTaskCompleteRef.current = onTaskComplete; }, [onTaskComplete]);
   useEffect(() => { onProjectCompleteRef.current = onProjectComplete; }, [onProjectComplete]);
+  useEffect(() => { onOvertimeRef.current = onOvertime; }, [onOvertime]);
 
   // Check for saved project on mount
   useEffect(() => {
@@ -103,7 +126,6 @@ export function useProjectTimer(
     const interval = setInterval(() => {
       setState((prev) => {
         if (!prev) return prev;
-
         const now = new Date().toISOString();
 
         if (prev.phase === 'running') {
@@ -111,14 +133,14 @@ export function useProjectTimer(
           const newTimeLeft = prev.timeLeft - 1;
 
           if (newTimeLeft <= 0) {
-            // Time's up — enter overtime prompt
+            // Time's up — enter overtime
+            onOvertimeRef.current();
             return { ...prev, timeLeft: 0, elapsedSeconds: newElapsed, phase: 'overtime', lastTickAt: now };
           }
           return { ...prev, timeLeft: newTimeLeft, elapsedSeconds: newElapsed, lastTickAt: now };
         }
 
         if (prev.phase === 'overtime') {
-          // Keep counting up
           return { ...prev, elapsedSeconds: prev.elapsedSeconds + 1, lastTickAt: now };
         }
 
@@ -128,7 +150,6 @@ export function useProjectTimer(
             // Break over — advance to next task
             const nextIndex = prev.currentTaskIndex + 1;
             if (nextIndex >= prev.tasks.length) {
-              // All tasks done
               return { ...prev, timeLeft: 0, phase: 'summary', lastTickAt: now };
             }
             const nextTask = prev.tasks[nextIndex];
@@ -150,6 +171,50 @@ export function useProjectTimer(
 
     return () => clearInterval(interval);
   }, [state?.phase]);
+
+  // ─── Compute timer view ───
+  const timerView: ProjectTimerView | null = (() => {
+    if (!state || state.phase === 'setup' || state.phase === 'summary') return null;
+
+    const currentTask = state.tasks[state.currentTaskIndex];
+    const completedCount = state.results.length;
+    const totalCount = state.tasks.length;
+    const isOvertime = state.phase === 'overtime';
+    const isBreak = state.phase === 'break';
+
+    // Map to Timer-compatible phase/status
+    let phase: TimerPhase;
+    let status: TimerStatus;
+
+    if (isBreak) {
+      phase = 'shortBreak';
+      status = 'running';
+    } else if (state.phase === 'paused') {
+      // Figure out if we were in break or work before pausing
+      const wasBreak = state.results.length > state.currentTaskIndex;
+      phase = wasBreak ? 'shortBreak' : 'work';
+      status = 'paused';
+    } else {
+      phase = 'work';
+      status = isOvertime ? 'running' : 'running';
+    }
+
+    const totalDuration = isBreak
+      ? currentTask.breakMinutes * 60
+      : currentTask.estimatedMinutes * 60;
+
+    return {
+      timeLeft: isOvertime ? state.elapsedSeconds : state.timeLeft,
+      totalDuration,
+      phase,
+      status,
+      taskName: currentTask?.name || '',
+      progressLabel: `${completedCount + (isBreak ? 1 : 0)}/${totalCount}`,
+      progressFraction: totalCount > 0 ? completedCount / totalCount : 0,
+      isOvertime,
+      overtimeSeconds: isOvertime ? state.elapsedSeconds : 0,
+    };
+  })();
 
   // ─── Setup ───
 
@@ -187,7 +252,6 @@ export function useProjectTimer(
       } else if (saved.phase === 'break') {
         saved.timeLeft = Math.max(0, saved.timeLeft - elapsed);
         if (saved.timeLeft <= 0) {
-          // Break was over — advance to next task
           const nextIndex = saved.currentTaskIndex + 1;
           if (nextIndex >= saved.tasks.length) {
             saved.phase = 'summary';
@@ -249,8 +313,7 @@ export function useProjectTimer(
   const resume = useCallback(() => {
     setState((prev) => {
       if (!prev || prev.phase !== 'paused') return prev;
-      // Determine what phase to resume to
-      const isBreak = prev.results.length > prev.currentTaskIndex; // current task already completed = we're in break
+      const isBreak = prev.results.length > prev.currentTaskIndex;
       let resumePhase: ProjectPhase;
       if (isBreak) {
         resumePhase = 'break';
@@ -337,29 +400,13 @@ export function useProjectTimer(
   const removeTask = useCallback((index: number) => {
     setState((prev) => {
       if (!prev) return prev;
-      // Can't remove current running task
       if (index === prev.currentTaskIndex && prev.phase !== 'setup') return prev;
       const newTasks = prev.tasks.filter((_, i) => i !== index);
-      // Adjust currentTaskIndex if needed
       let newIndex = prev.currentTaskIndex;
       if (index < prev.currentTaskIndex) {
         newIndex = Math.max(0, newIndex - 1);
       }
       return { ...prev, tasks: newTasks, currentTaskIndex: newIndex };
-    });
-  }, []);
-
-  const reorderTasks = useCallback((fromIndex: number, toIndex: number) => {
-    setState((prev) => {
-      if (!prev) return prev;
-      // Only allow reordering future tasks (after current)
-      if (prev.phase !== 'setup') {
-        if (fromIndex <= prev.currentTaskIndex || toIndex <= prev.currentTaskIndex) return prev;
-      }
-      const newTasks = [...prev.tasks];
-      const [moved] = newTasks.splice(fromIndex, 1);
-      newTasks.splice(toIndex, 0, moved);
-      return { ...prev, tasks: newTasks };
     });
   }, []);
 
@@ -390,6 +437,7 @@ export function useProjectTimer(
 
   return {
     state,
+    timerView,
     hasSavedProject,
     createProject,
     recoverProject,
@@ -402,7 +450,6 @@ export function useProjectTimer(
     continueOvertime,
     insertTask,
     removeTask,
-    reorderTasks,
     finishProject,
     abandonProject,
   };
