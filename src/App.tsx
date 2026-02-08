@@ -122,6 +122,7 @@ function App() {
         <RoundProgress
           current={timer.roundProgress}
           total={settings.pomodorosPerRound}
+          idle={timer.status === 'idle'}
         />
 
         {/* Task Input */}
