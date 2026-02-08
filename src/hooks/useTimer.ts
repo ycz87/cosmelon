@@ -14,14 +14,15 @@ interface UseTimerReturn {
   timeLeft: number;
   phase: TimerPhase;
   status: TimerStatus;
-  roundProgress: number; // how many pomodoros completed in current round (0-based)
-  celebrating: boolean;  // true during celebration animation after work phase completes
-  celebrationStage: TimerPhase | null; // which phase just completed (for celebration)
+  roundProgress: number;
+  celebrating: boolean;
+  celebrationStage: TimerPhase | null;
   dismissCelebration: () => void;
   start: () => void;
   pause: () => void;
   resume: () => void;
   skip: () => void;
+  abandon: () => void;
   reset: () => void;
 }
 
@@ -114,7 +115,13 @@ export function useTimer({ settings, onComplete, onSkipWork }: UseTimerOptions):
 
       setPhase(nextPhase);
       setTimeLeft(getDuration(nextPhase, s));
-      setStatus('idle');
+
+      // Auto-start logic
+      const shouldAutoStart = completedPhase === 'work'
+        ? s.autoStartBreak
+        : s.autoStartWork;
+      setStatus(shouldAutoStart ? 'running' : 'idle');
+
       onCompleteRef.current(completedPhase);
     }
   }, [timeLeft, status, phase, roundProgress]);
@@ -163,6 +170,15 @@ export function useTimer({ settings, onComplete, onSkipWork }: UseTimerOptions):
     setStatus('idle');
   }, [phase, roundProgress, timeLeft]);
 
+  const abandon = useCallback(() => {
+    // Return to idle for current phase, no record
+    const s = settingsRef.current;
+    setTimeLeft(getDuration(phase, s));
+    setStatus('idle');
+    setCelebrating(false);
+    setCelebrationStage(null);
+  }, [phase]);
+
   const reset = useCallback(() => {
     setPhase('work');
     setTimeLeft(settingsRef.current.workMinutes * 60);
@@ -177,5 +193,5 @@ export function useTimer({ settings, onComplete, onSkipWork }: UseTimerOptions):
     setCelebrationStage(null);
   }, []);
 
-  return { timeLeft, phase, status, roundProgress, celebrating, celebrationStage, dismissCelebration, start, pause, resume, skip, reset };
+  return { timeLeft, phase, status, roundProgress, celebrating, celebrationStage, dismissCelebration, start, pause, resume, skip, abandon, reset };
 }

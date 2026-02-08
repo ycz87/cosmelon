@@ -117,6 +117,27 @@ function App() {
     setRecords((prev) => prev.filter((r) => r.id !== id));
   }, [setRecords]);
 
+  const handleExport = useCallback(() => {
+    const data = {
+      exportedAt: new Date().toISOString(),
+      settings,
+      records,
+    };
+    const json = JSON.stringify(data, null, 2);
+    const blob = new Blob([json], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    const dateStr = new Date().toISOString().slice(0, 10);
+    a.href = url;
+    a.download = `pomodoro-export-${dateStr}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }, [settings, records]);
+
+  const handleChangeWorkMinutes = useCallback((minutes: number) => {
+    setSettings((prev) => ({ ...prev, workMinutes: minutes }));
+  }, [setSettings]);
+
   const isWork = timer.phase === 'work';
 
   // Celebration: determine growth stage for the work duration
@@ -142,7 +163,7 @@ function App() {
           </div>
           <div className="flex items-center gap-0.5 shrink-0">
             <GuideButton />
-            <Settings settings={settings} onChange={setSettings} disabled={timer.status !== 'idle'} />
+            <Settings settings={settings} onChange={setSettings} disabled={timer.status !== 'idle'} onExport={handleExport} />
           </div>
         </header>
 
@@ -154,9 +175,12 @@ function App() {
             celebrating={timer.celebrating}
             celebrationStage={celebrationGrowthStage}
             celebrationIsRipe={celebrationIsRipe}
+            workMinutes={settings.workMinutes}
             onCelebrationComplete={timer.dismissCelebration}
             onStart={timer.start} onPause={timer.pause}
             onResume={timer.resume} onSkip={timer.skip}
+            onAbandon={timer.abandon}
+            onChangeWorkMinutes={handleChangeWorkMinutes}
           />
           <RoundProgress current={timer.roundProgress} total={settings.pomodorosPerRound} idle={timer.status === 'idle'} />
           <TaskInput value={currentTask} onChange={setCurrentTask} disabled={timer.status !== 'idle'} />

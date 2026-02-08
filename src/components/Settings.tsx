@@ -12,6 +12,31 @@ interface SettingsProps {
   settings: PomodoroSettings;
   onChange: (settings: PomodoroSettings) => void;
   disabled: boolean;
+  onExport: () => void;
+}
+
+/** 开关组件 */
+function Toggle({ label, checked, onChange }: {
+  label: string; checked: boolean; onChange: (v: boolean) => void;
+}) {
+  const t = useTheme();
+  return (
+    <div className="flex items-center justify-between gap-3">
+      <div className="text-sm" style={{ color: t.textMuted }}>{label}</div>
+      <button
+        onClick={() => onChange(!checked)}
+        className="relative w-10 h-5.5 rounded-full transition-colors duration-200 cursor-pointer"
+        style={{ backgroundColor: checked ? `${t.accent}80` : t.inputBg }}
+        role="switch"
+        aria-checked={checked}
+      >
+        <span
+          className="absolute top-0.5 left-0.5 w-4.5 h-4.5 rounded-full bg-white shadow transition-transform duration-200"
+          style={{ transform: checked ? 'translateX(18px)' : 'translateX(0)' }}
+        />
+      </button>
+    </div>
+  );
 }
 
 /** 数字步进器 — 支持 −/输入/+ 三种操作 */
@@ -69,7 +94,7 @@ const ALERT_DURATION_OPTIONS = [1, 3, 5, 10];
 const TICK_LABELS: Record<TickType, string> = { none: '关闭', classic: '经典钟摆', soft: '轻柔滴答', mechanical: '机械钟表', wooden: '木质钟声' };
 const ROUND_OPTIONS = [2, 3, 4, 5, 6];
 
-export function Settings({ settings, onChange, disabled }: SettingsProps) {
+export function Settings({ settings, onChange, disabled, onExport }: SettingsProps) {
   const [isOpen, setIsOpen] = useState(false);
   const panelRef = useRef<HTMLDivElement>(null);
   const t = useTheme();
@@ -140,6 +165,12 @@ export function Settings({ settings, onChange, disabled }: SettingsProps) {
               </div>
             </div>
 
+            {/* 自动开始 */}
+            <Toggle label="自动开始休息" checked={settings.autoStartBreak}
+              onChange={(v) => update({ autoStartBreak: v })} />
+            <Toggle label="自动开始工作" checked={settings.autoStartWork}
+              onChange={(v) => update({ autoStartWork: v })} />
+
             <div className="border-t" style={{ borderColor: t.textFaint }} />
 
             {/* 音效设置 */}
@@ -206,6 +237,17 @@ export function Settings({ settings, onChange, disabled }: SettingsProps) {
                 ))}
               </div>
             </div>
+
+            <div className="border-t" style={{ borderColor: t.textFaint }} />
+
+            {/* 导出数据 */}
+            <button
+              onClick={onExport}
+              className="w-full py-2 rounded-lg text-xs transition-all cursor-pointer"
+              style={{ backgroundColor: t.inputBg, color: t.textMuted }}
+            >
+              📦 导出数据
+            </button>
           </div>
         </div>
       )}

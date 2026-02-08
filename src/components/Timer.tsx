@@ -1,9 +1,11 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { TimerPhase, TimerStatus } from '../hooks/useTimer';
 import type { GrowthStage } from '../types';
 import { formatTime } from '../utils/time';
 import { useTheme } from '../hooks/useTheme';
 import { CelebrationOverlay } from './CelebrationOverlay';
+
+const QUICK_DURATIONS = [5, 10, 15, 20, 25, 30, 45, 60];
 
 interface TimerProps {
   timeLeft: number;
@@ -13,18 +15,22 @@ interface TimerProps {
   celebrating: boolean;
   celebrationStage: GrowthStage | null;
   celebrationIsRipe: boolean;
+  workMinutes: number;
   onCelebrationComplete: () => void;
   onStart: () => void;
   onPause: () => void;
   onResume: () => void;
   onSkip: () => void;
+  onAbandon: () => void;
+  onChangeWorkMinutes: (minutes: number) => void;
 }
 
-export function Timer({ timeLeft, totalDuration, phase, status, celebrating, celebrationStage, celebrationIsRipe, onCelebrationComplete, onStart, onPause, onResume, onSkip }: TimerProps) {
+export function Timer({ timeLeft, totalDuration, phase, status, celebrating, celebrationStage, celebrationIsRipe, workMinutes, onCelebrationComplete, onStart, onPause, onResume, onSkip, onAbandon, onChangeWorkMinutes }: TimerProps) {
   const isWork = phase === 'work';
   const progress = totalDuration > 0 ? (totalDuration - timeLeft) / totalDuration : 0;
   const containerRef = useRef<HTMLDivElement>(null);
   const prevStatusRef = useRef<TimerStatus>(status);
+  const [showQuickPicker, setShowQuickPicker] = useState(false);
 
   useEffect(() => {
     if (status === 'running' && prevStatusRef.current === 'idle' && containerRef.current) {
@@ -32,6 +38,7 @@ export function Timer({ timeLeft, totalDuration, phase, status, celebrating, cel
       void containerRef.current.offsetWidth;
       containerRef.current.classList.add('animate-scale-in');
     }
+    if (status !== 'idle') setShowQuickPicker(false);
     prevStatusRef.current = status;
   }, [status]);
 
@@ -136,15 +143,39 @@ export function Timer({ timeLeft, totalDuration, phase, status, celebrating, cel
         <span
           className={`text-6xl sm:text-7xl font-timer tracking-tight select-none transition-opacity ${
             status === 'paused' ? 'animate-pulse' : ''
-          }`}
+          } ${status === 'idle' && isWork ? 'cursor-pointer hover:opacity-70' : ''}`}
           style={{ fontWeight: 300, color: theme.text }}
+          onClick={() => {
+            if (status === 'idle' && isWork) setShowQuickPicker(!showQuickPicker);
+          }}
+          title={status === 'idle' && isWork ? '点击快速调整时长' : undefined}
         >
           {formatTime(timeLeft)}
         </span>
+
+        {/* Quick duration picker */}
+        {showQuickPicker && status === 'idle' && isWork && (
+          <div className="absolute -bottom-2 translate-y-full flex flex-wrap justify-center gap-1.5 px-4 py-2.5 rounded-2xl border animate-fade-up z-10"
+            style={{ backgroundColor: `${theme.surface}f0`, borderColor: theme.textFaint }}>
+            {QUICK_DURATIONS.map((m) => (
+              <button key={m}
+                onClick={() => { onChangeWorkMinutes(m); setShowQuickPicker(false); }}
+                className="px-2.5 py-1 rounded-lg text-xs transition-all cursor-pointer"
+                style={{
+                  backgroundColor: workMinutes === m ? `${theme.accent}30` : theme.inputBg,
+                  color: workMinutes === m ? theme.accent : theme.textMuted,
+                  fontWeight: workMinutes === m ? 600 : 400,
+                }}>
+                {m}min
+              </button>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Controls — 使用主题色 */}
-      <div className="flex items-center gap-3 sm:gap-4 h-16">
+      <div className="flex flex-col items-center gap-2">
+        <div className="flex items-center gap-3 sm:gap-4 h-16">
         {status === 'idle' && (
           <button onClick={onStart}
             className="w-14 h-14 rounded-full flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95 cursor-pointer"
@@ -184,6 +215,18 @@ export function Timer({ timeLeft, totalDuration, phase, status, celebrating, cel
               <path d="M2 2L10 8L2 14V2Z" fill="currentColor" />
               <rect x="11" y="2" width="3" height="12" rx="0.5" fill="currentColor" />
             </svg>
+          </button>
+        )}
+        </div>
+
+        {/* Abandon link — subtle, only when running/paused */}
+        {status !== 'idle' && (
+          <button
+            onClick={onAbandon}
+            className="text-xs transition-colors cursor-pointer hover:underline"
+            style={{ color: theme.textFaint }}
+          >
+            放弃本次
           </button>
         )}
       </div>

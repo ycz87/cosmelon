@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import type { PomodoroRecord } from '../types';
 import { getGrowthStage, GROWTH_EMOJI } from '../types';
+import { useTheme } from '../hooks/useTheme';
 
 interface TaskListProps {
   records: PomodoroRecord[];
@@ -11,12 +12,14 @@ interface TaskListProps {
 export function TaskList({ records, onUpdate, onDelete }: TaskListProps) {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editValue, setEditValue] = useState('');
+  const [confirmingDeleteId, setConfirmingDeleteId] = useState<string | null>(null);
+  const theme = useTheme();
 
   if (records.length === 0) {
     return (
       <div className="text-center py-8">
-        <p className="text-white/20 text-[15px]">准备好了吗？</p>
-        <p className="text-white/12 text-sm mt-1.5">开始你的第一个番茄钟 🌱</p>
+        <p className="text-[15px]" style={{ color: theme.textMuted }}>准备好了吗？</p>
+        <p className="text-sm mt-1.5" style={{ color: theme.textFaint }}>开始你的第一个番茄钟 🌱</p>
       </div>
     );
   }
@@ -33,9 +36,23 @@ export function TaskList({ records, onUpdate, onDelete }: TaskListProps) {
     }
   };
 
+  const handleDeleteClick = (id: string) => {
+    if (confirmingDeleteId === id) {
+      // Second click — confirm delete
+      onDelete(id);
+      setConfirmingDeleteId(null);
+    } else {
+      // First click — enter confirm state
+      setConfirmingDeleteId(id);
+      // Auto-reset after 2.5 seconds
+      setTimeout(() => setConfirmingDeleteId((prev) => prev === id ? null : prev), 2500);
+    }
+  };
+
   return (
     <div className="w-full max-w-xs sm:max-w-sm space-y-1">
-      <h3 className="text-white/25 text-xs tracking-wider px-1 mb-2 font-medium uppercase">
+      <h3 className="text-xs tracking-wider px-1 mb-2 font-medium uppercase"
+        style={{ color: theme.textMuted }}>
         今日记录
       </h3>
       <div className="space-y-0.5">
@@ -45,12 +62,15 @@ export function TaskList({ records, onUpdate, onDelete }: TaskListProps) {
           const duration = record.durationMinutes || 25;
           const stage = getGrowthStage(duration);
           const isEditing = editingId === record.id;
+          const isConfirmingDelete = confirmingDeleteId === record.id;
 
           return (
             <div
               key={record.id}
-              className="group flex items-center gap-2.5 px-3 py-2.5 rounded-xl transition-colors hover:bg-white/[0.03] animate-fade-up"
-              style={{ animationDelay: `${index * 50}ms` }}
+              className="group flex items-center gap-2.5 px-3 py-2.5 rounded-xl transition-colors animate-fade-up"
+              style={{ animationDelay: `${index * 50}ms`, backgroundColor: 'transparent' }}
+              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = theme.inputBg}
+              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
             >
               {/* Growth stage icon */}
               <span className="text-sm shrink-0" title={`${duration}分钟`}>
@@ -69,12 +89,14 @@ export function TaskList({ records, onUpdate, onDelete }: TaskListProps) {
                     if (e.key === 'Escape') setEditingId(null);
                   }}
                   autoFocus
-                  className="flex-1 bg-white/[0.06] text-white/80 text-sm rounded-md px-2 py-0.5 outline-none focus:bg-white/[0.10] min-w-0"
+                  className="flex-1 rounded-md px-2 py-0.5 outline-none text-sm min-w-0"
+                  style={{ backgroundColor: theme.inputBg, color: theme.text }}
                   maxLength={100}
                 />
               ) : (
                 <span
-                  className="flex-1 text-white/50 text-sm truncate cursor-pointer hover:text-white/70 transition-colors"
+                  className="flex-1 text-sm truncate cursor-pointer transition-colors"
+                  style={{ color: theme.textMuted }}
                   onClick={() => startEdit(record)}
                   title="点击编辑"
                 >
@@ -83,25 +105,37 @@ export function TaskList({ records, onUpdate, onDelete }: TaskListProps) {
               )}
 
               {/* Duration */}
-              <span className="text-white/20 text-xs shrink-0">
+              <span className="text-xs shrink-0" style={{ color: theme.textFaint }}>
                 {duration}min
               </span>
 
               {/* Time */}
-              <span className="text-white/15 text-xs font-timer tabular-nums shrink-0">
+              <span className="text-xs font-timer tabular-nums shrink-0" style={{ color: theme.textFaint }}>
                 {timeStr}
               </span>
 
-              {/* Delete button — visible on hover */}
+              {/* Delete button — inline confirm */}
               {!isEditing && (
                 <button
-                  onClick={() => onDelete(record.id)}
-                  className="opacity-0 group-hover:opacity-100 text-white/15 hover:text-red-400/60 transition-all cursor-pointer shrink-0"
+                  onClick={() => handleDeleteClick(record.id)}
+                  className={`shrink-0 transition-all cursor-pointer ${
+                    isConfirmingDelete
+                      ? 'opacity-100 text-xs px-1.5 py-0.5 rounded'
+                      : 'opacity-0 group-hover:opacity-100'
+                  }`}
+                  style={isConfirmingDelete
+                    ? { color: '#ef4444', backgroundColor: 'rgba(239,68,68,0.1)' }
+                    : { color: theme.textFaint }
+                  }
                   aria-label="删除"
                 >
-                  <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-                    <path d="M2 2L10 10M10 2L2 10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-                  </svg>
+                  {isConfirmingDelete ? (
+                    '确认?'
+                  ) : (
+                    <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                      <path d="M2 2L10 10M10 2L2 10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+                    </svg>
+                  )}
                 </button>
               )}
             </div>

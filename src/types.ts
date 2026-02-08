@@ -99,6 +99,8 @@ export interface PomodoroSettings {
   alertVolume: number;   // 0-100，提示音音量
   tickVolume: number;    // 0-100，背景音音量
   theme: ThemeId;
+  autoStartBreak: boolean;   // 工作结束后自动开始休息
+  autoStartWork: boolean;    // 休息结束后自动开始工作
 }
 
 export const DEFAULT_SETTINGS: PomodoroSettings = {
@@ -112,6 +114,8 @@ export const DEFAULT_SETTINGS: PomodoroSettings = {
   alertVolume: 80,
   tickVolume: 40,
   theme: 'dark',
+  autoStartBreak: true,
+  autoStartWork: false,
 };
 
 // ─── 番茄生长阶段 ───
