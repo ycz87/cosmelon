@@ -11,7 +11,7 @@ export interface PomodoroSettings {
   workMinutes: number;
   shortBreakMinutes: number;
   longBreakMinutes: number;
-  pomodorosPerRound: number; // default 4
+  pomodorosPerRound: number;
   sound: SoundType;
 }
 
@@ -22,7 +22,3 @@ export const DEFAULT_SETTINGS: PomodoroSettings = {
   pomodorosPerRound: 4,
   sound: 'chime',
 };
-
-export const WORK_OPTIONS = [15, 20, 25, 30, 45, 60];
-export const SHORT_BREAK_OPTIONS = [3, 5, 10];
-export const LONG_BREAK_OPTIONS = [10, 15, 20, 30];

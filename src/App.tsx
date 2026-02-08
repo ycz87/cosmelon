@@ -65,7 +65,7 @@ function App() {
   }, [timer.timeLeft, timer.phase, timer.status]);
 
   const isWork = timer.phase === 'work';
-  const isTimerActive = timer.status === 'running' || timer.status === 'paused';
+  const isTimerRunning = timer.status === 'running';
 
   return (
     <div
@@ -82,7 +82,7 @@ function App() {
         <Settings
           settings={settings}
           onChange={setSettings}
-          disabled={isTimerActive}
+          disabled={isTimerRunning}
         />
       </div>
 
