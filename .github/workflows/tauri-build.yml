@@ -1,9 +1,6 @@
 name: Build & Release Tauri App
 
 on:
-  push:
-    tags:
-      - 'v*'
   workflow_dispatch:
 
 permissions:
@@ -61,10 +58,10 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tagName: ${{ github.ref_name }}
-          releaseName: 'Watermelon Clock ${{ github.ref_name }}'
+          tagName: v__VERSION__
+          releaseName: 'Watermelon Clock v__VERSION__'
           releaseBody: |
-            🍉 Watermelon Clock ${{ github.ref_name }}
+            🍉 Watermelon Clock v__VERSION__
 
             Download the installer for your platform:
             - **Windows**: `.msi` or `.exe` (NSIS installer)
