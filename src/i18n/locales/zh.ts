@@ -197,4 +197,56 @@ export const zh: Messages = {
 
   // Month nav
   monthFormat: (year: number, month: number) => `${year}年${month}月`,
+
+  // ─── Project mode ───
+  modePomodoro: '番茄钟',
+  modeProject: '项目模式',
+
+  // Setup
+  projectNamePlaceholder: '项目名称',
+  projectTasks: '子任务',
+  projectTaskPlaceholder: '任务名称',
+  projectAddTask: '添加子任务',
+  projectEstimatedTotal: '预计总时间',
+  projectBreakTotal: '休息',
+  projectCancel: '取消',
+  projectStart: '开始执行',
+
+  // Execution
+  projectCurrentTask: '当前任务',
+  projectBreakTime: '休息时间',
+  projectOvertime: '已超时',
+  projectEstimated: '预计',
+  projectContinue: '继续计时',
+  projectMarkDone: '标记完成',
+  projectPause: '暂停',
+  projectResume: '继续',
+  projectTaskList: '任务列表',
+  projectInsertTask: '插入新任务',
+  projectInsert: '插入',
+  projectAbandon: '放弃项目',
+  projectAbandonConfirm: '确定放弃？进度将丢失',
+  projectAbandonYes: '确定',
+
+  // Summary
+  projectComplete: '项目完成！',
+  projectTotalEstimated: '预计总时间',
+  projectTotalActual: '实际总时间',
+  projectAheadOfSchedule: '提前完成',
+  projectBehindSchedule: '超出预期',
+  projectTaskBreakdown: '任务明细',
+  projectCompleted: '已完成',
+  projectSkipped: '已跳过',
+  projectDone: '完成',
+
+  // Recovery
+  projectRecoveryTitle: '发现未完成的项目',
+  projectRecoveryDesc: '上次有一个项目还没完成，要继续吗？',
+  projectRecoveryResume: '恢复进度',
+  projectRecoveryDiscard: '重新开始',
+
+  // History
+  projectHistory: '项目记录',
+  projectHistoryEstimated: '预计',
+  projectHistoryActual: '实际',
 };

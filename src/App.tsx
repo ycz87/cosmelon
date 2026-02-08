@@ -12,8 +12,12 @@ import { Settings } from './components/Settings';
 import { GuideButton } from './components/Guide';
 import { InstallPrompt } from './components/InstallPrompt';
 import { HistoryPanel } from './components/HistoryPanel';
+import { ModeSwitch } from './components/ModeSwitch';
+import { ProjectMode } from './components/ProjectMode';
+import { ProjectRecoveryModal } from './components/ProjectRecoveryModal';
 import { useTimer } from './hooks/useTimer';
 import type { TimerPhase } from './hooks/useTimer';
+import { useProjectTimer } from './hooks/useProjectTimer';
 import { ThemeProvider } from './hooks/useTheme';
 import { useLocalStorage } from './hooks/useLocalStorage';
 import {
@@ -28,12 +32,16 @@ import { I18nProvider, getMessages } from './i18n';
 import type { PomodoroRecord, PomodoroSettings } from './types';
 import { DEFAULT_SETTINGS, migrateSettings, THEMES, getGrowthStage, GROWTH_EMOJI } from './types';
 import type { GrowthStage } from './types';
+import type { AppMode } from './types/project';
+import type { ProjectRecord } from './types/project';
 
 function App() {
   const [currentTask, setCurrentTask] = useState('');
   const [records, setRecords] = useLocalStorage<PomodoroRecord[]>('pomodoro-records', []);
+  const [projectRecords, setProjectRecords] = useLocalStorage<ProjectRecord[]>('pomodoro-project-records', []);
   const [settings, setSettings] = useLocalStorage<PomodoroSettings>('pomodoro-settings', DEFAULT_SETTINGS, migrateSettings);
   const [showHistory, setShowHistory] = useState(false);
+  const [mode, setMode] = useState<AppMode>('pomodoro');
 
   const theme = THEMES[settings.theme]?.colors ?? THEMES.dark.colors;
 
@@ -92,19 +100,50 @@ function App() {
 
   const timer = useTimer({ settings, onComplete: handleTimerComplete, onSkipWork: handleSkipWork });
 
+  // ─── Project timer ───
+  const handleProjectTaskComplete = useCallback((result: import('./types/project').ProjectTaskResult) => {
+    const minutes = Math.round(result.actualSeconds / 60);
+    if (minutes >= 1 && result.status === 'completed') {
+      const stage = getGrowthStage(minutes);
+      const emoji = GROWTH_EMOJI[stage];
+      const record: PomodoroRecord = {
+        id: Date.now().toString(),
+        task: result.name,
+        durationMinutes: minutes,
+        completedAt: result.completedAt,
+        date: getTodayKey(),
+      };
+      setRecords((prev) => [record, ...prev]);
+      sendBrowserNotification(t.workComplete(emoji), `"${result.name}" · ${minutes}${t.minutes}`);
+    }
+    playAlertRepeated(settings.alertSound, 1);
+  }, [setRecords, settings.alertSound, t]);
+
+  const handleProjectComplete = useCallback((record: ProjectRecord) => {
+    setProjectRecords((prev) => [record, ...prev]);
+    sendBrowserNotification(t.projectComplete, record.name);
+    playAlertRepeated(settings.alertSound, settings.alertRepeatCount);
+  }, [setProjectRecords, settings.alertSound, settings.alertRepeatCount, t]);
+
+  const project = useProjectTimer(handleProjectTaskComplete, handleProjectComplete);
+
+  // Determine if any timer is active (for disabling mode switch)
+  const isAnyTimerActive = timer.status !== 'idle' || (project.state !== null && project.state.phase !== 'setup' && project.state.phase !== 'summary');
+
   // Serialize mixer config for effect dependency (object reference comparison won't work)
   const ambienceMixerKey = JSON.stringify(settings.ambienceMixer);
 
   // 管理背景音生命周期 — 工作阶段运行时播放混音器配置的音效
+  const isProjectWorking = project.state?.phase === 'running' || project.state?.phase === 'overtime';
   useEffect(() => {
-    if (timer.status === 'running' && timer.phase === 'work') {
+    if ((timer.status === 'running' && timer.phase === 'work') || isProjectWorking) {
       applyMixerConfig(settings.ambienceMixer);
     } else {
       stopAllAmbience();
     }
     return () => stopAllAmbience();
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [timer.status, timer.phase, ambienceMixerKey]);
+  }, [timer.status, timer.phase, ambienceMixerKey, isProjectWorking]);
 
   const todayKey = getTodayKey();
   const todayRecords = records.filter((r) => r.date === todayKey);
@@ -117,6 +156,25 @@ function App() {
 
   // 页面标题显示倒计时
   useEffect(() => {
+    // Project mode title
+    if (project.state && (project.state.phase === 'running' || project.state.phase === 'overtime' || project.state.phase === 'break' || project.state.phase === 'paused')) {
+      const ps = project.state;
+      if (ps.phase === 'break') {
+        const m = Math.floor(ps.timeLeft / 60);
+        const s = ps.timeLeft % 60;
+        document.title = `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')} ☕ ${t.appName}`;
+      } else if (ps.phase === 'overtime') {
+        const m = Math.floor(ps.elapsedSeconds / 60);
+        const s = ps.elapsedSeconds % 60;
+        document.title = `+${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')} ⏰ ${t.appName}`;
+      } else {
+        const m = Math.floor(ps.timeLeft / 60);
+        const s = ps.timeLeft % 60;
+        document.title = `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')} 📋 ${t.appName}`;
+      }
+      return;
+    }
+    // Pomodoro mode title
     if (timer.status === 'running' || timer.status === 'paused') {
       const minutes = Math.floor(timer.timeLeft / 60);
       const seconds = timer.timeLeft % 60;
@@ -129,7 +187,7 @@ function App() {
     } else {
       document.title = t.appName;
     }
-  }, [timer.timeLeft, timer.phase, timer.status, t]);
+  }, [timer.timeLeft, timer.phase, timer.status, t, project.state]);
 
   const handleUpdateRecord = useCallback((id: string, task: string) => {
     setRecords((prev) => prev.map((r) => r.id === id ? { ...r, task } : r));
@@ -166,7 +224,10 @@ function App() {
   const celebrationGrowthStage: GrowthStage | null = timer.celebrating ? getGrowthStage(settings.workMinutes) : null;
   const celebrationIsRipe = settings.workMinutes >= 25;
 
-  const bgColor = !isWork ? theme.bgBreak
+  const isProjectActive = project.state !== null && project.state.phase !== 'setup';
+  const bgColor = isProjectActive
+    ? (project.state?.phase === 'break' ? theme.bgBreak : theme.bgWork)
+    : !isWork ? theme.bgBreak
     : timer.status === 'idle' ? theme.bg
     : theme.bgWork;
 
@@ -188,6 +249,7 @@ function App() {
             )}
           </div>
           <div className="flex items-center gap-0.5 shrink-0">
+            <ModeSwitch mode={mode} onChange={setMode} disabled={isAnyTimerActive} />
             <button
               onClick={() => setShowHistory(true)}
               className="w-8 h-8 rounded-full flex items-center justify-center transition-all cursor-pointer text-sm"
@@ -197,41 +259,58 @@ function App() {
               📅
             </button>
             <GuideButton />
-            <Settings settings={settings} onChange={setSettings} disabled={timer.status !== 'idle'} isWorkRunning={timer.status === 'running' && timer.phase === 'work'} onExport={handleExport} />
+            <Settings settings={settings} onChange={setSettings} disabled={timer.status !== 'idle'} isWorkRunning={(timer.status === 'running' && timer.phase === 'work') || isProjectWorking === true} onExport={handleExport} />
           </div>
         </header>
 
         {/* 主内容 */}
-        <div className="flex-1 flex flex-col items-center justify-center gap-5 sm:gap-7 w-full px-4">
-          <Timer
-            timeLeft={timer.timeLeft} totalDuration={totalDuration}
-            phase={timer.phase} status={timer.status}
-            celebrating={timer.celebrating}
-            celebrationStage={celebrationGrowthStage}
-            celebrationIsRipe={celebrationIsRipe}
-            workMinutes={settings.workMinutes}
-            onCelebrationComplete={timer.dismissCelebration}
-            onStart={timer.start} onPause={timer.pause}
-            onResume={timer.resume} onSkip={timer.skip}
-            onAbandon={timer.abandon}
-            onChangeWorkMinutes={handleChangeWorkMinutes}
-          />
-          <RoundProgress current={timer.roundProgress} total={settings.pomodorosPerRound} idle={timer.status === 'idle'} />
-          <TaskInput value={currentTask} onChange={setCurrentTask} disabled={timer.status !== 'idle'} />
-        </div>
+        {mode === 'pomodoro' ? (
+          <>
+            <div className="flex-1 flex flex-col items-center justify-center gap-5 sm:gap-7 w-full px-4">
+              <Timer
+                timeLeft={timer.timeLeft} totalDuration={totalDuration}
+                phase={timer.phase} status={timer.status}
+                celebrating={timer.celebrating}
+                celebrationStage={celebrationGrowthStage}
+                celebrationIsRipe={celebrationIsRipe}
+                workMinutes={settings.workMinutes}
+                onCelebrationComplete={timer.dismissCelebration}
+                onStart={timer.start} onPause={timer.pause}
+                onResume={timer.resume} onSkip={timer.skip}
+                onAbandon={timer.abandon}
+                onChangeWorkMinutes={handleChangeWorkMinutes}
+              />
+              <RoundProgress current={timer.roundProgress} total={settings.pomodorosPerRound} idle={timer.status === 'idle'} />
+              <TaskInput value={currentTask} onChange={setCurrentTask} disabled={timer.status !== 'idle'} />
+            </div>
 
-        {/* 底部 */}
-        <div className="flex flex-col items-center gap-5 w-full max-w-xs sm:max-w-sm px-4 pt-4 sm:pt-6 pb-6">
-          <TodayStats records={todayRecords} />
-          <TaskList records={todayRecords} onUpdate={handleUpdateRecord} onDelete={handleDeleteRecord} />
-        </div>
+            {/* 底部 */}
+            <div className="flex flex-col items-center gap-5 w-full max-w-xs sm:max-w-sm px-4 pt-4 sm:pt-6 pb-6">
+              <TodayStats records={todayRecords} />
+              <TaskList records={todayRecords} onUpdate={handleUpdateRecord} onDelete={handleDeleteRecord} />
+            </div>
+          </>
+        ) : (
+          <ProjectMode
+            project={project}
+            onSwitchToPomodoro={() => setMode('pomodoro')}
+          />
+        )}
 
         {/* PWA 安装提示 */}
         <InstallPrompt />
 
         {/* 历史记录面板 */}
         {showHistory && (
-          <HistoryPanel records={records} onClose={() => setShowHistory(false)} />
+          <HistoryPanel records={records} projectRecords={projectRecords} onClose={() => setShowHistory(false)} />
+        )}
+
+        {/* 项目恢复提示 */}
+        {project.hasSavedProject && (
+          <ProjectRecoveryModal
+            onRecover={() => { project.recoverProject(); setMode('project'); }}
+            onDiscard={project.discardSavedProject}
+          />
         )}
       </div>
     </ThemeProvider>

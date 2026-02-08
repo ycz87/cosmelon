@@ -124,4 +124,56 @@ export interface Messages {
   weekdays: readonly string[];
   weekdaysShort: readonly string[];
   monthFormat: (year: number, month: number) => string;
+
+  // ─── Project mode ───
+  modePomodoro: string;
+  modeProject: string;
+
+  // Setup
+  projectNamePlaceholder: string;
+  projectTasks: string;
+  projectTaskPlaceholder: string;
+  projectAddTask: string;
+  projectEstimatedTotal: string;
+  projectBreakTotal: string;
+  projectCancel: string;
+  projectStart: string;
+
+  // Execution
+  projectCurrentTask: string;
+  projectBreakTime: string;
+  projectOvertime: string;
+  projectEstimated: string;
+  projectContinue: string;
+  projectMarkDone: string;
+  projectPause: string;
+  projectResume: string;
+  projectTaskList: string;
+  projectInsertTask: string;
+  projectInsert: string;
+  projectAbandon: string;
+  projectAbandonConfirm: string;
+  projectAbandonYes: string;
+
+  // Summary
+  projectComplete: string;
+  projectTotalEstimated: string;
+  projectTotalActual: string;
+  projectAheadOfSchedule: string;
+  projectBehindSchedule: string;
+  projectTaskBreakdown: string;
+  projectCompleted: string;
+  projectSkipped: string;
+  projectDone: string;
+
+  // Recovery
+  projectRecoveryTitle: string;
+  projectRecoveryDesc: string;
+  projectRecoveryResume: string;
+  projectRecoveryDiscard: string;
+
+  // History
+  projectHistory: string;
+  projectHistoryEstimated: string;
+  projectHistoryActual: string;
 }

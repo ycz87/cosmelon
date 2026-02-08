@@ -10,16 +10,18 @@ import { BarChart } from './BarChart';
 import { GrowthIcon } from './GrowthIcon';
 import { formatDateKey, getRecentDays, getDayMinutes, getStreak, getSummary } from '../utils/stats';
 import type { PomodoroRecord } from '../types';
+import type { ProjectRecord } from '../types/project';
 import { getGrowthStage } from '../types';
 
 interface HistoryPanelProps {
   records: PomodoroRecord[];
+  projectRecords?: ProjectRecord[];
   onClose: () => void;
 }
 
 type Tab = 'history' | 'stats';
 
-export function HistoryPanel({ records, onClose }: HistoryPanelProps) {
+export function HistoryPanel({ records, projectRecords = [], onClose }: HistoryPanelProps) {
   const theme = useTheme();
   const t = useI18n();
   const today = formatDateKey(new Date());
@@ -153,6 +155,43 @@ export function HistoryPanel({ records, onClose }: HistoryPanelProps) {
                     })}
                   </div>
                 )}
+
+                {/* Project records for selected date */}
+                {(() => {
+                  const dayProjects = projectRecords.filter((p) => p.date === selectedDate);
+                  if (dayProjects.length === 0) return null;
+                  return (
+                    <div className="mt-4">
+                      <div className="text-xs font-medium uppercase tracking-wider mb-2"
+                        style={{ color: theme.textMuted }}>
+                        📋 {t.projectHistory}
+                      </div>
+                      <div className="space-y-1">
+                        {dayProjects.map((proj) => {
+                          const estMin = Math.round(proj.totalEstimatedSeconds / 60);
+                          const actMin = Math.round(proj.totalActualSeconds / 60);
+                          return (
+                            <div key={proj.id} className="px-3 py-2 rounded-xl"
+                              style={{ backgroundColor: theme.inputBg }}>
+                              <div className="flex items-center gap-2">
+                                <span className="text-sm truncate flex-1" style={{ color: theme.textMuted }}>
+                                  {proj.name}
+                                </span>
+                                <span className="text-xs shrink-0" style={{ color: theme.textFaint }}>
+                                  {proj.tasks.length} {t.projectCompleted}
+                                </span>
+                              </div>
+                              <div className="flex gap-3 mt-1 text-xs" style={{ color: theme.textFaint }}>
+                                <span>{t.projectHistoryEstimated}: {estMin}min</span>
+                                <span>{t.projectHistoryActual}: {actMin}min</span>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  );
+                })()}
               </div>
             </div>
           ) : (

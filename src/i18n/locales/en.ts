@@ -197,4 +197,56 @@ export const en: Messages = {
 
   // Month nav
   monthFormat: (year: number, month: number) => `${year}/${month}`,
+
+  // ─── Project mode ───
+  modePomodoro: 'Pomodoro',
+  modeProject: 'Project',
+
+  // Setup
+  projectNamePlaceholder: 'Project name',
+  projectTasks: 'Tasks',
+  projectTaskPlaceholder: 'Task name',
+  projectAddTask: 'Add task',
+  projectEstimatedTotal: 'Estimated total',
+  projectBreakTotal: 'breaks',
+  projectCancel: 'Cancel',
+  projectStart: 'Start',
+
+  // Execution
+  projectCurrentTask: 'Task',
+  projectBreakTime: 'Break time',
+  projectOvertime: 'Overtime',
+  projectEstimated: 'Est.',
+  projectContinue: 'Continue',
+  projectMarkDone: 'Done',
+  projectPause: 'Pause',
+  projectResume: 'Resume',
+  projectTaskList: 'Tasks',
+  projectInsertTask: 'Insert task',
+  projectInsert: 'Insert',
+  projectAbandon: 'Abandon project',
+  projectAbandonConfirm: 'Abandon? Progress will be lost.',
+  projectAbandonYes: 'Confirm',
+
+  // Summary
+  projectComplete: 'Project Complete!',
+  projectTotalEstimated: 'Estimated',
+  projectTotalActual: 'Actual',
+  projectAheadOfSchedule: 'Ahead by',
+  projectBehindSchedule: 'Over by',
+  projectTaskBreakdown: 'Task Breakdown',
+  projectCompleted: 'completed',
+  projectSkipped: 'skipped',
+  projectDone: 'Done',
+
+  // Recovery
+  projectRecoveryTitle: 'Unfinished Project Found',
+  projectRecoveryDesc: 'You have an unfinished project. Resume?',
+  projectRecoveryResume: 'Resume',
+  projectRecoveryDiscard: 'Start Fresh',
+
+  // History
+  projectHistory: 'Projects',
+  projectHistoryEstimated: 'Est.',
+  projectHistoryActual: 'Actual',
 };
