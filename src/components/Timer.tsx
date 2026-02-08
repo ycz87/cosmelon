@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react';
 import type { TimerPhase, TimerStatus } from '../hooks/useTimer';
 import { formatTime } from '../utils/time';
+import { useTheme } from '../hooks/useTheme';
 
 interface TimerProps {
   timeLeft: number;
@@ -38,8 +39,11 @@ export function Timer({ timeLeft, totalDuration, phase, status, onStart, onPause
   const headX = center + radius * Math.cos(angle);
   const headY = center + radius * Math.sin(angle);
 
-  const workColors = { from: '#ef4444', mid: '#f97316', to: '#fb923c' };
-  const breakColors = { from: '#34d399', mid: '#2dd4bf', to: '#5eead4' };
+  const theme = useTheme();
+
+  // 根据主题和阶段选择颜色
+  const workColors = { from: theme.accent, mid: theme.accentEnd, to: theme.accentEnd };
+  const breakColors = { from: theme.breakAccent, mid: theme.breakAccentEnd, to: theme.breakAccentEnd };
   const colors = isWork ? workColors : breakColors;
 
   const phaseLabel = phase === 'work' ? '🍅 专注时间'
@@ -49,11 +53,8 @@ export function Timer({ timeLeft, totalDuration, phase, status, onStart, onPause
   return (
     <div ref={containerRef} className="flex flex-col items-center gap-4 sm:gap-6">
       {/* Phase indicator */}
-      <div
-        className={`text-sm font-medium tracking-widest transition-colors duration-500 ${
-          isWork ? 'text-red-400' : 'text-emerald-400'
-        }`}
-      >
+      <div className="text-sm font-medium tracking-widest transition-colors duration-500"
+        style={{ color: isWork ? theme.accent : theme.breakAccent }}>
         {phaseLabel}
       </div>
 
@@ -116,31 +117,21 @@ export function Timer({ timeLeft, totalDuration, phase, status, onStart, onPause
         </svg>
 
         <span
-          className={`text-6xl sm:text-7xl font-timer text-white tracking-tight select-none transition-opacity ${
+          className={`text-6xl sm:text-7xl font-timer tracking-tight select-none transition-opacity ${
             status === 'paused' ? 'animate-pulse' : ''
           }`}
-          style={{ fontWeight: 300 }}
+          style={{ fontWeight: 300, color: theme.text }}
         >
           {formatTime(timeLeft)}
         </span>
       </div>
 
-      {/* Controls */}
+      {/* Controls — 使用主题色 */}
       <div className="flex items-center gap-3 sm:gap-4 h-16">
         {status === 'idle' && (
-          <button
-            onClick={onStart}
-            className={`w-14 h-14 rounded-full flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95 cursor-pointer ${
-              isWork
-                ? 'bg-gradient-to-br from-red-500 to-orange-500 hover:from-red-400 hover:to-orange-400'
-                : 'bg-gradient-to-br from-emerald-500 to-teal-400 hover:from-emerald-400 hover:to-teal-300'
-            }`}
-            style={{
-              boxShadow: isWork
-                ? '0 4px 24px rgba(239, 68, 68, 0.4)'
-                : '0 4px 24px rgba(52, 211, 153, 0.4)',
-            }}
-          >
+          <button onClick={onStart}
+            className="w-14 h-14 rounded-full flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95 cursor-pointer"
+            style={{ background: `linear-gradient(135deg, ${colors.from}, ${colors.to})`, boxShadow: `0 4px 24px ${colors.from}66` }}>
             <svg width="20" height="24" viewBox="0 0 20 24" fill="none" className="ml-0.5">
               <path d="M2 2L18 12L2 22V2Z" fill="white" />
             </svg>
@@ -148,35 +139,20 @@ export function Timer({ timeLeft, totalDuration, phase, status, onStart, onPause
         )}
 
         {status === 'running' && (
-          <button
-            onClick={onPause}
-            className={`w-14 h-14 rounded-full flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95 cursor-pointer ${
-              isWork
-                ? 'bg-red-500/20 hover:bg-red-500/30 border border-red-500/30'
-                : 'bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/30'
-            }`}
-          >
+          <button onClick={onPause}
+            className="w-14 h-14 rounded-full flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95 cursor-pointer border"
+            style={{ backgroundColor: `${colors.from}20`, borderColor: `${colors.from}40` }}>
             <svg width="16" height="20" viewBox="0 0 16 20" fill="none">
-              <rect x="1" y="1" width="4.5" height="18" rx="1.5" fill={isWork ? '#f87171' : '#6ee7b7'} />
-              <rect x="10.5" y="1" width="4.5" height="18" rx="1.5" fill={isWork ? '#f87171' : '#6ee7b7'} />
+              <rect x="1" y="1" width="4.5" height="18" rx="1.5" fill={colors.from} fillOpacity="0.7" />
+              <rect x="10.5" y="1" width="4.5" height="18" rx="1.5" fill={colors.from} fillOpacity="0.7" />
             </svg>
           </button>
         )}
 
         {status === 'paused' && (
-          <button
-            onClick={onResume}
-            className={`w-14 h-14 rounded-full flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95 cursor-pointer ${
-              isWork
-                ? 'bg-gradient-to-br from-red-500 to-orange-500 hover:from-red-400 hover:to-orange-400'
-                : 'bg-gradient-to-br from-emerald-500 to-teal-400 hover:from-emerald-400 hover:to-teal-300'
-            }`}
-            style={{
-              boxShadow: isWork
-                ? '0 4px 24px rgba(239, 68, 68, 0.4)'
-                : '0 4px 24px rgba(52, 211, 153, 0.4)',
-            }}
-          >
+          <button onClick={onResume}
+            className="w-14 h-14 rounded-full flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95 cursor-pointer"
+            style={{ background: `linear-gradient(135deg, ${colors.from}, ${colors.to})`, boxShadow: `0 4px 24px ${colors.from}66` }}>
             <svg width="20" height="24" viewBox="0 0 20 24" fill="none" className="ml-0.5">
               <path d="M2 2L18 12L2 22V2Z" fill="white" />
             </svg>
@@ -184,14 +160,9 @@ export function Timer({ timeLeft, totalDuration, phase, status, onStart, onPause
         )}
 
         {status !== 'idle' && (
-          <button
-            onClick={onSkip}
-            className={`w-11 h-11 rounded-full flex items-center justify-center transition-all duration-200 cursor-pointer ${
-              isWork
-                ? 'bg-red-500/10 text-red-400/60 hover:bg-red-500/20 hover:text-red-400/80'
-                : 'bg-emerald-500/10 text-emerald-400/60 hover:bg-emerald-500/20 hover:text-emerald-400/80'
-            }`}
-          >
+          <button onClick={onSkip}
+            className="w-11 h-11 rounded-full flex items-center justify-center transition-all duration-200 cursor-pointer"
+            style={{ backgroundColor: `${colors.from}15`, color: `${colors.from}99` }}>
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
               <path d="M2 2L10 8L2 14V2Z" fill="currentColor" />
               <rect x="11" y="2" width="3" height="12" rx="0.5" fill="currentColor" />
