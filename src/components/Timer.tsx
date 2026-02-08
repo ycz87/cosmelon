@@ -19,7 +19,6 @@ export function Timer({ timeLeft, phase, status, onStart, onPause, onResume, onS
   const containerRef = useRef<HTMLDivElement>(null);
   const prevStatusRef = useRef<TimerStatus>(status);
 
-  // Scale-in animation when starting
   useEffect(() => {
     if (status === 'running' && prevStatusRef.current === 'idle' && containerRef.current) {
       containerRef.current.classList.remove('animate-scale-in');
@@ -29,17 +28,14 @@ export function Timer({ timeLeft, phase, status, onStart, onPause, onResume, onS
     prevStatusRef.current = status;
   }, [status]);
 
-  // SVG parameters — no CSS rotation, handle arc direction in SVG
   const size = 320;
   const center = size / 2;
   const radius = 136;
   const circumference = 2 * Math.PI * radius;
-  // We draw the arc starting from top (12 o'clock) going clockwise
-  // SVG default starts at 3 o'clock, so we use transform on the circle element
   const strokeDashoffset = circumference * (1 - progress);
 
-  // Calculate the position of the progress head for the glow dot
-  const angle = progress * 2 * Math.PI - Math.PI / 2; // -90° to start from top
+  // Position of the progress head for the glow dot
+  const angle = progress * 2 * Math.PI - Math.PI / 2;
   const headX = center + radius * Math.cos(angle);
   const headY = center + radius * Math.sin(angle);
 
@@ -61,24 +57,36 @@ export function Timer({ timeLeft, phase, status, onStart, onPause, onResume, onS
           viewBox={`0 0 ${size} ${size}`}
         >
           <defs>
-            {/* Work gradient: red → orange, rotated to follow the arc */}
+            {/* Progress gradient: red → orange (work) / emerald → teal (break) */}
             <linearGradient id="grad-work" gradientUnits="userSpaceOnUse"
               x1={center} y1="0" x2={size} y2={size}>
               <stop offset="0%" stopColor="#ef4444" />
               <stop offset="50%" stopColor="#f97316" />
               <stop offset="100%" stopColor="#fb923c" />
             </linearGradient>
-            {/* Break gradient: emerald → teal */}
             <linearGradient id="grad-break" gradientUnits="userSpaceOnUse"
               x1={center} y1="0" x2={size} y2={size}>
               <stop offset="0%" stopColor="#34d399" />
               <stop offset="50%" stopColor="#2dd4bf" />
               <stop offset="100%" stopColor="#5eead4" />
             </linearGradient>
-            {/* Glow filter for the progress head */}
+
+            {/* Tinted base ring gradient — gives the ring color even at idle */}
+            <linearGradient id="base-work" gradientUnits="userSpaceOnUse"
+              x1={center} y1="0" x2={size} y2={size}>
+              <stop offset="0%" stopColor="#ef4444" stopOpacity="0.15" />
+              <stop offset="100%" stopColor="#f97316" stopOpacity="0.08" />
+            </linearGradient>
+            <linearGradient id="base-break" gradientUnits="userSpaceOnUse"
+              x1={center} y1="0" x2={size} y2={size}>
+              <stop offset="0%" stopColor="#34d399" stopOpacity="0.15" />
+              <stop offset="100%" stopColor="#2dd4bf" stopOpacity="0.08" />
+            </linearGradient>
+
+            {/* Glow filters for the progress head dot */}
             <filter id="glow-work" x="-50%" y="-50%" width="200%" height="200%">
-              <feGaussianBlur stdDeviation="6" result="blur" />
-              <feFlood floodColor="#ef4444" floodOpacity="0.8" />
+              <feGaussianBlur stdDeviation="8" result="blur" />
+              <feFlood floodColor="#f97316" floodOpacity="0.9" />
               <feComposite in2="blur" operator="in" />
               <feMerge>
                 <feMergeNode />
@@ -86,18 +94,19 @@ export function Timer({ timeLeft, phase, status, onStart, onPause, onResume, onS
               </feMerge>
             </filter>
             <filter id="glow-break" x="-50%" y="-50%" width="200%" height="200%">
-              <feGaussianBlur stdDeviation="6" result="blur" />
-              <feFlood floodColor="#34d399" floodOpacity="0.8" />
+              <feGaussianBlur stdDeviation="8" result="blur" />
+              <feFlood floodColor="#2dd4bf" floodOpacity="0.9" />
               <feComposite in2="blur" operator="in" />
               <feMerge>
                 <feMergeNode />
                 <feMergeNode in="SourceGraphic" />
               </feMerge>
             </filter>
-            {/* Subtle radial gradient for inner area */}
+
+            {/* Inner radial glow */}
             <radialGradient id="inner-glow" cx="50%" cy="50%" r="50%">
-              <stop offset="0%" stopColor={isWork ? '#ef4444' : '#34d399'} stopOpacity="0.06" />
-              <stop offset="70%" stopColor={isWork ? '#ef4444' : '#34d399'} stopOpacity="0.02" />
+              <stop offset="0%" stopColor={isWork ? '#ef4444' : '#34d399'} stopOpacity="0.07" />
+              <stop offset="60%" stopColor={isWork ? '#ef4444' : '#34d399'} stopOpacity="0.03" />
               <stop offset="100%" stopColor="transparent" stopOpacity="0" />
             </radialGradient>
           </defs>
@@ -105,18 +114,18 @@ export function Timer({ timeLeft, phase, status, onStart, onPause, onResume, onS
           {/* Inner subtle radial glow */}
           <circle cx={center} cy={center} r={radius - 10} fill="url(#inner-glow)" />
 
-          {/* Background circle — visible but subtle */}
+          {/* Base ring — tinted with phase color, not plain gray */}
           <circle
             cx={center}
             cy={center}
             r={radius}
             fill="none"
-            stroke="white"
-            strokeOpacity="0.12"
+            stroke={`url(#${isWork ? 'base-work' : 'base-break'})`}
             strokeWidth="8"
+            transform={`rotate(-90 ${center} ${center})`}
           />
 
-          {/* Progress arc */}
+          {/* Progress arc — bright gradient */}
           <circle
             cx={center}
             cy={center}
@@ -167,8 +176,8 @@ export function Timer({ timeLeft, phase, status, onStart, onPause, onResume, onS
             }`}
             style={{
               boxShadow: isWork
-                ? '0 4px 20px rgba(239, 68, 68, 0.3)'
-                : '0 4px 20px rgba(52, 211, 153, 0.3)',
+                ? '0 4px 24px rgba(239, 68, 68, 0.35)'
+                : '0 4px 24px rgba(52, 211, 153, 0.35)',
             }}
           >
             <svg width="20" height="24" viewBox="0 0 20 24" fill="none" className="ml-0.5">
@@ -199,8 +208,8 @@ export function Timer({ timeLeft, phase, status, onStart, onPause, onResume, onS
             }`}
             style={{
               boxShadow: isWork
-                ? '0 4px 20px rgba(239, 68, 68, 0.3)'
-                : '0 4px 20px rgba(52, 211, 153, 0.3)',
+                ? '0 4px 24px rgba(239, 68, 68, 0.35)'
+                : '0 4px 24px rgba(52, 211, 153, 0.35)',
             }}
           >
             <svg width="20" height="24" viewBox="0 0 20 24" fill="none" className="ml-0.5">
