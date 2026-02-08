@@ -96,7 +96,8 @@ export function Timer({ timeLeft, phase, status, onStart, onPause, onResume, onS
             </filter>
             {/* Subtle radial gradient for inner area */}
             <radialGradient id="inner-glow" cx="50%" cy="50%" r="50%">
-              <stop offset="0%" stopColor={isWork ? '#ef4444' : '#34d399'} stopOpacity="0.03" />
+              <stop offset="0%" stopColor={isWork ? '#ef4444' : '#34d399'} stopOpacity="0.06" />
+              <stop offset="70%" stopColor={isWork ? '#ef4444' : '#34d399'} stopOpacity="0.02" />
               <stop offset="100%" stopColor="transparent" stopOpacity="0" />
             </radialGradient>
           </defs>
@@ -111,7 +112,7 @@ export function Timer({ timeLeft, phase, status, onStart, onPause, onResume, onS
             r={radius}
             fill="none"
             stroke="white"
-            strokeOpacity="0.08"
+            strokeOpacity="0.12"
             strokeWidth="8"
           />
 
