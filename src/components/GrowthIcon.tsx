@@ -69,22 +69,22 @@ function BloomIcon({ size }: { size: number }) {
   );
 }
 
-/** 青瓜 — 小的青绿色西瓜+条纹 */
+/** 青瓜 — 小的浅绿/黄绿色未成熟西瓜 */
 function GreenIcon({ size }: { size: number }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
       {/* 藤 */}
-      <path d="M12 6 C12 4 13 3 14 2.5" stroke="#16a34a" strokeWidth="1" strokeLinecap="round" />
+      <path d="M12 7 C12 5 13 4 14 3.5" stroke="#65a30d" strokeWidth="1" strokeLinecap="round" />
       {/* 小叶 */}
-      <path d="M13.5 3.5 C15 2.5 16.5 3 16 4 C15.5 5 14 4.5 13.5 3.5Z" fill="#4ade80" />
-      {/* 西瓜主体 */}
-      <ellipse cx="12" cy="13" rx="7" ry="7.5" fill="#22c55e" />
-      {/* 深色条纹 */}
-      <path d="M8 7 C7 10 7 16 8 19.5" stroke="#15803d" strokeWidth="1.2" strokeLinecap="round" fill="none" />
-      <path d="M12 5.5 C12 10 12 16 12 20.5" stroke="#15803d" strokeWidth="1.2" strokeLinecap="round" fill="none" />
-      <path d="M16 7 C17 10 17 16 16 19.5" stroke="#15803d" strokeWidth="1.2" strokeLinecap="round" fill="none" />
+      <path d="M13.5 4.5 C15 3.5 16.5 4 16 5 C15.5 6 14 5.5 13.5 4.5Z" fill="#a3e635" />
+      {/* 西瓜主体 — 浅绿/黄绿，比成熟的小 */}
+      <ellipse cx="12" cy="14.5" rx="6" ry="6.5" fill="#a3e635" />
+      {/* 浅色条纹 — 不太明显 */}
+      <path d="M9 9.5 C8.3 12 8.3 17 9 20" stroke="#84cc16" strokeWidth="0.9" strokeLinecap="round" fill="none" opacity="0.6" />
+      <path d="M12 8 C12 12 12 17 12 21" stroke="#84cc16" strokeWidth="0.9" strokeLinecap="round" fill="none" opacity="0.6" />
+      <path d="M15 9.5 C15.7 12 15.7 17 15 20" stroke="#84cc16" strokeWidth="0.9" strokeLinecap="round" fill="none" opacity="0.6" />
       {/* 高光 */}
-      <ellipse cx="9.5" cy="10" rx="2" ry="3" fill="white" opacity="0.15" transform="rotate(-15 9.5 10)" />
+      <ellipse cx="10" cy="12" rx="1.8" ry="2.5" fill="white" opacity="0.2" transform="rotate(-15 10 12)" />
     </svg>
   );
 }
