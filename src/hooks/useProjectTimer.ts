@@ -364,6 +364,10 @@ export function useProjectTimer(
   const completeCurrentTask = useCallback(() => {
     setState((prev) => {
       if (!prev) return prev;
+      // Only allow during work/overtime/paused-work phases (not break)
+      if (prev.phase === 'break' || prev.phase === 'setup' || prev.phase === 'summary') return prev;
+      // If paused, check if we were in break (results.length > currentTaskIndex means break)
+      if (prev.phase === 'paused' && prev.results.length > prev.currentTaskIndex) return prev;
       return recordTaskResult(prev, 'completed');
     });
   }, [recordTaskResult]);
@@ -371,6 +375,8 @@ export function useProjectTimer(
   const skipCurrentTask = useCallback(() => {
     setState((prev) => {
       if (!prev) return prev;
+      if (prev.phase === 'break' || prev.phase === 'setup' || prev.phase === 'summary') return prev;
+      if (prev.phase === 'paused' && prev.results.length > prev.currentTaskIndex) return prev;
       return recordTaskResult(prev, 'skipped');
     });
   }, [recordTaskResult]);

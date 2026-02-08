@@ -13,19 +13,23 @@ Charles 反馈：超时弹窗打断心流，按钮布局不够直观。
 - 删除 `showOvertimePrompt` 逻辑
 - 保留：进度环变红 + 数字变红 "+MM:SS"（用户仍可感知超时）
 
-### 改动 2：项目模式按钮改造
-- 原"跳过"按钮 → 圆形 **✓ 按钮**（绿色/accent，调用 `completeCurrentTask`）
-- 新增圆形 **✗ 按钮**（灰色，调用 `skipCurrentTask`）
-- 两个按钮在计时器下方左右对称
-- 删除底部"放弃本次"按钮（项目模式下，通过 `!projectControls` 条件控制）
+### 改动 2：按钮布局修正
+- 布局：✗（左）⏸/▶（中）✓（右），三个按钮一行
+- ✗ 灰色圆形（跳过），✓ 绿色/accent 圆形（完成），暂停/继续在中间最大
+- 删除底部"放弃本次"按钮（项目模式下）
 - 普通番茄钟模式完全不受影响
+
+### Bug 修复：完成子任务后白屏
+- **根因：** break 阶段 ✓/✗ 按钮仍然可见，用户在 break 时点击 ✓ 会重复调用 `recordTaskResult`，导致 results 重复 + currentTaskIndex 越界 → 渲染崩溃
+- **修复 1：** Timer 新增 `hideActions` prop，break 阶段隐藏 ✓/✗ 按钮，只保留暂停/继续
+- **修复 2：** `completeCurrentTask` / `skipCurrentTask` 加 phase 保护，break/setup/summary 阶段直接 return，paused 时检查是否为 break-paused
 
 ### 涉及文件
 - `src/types/project.ts` — 删除 `overtimeDismissed` 字段
-- `src/hooks/useProjectTimer.ts` — 删除 `overtimeDismissed` 赋值
-- `src/components/Timer.tsx` — 新增 `projectControls` prop，✓/✗ 按钮，条件隐藏放弃按钮
+- `src/hooks/useProjectTimer.ts` — 删除 `overtimeDismissed`，complete/skip 加 phase 保护
+- `src/components/Timer.tsx` — 按钮重排 ✗/⏸/✓，新增 `hideActions` prop
 - `src/components/ProjectTaskBar.tsx` — 清理超时提示
-- `src/App.tsx` — 传递 `projectControls` 给 Timer
+- `src/App.tsx` — break 阶段传 `hideActions=true`
 
 ---
 

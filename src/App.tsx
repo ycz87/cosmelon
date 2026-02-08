@@ -273,6 +273,7 @@ function App() {
           if (isProjectExecuting && project.state) {
             const projWorkMinutes = project.state.tasks[project.state.currentTaskIndex]?.estimatedMinutes || 25;
             const projGrowthStage: GrowthStage | null = null; // no celebration in project mode mid-task
+            const isBreakPhase = pv.phase !== 'work';
             return (
               <>
                 <div className="flex-1 flex flex-col items-center justify-center gap-4 sm:gap-6 w-full px-4">
@@ -304,6 +305,7 @@ function App() {
                       onComplete: project.completeCurrentTask,
                       onSkipTask: project.skipCurrentTask,
                     }}
+                    hideActions={isBreakPhase}
                   />
                 </div>
 
