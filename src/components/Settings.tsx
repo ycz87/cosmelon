@@ -1,6 +1,6 @@
 /**
  * 设置面板 — 齿轮图标展开，包含所有用户可配置项
- * 计时运行中锁定时长设置，暂停时可修改
+ * 计时运行中和暂停中锁定时长设置，仅 idle 状态可修改
  */
 import { useState, useRef, useEffect } from 'react';
 import type { PomodoroSettings, SoundType, TickType, ThemeId } from '../types';
@@ -114,11 +114,11 @@ export function Settings({ settings, onChange, disabled }: SettingsProps) {
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 top-12 w-72 sm:w-80 p-5 rounded-2xl border shadow-2xl z-50 animate-fade-up max-h-[75vh] overflow-y-auto"
+        <div className="absolute right-0 top-12 w-[calc(100vw-1.5rem)] sm:w-80 p-4 sm:p-5 rounded-2xl border shadow-2xl z-50 animate-fade-up max-h-[75vh] overflow-y-auto"
           style={{ backgroundColor: t.surface, borderColor: t.textFaint }}>
           <div className="flex flex-col gap-4">
             {disabled && (
-              <div className="text-xs" style={{ color: '#fbbf24' }}>⏸ 计时中无法修改，暂停后可调整</div>
+              <div className="text-xs" style={{ color: '#fbbf24' }}>⏳ 计时进行中，完成或重置后可调整</div>
             )}
 
             {/* 时长设置 */}

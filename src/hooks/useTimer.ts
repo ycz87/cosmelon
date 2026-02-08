@@ -7,6 +7,7 @@ export type TimerStatus = 'idle' | 'running' | 'paused';
 interface UseTimerOptions {
   settings: PomodoroSettings;
   onComplete: (phase: TimerPhase) => void;
+  onSkipWork: (elapsedSeconds: number) => void;
 }
 
 interface UseTimerReturn {
@@ -32,7 +33,7 @@ function getDuration(phase: TimerPhase, settings: PomodoroSettings): number {
   }
 }
 
-export function useTimer({ settings, onComplete }: UseTimerOptions): UseTimerReturn {
+export function useTimer({ settings, onComplete, onSkipWork }: UseTimerOptions): UseTimerReturn {
   const [phase, setPhase] = useState<TimerPhase>('work');
   const [status, setStatus] = useState<TimerStatus>('idle');
   const [timeLeft, setTimeLeft] = useState(settings.workMinutes * 60);
@@ -40,11 +41,16 @@ export function useTimer({ settings, onComplete }: UseTimerOptions): UseTimerRet
   const [celebrating, setCelebrating] = useState(false);
   const [celebrationStage, setCelebrationStage] = useState<TimerPhase | null>(null);
   const onCompleteRef = useRef(onComplete);
+  const onSkipWorkRef = useRef(onSkipWork);
   const settingsRef = useRef(settings);
 
   useEffect(() => {
     onCompleteRef.current = onComplete;
   }, [onComplete]);
+
+  useEffect(() => {
+    onSkipWorkRef.current = onSkipWork;
+  }, [onSkipWork]);
 
   useEffect(() => {
     settingsRef.current = settings;
@@ -131,8 +137,19 @@ export function useTimer({ settings, onComplete }: UseTimerOptions): UseTimerRet
     let nextRoundProgress = roundProgress;
 
     if (phase === 'work') {
-      // Skipping work doesn't count as completed
-      nextPhase = 'shortBreak';
+      // Calculate elapsed time and record it
+      const totalSeconds = getDuration('work', s);
+      const elapsedSeconds = totalSeconds - timeLeft;
+      if (elapsedSeconds > 0) {
+        onSkipWorkRef.current(elapsedSeconds);
+      }
+      // Skipping work still counts toward round progress
+      nextRoundProgress = roundProgress + 1;
+      if (nextRoundProgress >= s.pomodorosPerRound) {
+        nextPhase = 'longBreak';
+      } else {
+        nextPhase = 'shortBreak';
+      }
     } else {
       if (phase === 'longBreak') {
         nextRoundProgress = 0;
@@ -144,7 +161,7 @@ export function useTimer({ settings, onComplete }: UseTimerOptions): UseTimerRet
     setPhase(nextPhase);
     setTimeLeft(getDuration(nextPhase, s));
     setStatus('idle');
-  }, [phase, roundProgress]);
+  }, [phase, roundProgress, timeLeft]);
 
   const reset = useCallback(() => {
     setPhase('work');

@@ -54,7 +54,23 @@ function App() {
     }
   }, [currentTask, setRecords, settings.sound, settings.workMinutes, settings.alertDurationSeconds]);
 
-  const timer = useTimer({ settings, onComplete: handleTimerComplete });
+  const handleSkipWork = useCallback((elapsedSeconds: number) => {
+    const elapsedMinutes = Math.round(elapsedSeconds / 60);
+    if (elapsedMinutes < 1) return; // less than 1 minute, don't record
+    const stage = getGrowthStage(elapsedMinutes);
+    const emoji = GROWTH_EMOJI[stage];
+    const record: PomodoroRecord = {
+      id: Date.now().toString(),
+      task: currentTask,
+      durationMinutes: elapsedMinutes,
+      completedAt: new Date().toISOString(),
+      date: getTodayKey(),
+    };
+    setRecords((prev) => [record, ...prev]);
+    sendNotification(`${emoji} 手动完成`, `\"${currentTask || '未命名任务'}\" · 专注了 ${elapsedMinutes} 分钟`, settings.sound, settings.alertDurationSeconds);
+  }, [currentTask, setRecords, settings.sound, settings.alertDurationSeconds]);
+
+  const timer = useTimer({ settings, onComplete: handleTimerComplete, onSkipWork: handleSkipWork });
 
   // 管理背景滴答声生命周期
   useEffect(() => {
@@ -101,7 +117,6 @@ function App() {
   }, [setRecords]);
 
   const isWork = timer.phase === 'work';
-  const isTimerRunning = timer.status === 'running';
 
   // Celebration: determine growth stage for the work duration
   const celebrationGrowthStage: GrowthStage | null = timer.celebrating ? getGrowthStage(settings.workMinutes) : null;
@@ -119,14 +134,14 @@ function App() {
         style={{ backgroundColor: bgColor }}>
 
         {/* Header */}
-        <header className="w-full flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 shrink-0">
-          <div className="flex items-center gap-2">
-            <span className="text-base">🍅</span>
-            <span className="text-sm font-medium tracking-wide" style={{ color: theme.textMuted }}>番茄时钟</span>
+        <header className="w-full flex items-center justify-between px-3 sm:px-6 py-2 sm:py-4 shrink-0 z-40 relative">
+          <div className="flex items-center gap-1.5 min-w-0">
+            <span className="text-base shrink-0">🍅</span>
+            <span className="text-sm font-medium tracking-wide truncate" style={{ color: theme.textMuted }}>番茄时钟</span>
           </div>
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-0.5 shrink-0">
             <GuideButton />
-            <Settings settings={settings} onChange={setSettings} disabled={isTimerRunning} />
+            <Settings settings={settings} onChange={setSettings} disabled={timer.status !== 'idle'} />
           </div>
         </header>
 
@@ -143,7 +158,7 @@ function App() {
             onResume={timer.resume} onSkip={timer.skip}
           />
           <RoundProgress current={timer.roundProgress} total={settings.pomodorosPerRound} idle={timer.status === 'idle'} />
-          <TaskInput value={currentTask} onChange={setCurrentTask} disabled={timer.status === 'running'} />
+          <TaskInput value={currentTask} onChange={setCurrentTask} disabled={timer.status !== 'idle'} />
         </div>
 
         {/* 底部 — 统计和记录 */}
