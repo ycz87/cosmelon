@@ -7,6 +7,8 @@ import type { PomodoroSettings, SoundType, TickType, ThemeId } from '../types';
 import { THEMES } from '../types';
 import { playNotificationSound, previewTickSound, setAlertVolume, setTickVolume } from '../utils/notification';
 import { useTheme } from '../hooks/useTheme';
+import { useI18n } from '../i18n';
+import type { Locale } from '../i18n';
 
 interface SettingsProps {
   settings: PomodoroSettings;
@@ -40,9 +42,9 @@ function Toggle({ label, checked, onChange }: {
 }
 
 /** 数字步进器 — 支持 −/输入/+ 三种操作 */
-function NumberStepper({ label, value, onChange, min, max, step = 1, unit = '分钟', disabled }: {
+function NumberStepper({ label, value, onChange, min, max, step = 1, unit, disabled }: {
   label: string; value: number; onChange: (v: number) => void;
-  min: number; max: number; step?: number; unit?: string; disabled: boolean;
+  min: number; max: number; step?: number; unit: string; disabled: boolean;
 }) {
   const clamp = (v: number) => Math.min(max, Math.max(min, v));
   const inputRef = useRef<HTMLInputElement>(null);
@@ -89,15 +91,15 @@ function VolumeSlider({ label, value, onChange }: {
   );
 }
 
-const SOUND_LABELS: Record<SoundType, string> = { chime: '🎵 和弦', bell: '🔔 铃声', nature: '🌿 自然' };
 const ALERT_DURATION_OPTIONS = [1, 3, 5, 10];
-const TICK_LABELS: Record<TickType, string> = { none: '关闭', classic: '经典钟摆', soft: '轻柔滴答', mechanical: '机械钟表', wooden: '木质钟声' };
 const ROUND_OPTIONS = [2, 3, 4, 5, 6];
+const LOCALE_LABELS: Record<Locale, string> = { zh: '中文', en: 'EN' };
 
 export function Settings({ settings, onChange, disabled, onExport }: SettingsProps) {
   const [isOpen, setIsOpen] = useState(false);
   const panelRef = useRef<HTMLDivElement>(null);
-  const t = useTheme();
+  const theme = useTheme();
+  const i18n = useI18n();
 
   useEffect(() => {
     if (!isOpen) return;
@@ -122,16 +124,41 @@ export function Settings({ settings, onChange, disabled, onExport }: SettingsPro
       active ? 'font-medium' : ''
     }`;
   const optStyle = (active: boolean) => ({
-    backgroundColor: active ? `${t.accent}30` : t.inputBg,
-    color: active ? t.accent : t.textMuted,
+    backgroundColor: active ? `${theme.accent}30` : theme.inputBg,
+    color: active ? theme.accent : theme.textMuted,
   });
+
+  // Sound labels from i18n
+  const soundLabels: Record<SoundType, string> = {
+    chime: i18n.soundChime,
+    bell: i18n.soundBell,
+    nature: i18n.soundNature,
+  };
+
+  // Tick labels from i18n
+  const tickLabels: Record<TickType, string> = {
+    none: i18n.tickNone,
+    classic: i18n.tickClassic,
+    soft: i18n.tickSoft,
+    mechanical: i18n.tickMechanical,
+    wooden: i18n.tickWooden,
+  };
+
+  // Theme labels from i18n
+  const themeLabels: Record<ThemeId, string> = {
+    dark: i18n.themeDark,
+    light: i18n.themeLight,
+    forest: i18n.themeForest,
+    ocean: i18n.themeOcean,
+    warm: i18n.themeWarm,
+  };
 
   return (
     <div className="relative" ref={panelRef}>
       <button onClick={() => setIsOpen(!isOpen)}
         className={`w-9 h-9 rounded-full flex items-center justify-center transition-all cursor-pointer`}
-        style={{ color: isOpen ? t.textMuted : t.textFaint }}
-        aria-label="设置">
+        style={{ color: isOpen ? theme.textMuted : theme.textFaint }}
+        aria-label={i18n.settings}>
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
           <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" />
           <circle cx="12" cy="12" r="3" />
@@ -140,22 +167,22 @@ export function Settings({ settings, onChange, disabled, onExport }: SettingsPro
 
       {isOpen && (
         <div className="absolute right-0 top-12 w-[calc(100vw-1.5rem)] sm:w-80 p-4 sm:p-5 rounded-2xl border shadow-2xl z-50 animate-fade-up max-h-[75vh] overflow-y-auto"
-          style={{ backgroundColor: t.surface, borderColor: t.textFaint }}>
+          style={{ backgroundColor: theme.surface, borderColor: theme.textFaint }}>
           <div className="flex flex-col gap-4">
             {disabled && (
-              <div className="text-xs" style={{ color: '#fbbf24' }}>⏳ 计时进行中，完成或重置后可调整</div>
+              <div className="text-xs" style={{ color: '#fbbf24' }}>{i18n.timerRunningHint}</div>
             )}
 
             {/* 时长设置 */}
-            <NumberStepper label="专注时长" value={settings.workMinutes}
-              onChange={(v) => update({ workMinutes: v })} min={1} max={120} disabled={disabled} />
-            <NumberStepper label="短休息" value={settings.shortBreakMinutes}
-              onChange={(v) => update({ shortBreakMinutes: v })} min={1} max={30} disabled={disabled} />
-            <NumberStepper label="长休息" value={settings.longBreakMinutes}
-              onChange={(v) => update({ longBreakMinutes: v })} min={1} max={60} disabled={disabled} />
+            <NumberStepper label={i18n.workDuration} value={settings.workMinutes}
+              onChange={(v) => update({ workMinutes: v })} min={1} max={120} disabled={disabled} unit={i18n.minutes} />
+            <NumberStepper label={i18n.shortBreak} value={settings.shortBreakMinutes}
+              onChange={(v) => update({ shortBreakMinutes: v })} min={1} max={30} disabled={disabled} unit={i18n.minutes} />
+            <NumberStepper label={i18n.longBreak} value={settings.longBreakMinutes}
+              onChange={(v) => update({ longBreakMinutes: v })} min={1} max={60} disabled={disabled} unit={i18n.minutes} />
 
             <div className="flex items-center justify-between gap-3">
-              <div className={`text-sm ${disabled ? 'opacity-40' : ''}`} style={{ color: t.textMuted }}>长休息间隔</div>
+              <div className={`text-sm ${disabled ? 'opacity-40' : ''}`} style={{ color: theme.textMuted }}>{i18n.longBreakInterval}</div>
               <div className={`flex gap-1 ${disabled ? 'opacity-40 pointer-events-none' : ''}`}>
                 {ROUND_OPTIONS.map((n) => (
                   <button key={n} onClick={() => update({ pomodorosPerRound: n })}
@@ -166,87 +193,103 @@ export function Settings({ settings, onChange, disabled, onExport }: SettingsPro
             </div>
 
             {/* 自动开始 */}
-            <Toggle label="自动开始休息" checked={settings.autoStartBreak}
+            <Toggle label={i18n.autoStartBreak} checked={settings.autoStartBreak}
               onChange={(v) => update({ autoStartBreak: v })} />
-            <Toggle label="自动开始工作" checked={settings.autoStartWork}
+            <Toggle label={i18n.autoStartWork} checked={settings.autoStartWork}
               onChange={(v) => update({ autoStartWork: v })} />
 
-            <div className="border-t" style={{ borderColor: t.textFaint }} />
+            <div className="border-t" style={{ borderColor: theme.textFaint }} />
 
             {/* 音效设置 */}
             <div className="flex items-center justify-between gap-3">
-              <div className="text-sm" style={{ color: t.textMuted }}>提醒音效</div>
+              <div className="text-sm" style={{ color: theme.textMuted }}>{i18n.alertSound}</div>
               <div className="flex gap-1.5">
-                {(Object.keys(SOUND_LABELS) as SoundType[]).map((s) => (
+                {(Object.keys(soundLabels) as SoundType[]).map((s) => (
                   <button key={s} onClick={() => { update({ sound: s }); playNotificationSound(s, 1); }}
                     className={optBtn(settings.sound === s)}
-                    style={optStyle(settings.sound === s)}>{SOUND_LABELS[s]}</button>
+                    style={optStyle(settings.sound === s)}>{soundLabels[s]}</button>
                 ))}
               </div>
             </div>
 
             <div className="flex items-center justify-between gap-3">
-              <div className="text-sm" style={{ color: t.textMuted }}>提醒时长</div>
+              <div className="text-sm" style={{ color: theme.textMuted }}>{i18n.alertDuration}</div>
               <div className="flex gap-1">
                 {ALERT_DURATION_OPTIONS.map((d) => (
                   <button key={d} onClick={() => update({ alertDurationSeconds: d })}
                     className={optBtn(settings.alertDurationSeconds === d)}
-                    style={optStyle(settings.alertDurationSeconds === d)}>{d}秒</button>
+                    style={optStyle(settings.alertDurationSeconds === d)}>{d}{i18n.seconds}</button>
                 ))}
               </div>
             </div>
 
-            <VolumeSlider label="提醒音量" value={settings.alertVolume}
+            <VolumeSlider label={i18n.alertVolume} value={settings.alertVolume}
               onChange={(v) => update({ alertVolume: v })} />
 
-            <div className="border-t" style={{ borderColor: t.textFaint }} />
+            <div className="border-t" style={{ borderColor: theme.textFaint }} />
 
             {/* 背景音设置 */}
             <div className="flex flex-col gap-2">
-              <div className="text-sm" style={{ color: t.textMuted }}>专注背景音</div>
+              <div className="text-sm" style={{ color: theme.textMuted }}>{i18n.focusBackground}</div>
               <div className="flex flex-wrap gap-1.5">
-                {(Object.keys(TICK_LABELS) as TickType[]).map((tt) => (
+                {(Object.keys(tickLabels) as TickType[]).map((tt) => (
                   <button key={tt} onClick={() => { update({ tickSound: tt }); previewTickSound(tt); }}
                     className={optBtn(settings.tickSound === tt)}
-                    style={optStyle(settings.tickSound === tt)}>{TICK_LABELS[tt]}</button>
+                    style={optStyle(settings.tickSound === tt)}>{tickLabels[tt]}</button>
                 ))}
               </div>
             </div>
 
             {settings.tickSound !== 'none' && (
-              <VolumeSlider label="背景音量" value={settings.tickVolume}
+              <VolumeSlider label={i18n.bgVolume} value={settings.tickVolume}
                 onChange={(v) => update({ tickVolume: v })} />
             )}
 
-            <div className="border-t" style={{ borderColor: t.textFaint }} />
+            <div className="border-t" style={{ borderColor: theme.textFaint }} />
 
             {/* 主题选择 */}
             <div className="flex flex-col gap-2">
-              <div className="text-sm" style={{ color: t.textMuted }}>主题</div>
+              <div className="text-sm" style={{ color: theme.textMuted }}>{i18n.theme}</div>
               <div className="flex flex-wrap gap-1.5">
                 {(Object.keys(THEMES) as ThemeId[]).map((id) => (
                   <button key={id} onClick={() => update({ theme: id })}
                     className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs transition-all cursor-pointer"
                     style={{
-                      backgroundColor: settings.theme === id ? `${THEMES[id].colors.accent}30` : t.inputBg,
-                      color: settings.theme === id ? THEMES[id].colors.accent : t.textMuted,
+                      backgroundColor: settings.theme === id ? `${THEMES[id].colors.accent}30` : theme.inputBg,
+                      color: settings.theme === id ? THEMES[id].colors.accent : theme.textMuted,
                     }}>
                     <span className="w-3 h-3 rounded-full shrink-0" style={{ backgroundColor: THEMES[id].colors.accent }} />
-                    {THEMES[id].name}
+                    {themeLabels[id]}
                   </button>
                 ))}
               </div>
             </div>
 
-            <div className="border-t" style={{ borderColor: t.textFaint }} />
+            <div className="border-t" style={{ borderColor: theme.textFaint }} />
+
+            {/* 语言切换 */}
+            <div className="flex items-center justify-between gap-3">
+              <div className="text-sm" style={{ color: theme.textMuted }}>{i18n.language}</div>
+              <div className="flex gap-1.5">
+                {(Object.keys(LOCALE_LABELS) as Locale[]).map((loc) => (
+                  <button key={loc} onClick={() => update({ language: loc })}
+                    className={optBtn(settings.language === loc)}
+                    style={optStyle(settings.language === loc)}>
+                    {LOCALE_LABELS[loc]}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="border-t" style={{ borderColor: theme.textFaint }} />
 
             {/* 导出数据 */}
             <button
               onClick={onExport}
               className="w-full py-2 rounded-lg text-xs transition-all cursor-pointer"
-              style={{ backgroundColor: t.inputBg, color: t.textMuted }}
+              style={{ backgroundColor: theme.inputBg, color: theme.textMuted }}
             >
-              📦 导出数据
+              {i18n.exportData}
             </button>
           </div>
         </div>

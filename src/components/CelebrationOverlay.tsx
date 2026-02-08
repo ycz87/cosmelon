@@ -6,6 +6,7 @@
 import { useEffect, useState, useMemo } from 'react';
 import type { GrowthStage } from '../types';
 import { useTheme } from '../hooks/useTheme';
+import { useI18n } from '../i18n';
 import { GrowthIcon } from './GrowthIcon';
 
 interface CelebrationOverlayProps {
@@ -26,9 +27,6 @@ interface Particle {
   shape: 'circle' | 'rect' | 'star';
 }
 
-const CELEBRATION_TEXTS = ['太棒了！🎉', '干得漂亮！✨', '完美专注！🔥', '继续保持！💪'];
-const CELEBRATION_TEXTS_SHORT = ['不错！👍', '完成了！✨', '好的开始！🌱'];
-
 function generateParticles(count: number, colors: string[]): Particle[] {
   return Array.from({ length: count }, (_, i) => ({
     id: i,
@@ -47,11 +45,12 @@ export function CelebrationOverlay({ stage, isRipe, onComplete }: CelebrationOve
   const [visible, setVisible] = useState(true);
   const [phase, setPhase] = useState<'enter' | 'show' | 'exit'>('enter');
   const theme = useTheme();
+  const t = useI18n();
 
   const text = useMemo(() => {
-    const pool = isRipe ? CELEBRATION_TEXTS : CELEBRATION_TEXTS_SHORT;
+    const pool = isRipe ? t.celebrationRipe : t.celebrationShort;
     return pool[Math.floor(Math.random() * pool.length)];
-  }, [isRipe]);
+  }, [isRipe, t]);
 
   const particleColors = useMemo(() => {
     return isRipe

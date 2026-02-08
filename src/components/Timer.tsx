@@ -3,6 +3,7 @@ import type { TimerPhase, TimerStatus } from '../hooks/useTimer';
 import type { GrowthStage } from '../types';
 import { formatTime } from '../utils/time';
 import { useTheme } from '../hooks/useTheme';
+import { useI18n } from '../i18n';
 import { CelebrationOverlay } from './CelebrationOverlay';
 
 const QUICK_DURATIONS = [5, 10, 15, 20, 25, 30, 45, 60];
@@ -53,15 +54,16 @@ export function Timer({ timeLeft, totalDuration, phase, status, celebrating, cel
   const headY = center + radius * Math.sin(angle);
 
   const theme = useTheme();
+  const t = useI18n();
 
   // 根据主题和阶段选择颜色
   const workColors = { from: theme.accent, mid: theme.accentEnd, to: theme.accentEnd };
   const breakColors = { from: theme.breakAccent, mid: theme.breakAccentEnd, to: theme.breakAccentEnd };
   const colors = isWork ? workColors : breakColors;
 
-  const phaseLabel = phase === 'work' ? '🍉 专注时间'
-    : phase === 'longBreak' ? '🌙 长休息'
-    : '☕ 休息一下';
+  const phaseLabel = phase === 'work' ? t.phaseWork
+    : phase === 'longBreak' ? t.phaseLongBreak
+    : t.phaseShortBreak;
 
   return (
     <div ref={containerRef} className="flex flex-col items-center gap-4 sm:gap-6 relative">
@@ -148,7 +150,7 @@ export function Timer({ timeLeft, totalDuration, phase, status, celebrating, cel
           onClick={() => {
             if (status === 'idle' && isWork) setShowQuickPicker(!showQuickPicker);
           }}
-          title={status === 'idle' && isWork ? '点击快速调整时长' : undefined}
+          title={status === 'idle' && isWork ? t.quickTimeHint : undefined}
         >
           {formatTime(timeLeft)}
         </span>
@@ -226,7 +228,7 @@ export function Timer({ timeLeft, totalDuration, phase, status, celebrating, cel
             className="px-3.5 py-1.5 rounded-full text-xs font-semibold border transition-all duration-200 cursor-pointer hover:border-red-400/60 hover:text-red-400/90 hover:bg-red-400/15 active:scale-95"
             style={{ color: theme.textMuted, borderColor: `${theme.text}25`, backgroundColor: `${theme.text}10` }}
           >
-            放弃本次
+            {t.abandon}
           </button>
         )}
       </div>

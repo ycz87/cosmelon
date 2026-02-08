@@ -3,6 +3,7 @@
  */
 import { useState, useMemo } from 'react';
 import { useTheme } from '../hooks/useTheme';
+import { useI18n } from '../i18n';
 import { getMonthDays, formatDateKey } from '../utils/stats';
 
 interface MiniCalendarProps {
@@ -11,10 +12,9 @@ interface MiniCalendarProps {
   onSelect: (dateKey: string) => void;
 }
 
-const WEEKDAYS = ['一', '二', '三', '四', '五', '六', '日'];
-
 export function MiniCalendar({ recordDates, selectedDate, onSelect }: MiniCalendarProps) {
   const theme = useTheme();
+  const t = useI18n();
   const today = formatDateKey(new Date());
 
   const [viewYear, setViewYear] = useState(() => new Date().getFullYear());
@@ -25,7 +25,7 @@ export function MiniCalendar({ recordDates, selectedDate, onSelect }: MiniCalend
   // First day offset (Monday = 0)
   const firstDayOfWeek = (days[0].getDay() + 6) % 7; // shift so Mon=0
 
-  const monthLabel = `${viewYear}年${viewMonth + 1}月`;
+  const monthLabel = t.monthFormat(viewYear, viewMonth + 1);
 
   const goPrev = () => {
     if (viewMonth === 0) { setViewYear(viewYear - 1); setViewMonth(11); }
@@ -64,7 +64,7 @@ export function MiniCalendar({ recordDates, selectedDate, onSelect }: MiniCalend
 
       {/* Weekday headers */}
       <div className="grid grid-cols-7 gap-0.5 mb-1">
-        {WEEKDAYS.map((d) => (
+        {t.weekdays.map((d) => (
           <div key={d} className="text-center text-[10px] py-0.5" style={{ color: theme.textFaint }}>
             {d}
           </div>

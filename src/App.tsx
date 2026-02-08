@@ -19,6 +19,7 @@ import { useLocalStorage } from './hooks/useLocalStorage';
 import { sendNotification, requestNotificationPermission, startTickSound, stopTickSound, setAlertVolume, setTickVolume } from './utils/notification';
 import { getTodayKey } from './utils/time';
 import { getStreak } from './utils/stats';
+import { I18nProvider, getMessages } from './i18n';
 import type { PomodoroRecord, PomodoroSettings } from './types';
 import { DEFAULT_SETTINGS, THEMES, getGrowthStage, GROWTH_EMOJI } from './types';
 import type { GrowthStage } from './types';
@@ -30,6 +31,9 @@ function App() {
   const [showHistory, setShowHistory] = useState(false);
 
   const theme = THEMES[settings.theme]?.colors ?? THEMES.dark.colors;
+
+  // i18n
+  const t = useMemo(() => getMessages(settings.language), [settings.language]);
 
   // 连续打卡
   const streak = useMemo(() => getStreak(records), [records]);
@@ -53,13 +57,13 @@ function App() {
         date: getTodayKey(),
       };
       setRecords((prev) => [record, ...prev]);
-      sendNotification(`${emoji} 西瓜钟完成！`, `"${currentTask || '未命名任务'}" · ${settings.workMinutes}分钟`, settings.sound, settings.alertDurationSeconds);
+      sendNotification(t.workComplete(emoji), `"${currentTask || t.unnamed}" · ${settings.workMinutes}${t.minutes}`, settings.sound, settings.alertDurationSeconds);
     } else if (phase === 'longBreak') {
-      sendNotification('🌙 长休息结束', '新一轮开始，准备好了吗？', settings.sound, settings.alertDurationSeconds);
+      sendNotification(t.longBreakOver, t.longBreakOverBody, settings.sound, settings.alertDurationSeconds);
     } else {
-      sendNotification('☕ 休息结束', '准备好开始下一个西瓜钟了吗？', settings.sound, settings.alertDurationSeconds);
+      sendNotification(t.breakOver, t.breakOverBody, settings.sound, settings.alertDurationSeconds);
     }
-  }, [currentTask, setRecords, settings.sound, settings.workMinutes, settings.alertDurationSeconds]);
+  }, [currentTask, setRecords, settings.sound, settings.workMinutes, settings.alertDurationSeconds, t]);
 
   const handleSkipWork = useCallback((elapsedSeconds: number) => {
     const elapsedMinutes = Math.round(elapsedSeconds / 60);
@@ -74,8 +78,8 @@ function App() {
       date: getTodayKey(),
     };
     setRecords((prev) => [record, ...prev]);
-    sendNotification(`${emoji} 手动完成`, `\"${currentTask || '未命名任务'}\" · 专注了 ${elapsedMinutes} 分钟`, settings.sound, settings.alertDurationSeconds);
-  }, [currentTask, setRecords, settings.sound, settings.alertDurationSeconds]);
+    sendNotification(t.skipComplete(emoji), `"${currentTask || t.unnamed}" 00b7 ${elapsedMinutes}${t.minutes}`, settings.sound, settings.alertDurationSeconds);
+  }, [currentTask, setRecords, settings.sound, settings.alertDurationSeconds, t]);
 
   const timer = useTimer({ settings, onComplete: handleTimerComplete, onSkipWork: handleSkipWork });
 
@@ -105,15 +109,14 @@ function App() {
       const seconds = timer.timeLeft % 60;
       const timeStr = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
       const phaseEmoji = timer.phase === 'work' ? '🍉' : timer.phase === 'longBreak' ? '🌙' : '☕';
-      document.title = `${timeStr} ${phaseEmoji} 西瓜时钟`;
+      document.title = `${timeStr} ${phaseEmoji} ${t.appName}`;
     } else if (timer.phase !== 'work') {
-      // Idle in break phase — show break label
-      const breakLabel = timer.phase === 'longBreak' ? '🌙 长休息' : '☕ 休息一下';
-      document.title = `${breakLabel} · 西瓜时钟`;
+      const breakLabel = timer.phase === 'longBreak' ? t.phaseLongBreak : t.phaseShortBreak;
+      document.title = `${breakLabel} · ${t.appName}`;
     } else {
-      document.title = '西瓜时钟';
+      document.title = t.appName;
     }
-  }, [timer.timeLeft, timer.phase, timer.status]);
+  }, [timer.timeLeft, timer.phase, timer.status, t]);
 
   const handleUpdateRecord = useCallback((id: string, task: string) => {
     setRecords((prev) => prev.map((r) => r.id === id ? { ...r, task } : r));
@@ -157,6 +160,7 @@ function App() {
     : theme.bgWork;
 
   return (
+    <I18nProvider value={t}>
     <ThemeProvider value={theme}>
       <div className="min-h-dvh flex flex-col items-center transition-colors duration-700"
         style={{ backgroundColor: bgColor }}>
@@ -165,7 +169,7 @@ function App() {
         <header className="w-full flex items-center justify-between px-3 sm:px-6 py-2 sm:py-4 shrink-0 z-40 relative">
           <div className="flex items-center gap-1.5 min-w-0">
             <span className="text-base shrink-0">🍉</span>
-            <span className="text-sm font-medium tracking-wide truncate" style={{ color: theme.textMuted }}>西瓜时钟</span>
+            <span className="text-sm font-medium tracking-wide truncate" style={{ color: theme.textMuted }}>{t.appName}</span>
             {streak.current > 0 && (
               <span className="text-xs font-medium shrink-0 ml-1" style={{ color: theme.accent }}>
                 🔥{streak.current}
@@ -177,7 +181,7 @@ function App() {
               onClick={() => setShowHistory(true)}
               className="w-8 h-8 rounded-full flex items-center justify-center transition-all cursor-pointer text-sm"
               style={{ color: theme.textMuted }}
-              aria-label="历史记录"
+              aria-label={t.historyTab}
             >
               📅
             </button>
@@ -220,6 +224,7 @@ function App() {
         )}
       </div>
     </ThemeProvider>
+    </I18nProvider>
   );
 }
 

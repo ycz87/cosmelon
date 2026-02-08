@@ -1,4 +1,5 @@
 import { useRef } from 'react';
+import { useI18n } from '../i18n';
 
 interface TaskInputProps {
   value: string;
@@ -8,6 +9,7 @@ interface TaskInputProps {
 
 export function TaskInput({ value, onChange, disabled }: TaskInputProps) {
   const inputRef = useRef<HTMLInputElement>(null);
+  const t = useI18n();
 
   return (
     <div className="w-full max-w-xs sm:max-w-sm px-4">
@@ -24,7 +26,7 @@ export function TaskInput({ value, onChange, disabled }: TaskInputProps) {
           value={value}
           onChange={(e) => onChange(e.target.value)}
           disabled={disabled}
-          placeholder="这个西瓜钟要做什么？"
+          placeholder={t.taskPlaceholder}
           className="flex-1 bg-transparent text-white/90 placeholder-white/20 outline-none text-[15px] min-w-0"
           maxLength={100}
         />
@@ -32,7 +34,7 @@ export function TaskInput({ value, onChange, disabled }: TaskInputProps) {
           <button
             onClick={() => onChange('')}
             className="text-white/15 hover:text-white/40 transition-colors shrink-0 cursor-pointer"
-            aria-label="清除"
+            aria-label={t.clearTask}
           >
             <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
               <path d="M3 3L11 11M11 3L3 11" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />

@@ -4,10 +4,11 @@
  */
 import { useState, useMemo } from 'react';
 import { useTheme } from '../hooks/useTheme';
+import { useI18n } from '../i18n';
 import { MiniCalendar } from './MiniCalendar';
 import { BarChart } from './BarChart';
 import { GrowthIcon } from './GrowthIcon';
-import { formatDateKey, getRecentDays, getDayMinutes, getStreak, getSummary, formatMinutes } from '../utils/stats';
+import { formatDateKey, getRecentDays, getDayMinutes, getStreak, getSummary } from '../utils/stats';
 import type { PomodoroRecord } from '../types';
 import { getGrowthStage } from '../types';
 
@@ -20,6 +21,7 @@ type Tab = 'history' | 'stats';
 
 export function HistoryPanel({ records, onClose }: HistoryPanelProps) {
   const theme = useTheme();
+  const t = useI18n();
   const today = formatDateKey(new Date());
   const [tab, setTab] = useState<Tab>('history');
   const [selectedDate, setSelectedDate] = useState(today);
@@ -50,14 +52,20 @@ export function HistoryPanel({ records, onClose }: HistoryPanelProps) {
 
   // Format selected date for display
   const selectedDateLabel = useMemo(() => {
-    if (selectedDate === today) return '今天';
+    if (selectedDate === today) return t.today;
     const yesterday = formatDateKey(new Date(Date.now() - 86400000));
-    if (selectedDate === yesterday) return '昨天';
+    if (selectedDate === yesterday) return t.yesterday;
     const [, m, d] = selectedDate.split('-');
-    return `${parseInt(m)}月${parseInt(d)}日`;
-  }, [selectedDate, today]);
+    return t.dateFormat(parseInt(m), parseInt(d));
+  }, [selectedDate, today, t]);
 
   const selectedDayMinutes = selectedRecords.reduce((s, r) => s + (r.durationMinutes || 25), 0);
+
+  // Chart range labels
+  const chartRangeLabels: Record<7 | 30, string> = {
+    7: t.thisWeek,
+    30: t.thisMonth,
+  };
 
   return (
     <div className="fixed inset-0 z-[90] flex items-end justify-center" onClick={onClose}>
@@ -74,17 +82,17 @@ export function HistoryPanel({ records, onClose }: HistoryPanelProps) {
 
         {/* Tabs */}
         <div className="flex gap-1 px-5 mb-4">
-          {(['history', 'stats'] as Tab[]).map((t) => (
+          {(['history', 'stats'] as Tab[]).map((tabKey) => (
             <button
-              key={t}
-              onClick={() => setTab(t)}
+              key={tabKey}
+              onClick={() => setTab(tabKey)}
               className="px-4 py-1.5 rounded-lg text-sm font-medium transition-all cursor-pointer"
               style={{
-                backgroundColor: tab === t ? `${theme.accent}20` : 'transparent',
-                color: tab === t ? theme.accent : theme.textMuted,
+                backgroundColor: tab === tabKey ? `${theme.accent}20` : 'transparent',
+                color: tab === tabKey ? theme.accent : theme.textMuted,
               }}
             >
-              {t === 'history' ? '📅 历史' : '📊 统计'}
+              {tabKey === 'history' ? t.historyTab : t.statsTab}
             </button>
           ))}
         </div>
@@ -96,7 +104,7 @@ export function HistoryPanel({ records, onClose }: HistoryPanelProps) {
               {streak.current > 0 && (
                 <div className="flex items-center justify-center gap-2 py-2 rounded-xl text-sm"
                   style={{ backgroundColor: `${theme.accent}10`, color: theme.accent }}>
-                  🔥 已连续专注 {streak.current} 天
+                  {t.streakBanner(streak.current)}
                 </div>
               )}
 
@@ -115,14 +123,14 @@ export function HistoryPanel({ records, onClose }: HistoryPanelProps) {
                   </span>
                   {selectedRecords.length > 0 && (
                     <span className="text-xs" style={{ color: theme.textMuted }}>
-                      {selectedRecords.length} 个 · {formatMinutes(selectedDayMinutes)}
+                      {t.countUnit(selectedRecords.length)} · {t.formatMinutes(selectedDayMinutes)}
                     </span>
                   )}
                 </div>
 
                 {selectedRecords.length === 0 ? (
                   <div className="text-center py-6 text-sm" style={{ color: theme.textFaint }}>
-                    这天没有记录
+                    {t.noRecords}
                   </div>
                 ) : (
                   <div className="space-y-0.5">
@@ -136,7 +144,7 @@ export function HistoryPanel({ records, onClose }: HistoryPanelProps) {
                           style={{ backgroundColor: theme.inputBg }}>
                           <GrowthIcon stage={stage} size={18} />
                           <span className="flex-1 text-sm truncate" style={{ color: theme.textMuted }}>
-                            {record.task || '未命名任务'}
+                            {record.task || t.unnamed}
                           </span>
                           <span className="text-xs" style={{ color: theme.textFaint }}>{duration}min</span>
                           <span className="text-xs font-mono" style={{ color: theme.textFaint }}>{timeStr}</span>
@@ -155,20 +163,20 @@ export function HistoryPanel({ records, onClose }: HistoryPanelProps) {
                   <div className="text-2xl font-semibold" style={{ color: theme.accent }}>
                     {streak.current}
                   </div>
-                  <div className="text-[10px] mt-0.5" style={{ color: theme.textMuted }}>当前连续</div>
+                  <div className="text-[10px] mt-0.5" style={{ color: theme.textMuted }}>{t.currentStreak}</div>
                 </div>
                 <div className="flex-1 rounded-xl p-3 text-center" style={{ backgroundColor: theme.inputBg }}>
                   <div className="text-2xl font-semibold" style={{ color: theme.text }}>
                     {streak.longest}
                   </div>
-                  <div className="text-[10px] mt-0.5" style={{ color: theme.textMuted }}>历史最长</div>
+                  <div className="text-[10px] mt-0.5" style={{ color: theme.textMuted }}>{t.longestStreak}</div>
                 </div>
               </div>
 
               {/* Chart */}
               <div>
                 <div className="flex items-center justify-between mb-3">
-                  <span className="text-sm font-medium" style={{ color: theme.text }}>专注趋势</span>
+                  <span className="text-sm font-medium" style={{ color: theme.text }}>{t.focusTrend}</span>
                   <div className="flex gap-1">
                     {([7, 30] as const).map((n) => (
                       <button
@@ -180,7 +188,7 @@ export function HistoryPanel({ records, onClose }: HistoryPanelProps) {
                           color: chartRange === n ? theme.accent : theme.textMuted,
                         }}
                       >
-                        {n}天
+                        {chartRangeLabels[n]}
                       </button>
                     ))}
                   </div>
@@ -190,10 +198,10 @@ export function HistoryPanel({ records, onClose }: HistoryPanelProps) {
 
               {/* Summary cards */}
               <div className="grid grid-cols-2 gap-2.5">
-                <SummaryCard label="本周" value={formatMinutes(summary.weekMinutes)} theme={theme} />
-                <SummaryCard label="本月" value={formatMinutes(summary.monthMinutes)} theme={theme} />
-                <SummaryCard label="累计时长" value={formatMinutes(summary.totalMinutes)} theme={theme} />
-                <SummaryCard label="累计完成" value={`${summary.totalCount} 个`} theme={theme} />
+                <SummaryCard label={t.thisWeek} value={t.formatMinutes(summary.weekMinutes)} theme={theme} />
+                <SummaryCard label={t.thisMonth} value={t.formatMinutes(summary.monthMinutes)} theme={theme} />
+                <SummaryCard label={t.totalTime} value={t.formatMinutes(summary.totalMinutes)} theme={theme} />
+                <SummaryCard label={t.totalCount} value={t.countUnit(summary.totalCount)} theme={theme} />
               </div>
             </div>
           )}

@@ -2,7 +2,7 @@
  * BarChart — 纯 SVG 柱状图，显示每天的专注时长
  */
 import { useTheme } from '../hooks/useTheme';
-import { getWeekdayShort } from '../utils/stats';
+import { useI18n } from '../i18n';
 
 interface BarChartProps {
   data: { date: string; minutes: number }[];
@@ -11,11 +11,19 @@ interface BarChartProps {
 
 export function BarChart({ data, height = 140 }: BarChartProps) {
   const theme = useTheme();
+  const t = useI18n();
   const maxMinutes = Math.max(...data.map((d) => d.minutes), 1);
   const barWidth = Math.min(28, Math.floor(280 / data.length) - 4);
   const chartWidth = data.length * (barWidth + 4);
   const padding = { top: 10, bottom: 28, left: 0, right: 0 };
   const barAreaHeight = height - padding.top - padding.bottom;
+
+  /** Get weekday short name from date key using i18n */
+  const getWeekday = (dateKey: string): string => {
+    const [y, m, d] = dateKey.split('-').map(Number);
+    const dayIndex = new Date(y, m - 1, d).getDay(); // 0=Sun
+    return t.weekdaysShort[dayIndex];
+  };
 
   return (
     <svg
@@ -29,7 +37,7 @@ export function BarChart({ data, height = 140 }: BarChartProps) {
         const x = i * (barWidth + 4) + 2;
         const y = padding.top + barAreaHeight - barHeight;
         const isToday = i === data.length - 1;
-        const weekday = getWeekdayShort(d.date);
+        const weekday = getWeekday(d.date);
         const dayNum = d.date.split('-')[2];
 
         return (

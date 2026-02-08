@@ -1,3 +1,6 @@
+import type { Locale } from './i18n';
+import { detectLocale } from './i18n';
+
 /**
  * 西瓜钟记录 — 每完成一个工作阶段生成一条
  */
@@ -101,6 +104,7 @@ export interface PomodoroSettings {
   theme: ThemeId;
   autoStartBreak: boolean;   // 工作结束后自动开始休息
   autoStartWork: boolean;    // 休息结束后自动开始工作
+  language: Locale;          // 界面语言
 }
 
 export const DEFAULT_SETTINGS: PomodoroSettings = {
@@ -116,6 +120,7 @@ export const DEFAULT_SETTINGS: PomodoroSettings = {
   theme: 'dark',
   autoStartBreak: true,
   autoStartWork: false,
+  language: detectLocale(),
 };
 
 // ─── 西瓜生长阶段 ───

@@ -4,6 +4,7 @@
  */
 import { useState, useEffect, useCallback } from 'react';
 import { useTheme } from '../hooks/useTheme';
+import { useI18n } from '../i18n';
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
@@ -17,6 +18,7 @@ export function InstallPrompt() {
   const [visible, setVisible] = useState(false);
   const [isInstalled, setIsInstalled] = useState(false);
   const theme = useTheme();
+  const t = useI18n();
 
   useEffect(() => {
     // Check if already installed (standalone mode)
@@ -78,10 +80,10 @@ export function InstallPrompt() {
         <span className="text-2xl shrink-0">📱</span>
         <div className="flex-1 min-w-0">
           <div className="text-sm font-medium" style={{ color: theme.text }}>
-            安装到桌面
+            {t.installTitle}
           </div>
           <div className="text-xs mt-0.5" style={{ color: theme.textMuted }}>
-            像 App 一样使用，体验更好
+            {t.installDesc}
           </div>
         </div>
         <div className="flex items-center gap-1.5 shrink-0">
@@ -93,13 +95,13 @@ export function InstallPrompt() {
               color: 'white',
             }}
           >
-            安装
+            {t.installButton}
           </button>
           <button
             onClick={handleDismiss}
             className="w-7 h-7 rounded-lg flex items-center justify-center transition-all cursor-pointer"
             style={{ color: theme.textMuted }}
-            aria-label="关闭"
+            aria-label="Close"
           >
             ✕
           </button>

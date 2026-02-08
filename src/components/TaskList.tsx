@@ -2,6 +2,7 @@ import { useState } from 'react';
 import type { PomodoroRecord } from '../types';
 import { getGrowthStage } from '../types';
 import { useTheme } from '../hooks/useTheme';
+import { useI18n } from '../i18n';
 import { GrowthIcon } from './GrowthIcon';
 
 interface TaskListProps {
@@ -15,12 +16,13 @@ export function TaskList({ records, onUpdate, onDelete }: TaskListProps) {
   const [editValue, setEditValue] = useState('');
   const [confirmingDeleteId, setConfirmingDeleteId] = useState<string | null>(null);
   const theme = useTheme();
+  const t = useI18n();
 
   if (records.length === 0) {
     return (
       <div className="text-center py-8">
-        <p className="text-[15px]" style={{ color: theme.textMuted }}>准备好了吗？</p>
-        <p className="text-sm mt-1.5" style={{ color: theme.textFaint }}>开始你的第一个西瓜钟 🍉</p>
+        <p className="text-[15px]" style={{ color: theme.textMuted }}>{t.emptyTitle}</p>
+        <p className="text-sm mt-1.5" style={{ color: theme.textFaint }}>{t.emptySubtitle}</p>
       </div>
     );
   }
@@ -54,7 +56,7 @@ export function TaskList({ records, onUpdate, onDelete }: TaskListProps) {
     <div className="w-full max-w-xs sm:max-w-sm space-y-1">
       <h3 className="text-xs tracking-wider px-1 mb-2 font-medium uppercase"
         style={{ color: theme.textMuted }}>
-        今日记录
+        {t.todayRecords}
       </h3>
       <div className="space-y-0.5">
         {records.map((record, index) => {
@@ -97,9 +99,9 @@ export function TaskList({ records, onUpdate, onDelete }: TaskListProps) {
                   className="flex-1 text-sm truncate cursor-pointer transition-colors"
                   style={{ color: theme.textMuted }}
                   onClick={() => startEdit(record)}
-                  title="点击编辑"
+                  title={t.editHint}
                 >
-                  {record.task || '未命名任务'}
+                  {record.task || t.unnamed}
                 </span>
               )}
 
@@ -126,10 +128,10 @@ export function TaskList({ records, onUpdate, onDelete }: TaskListProps) {
                     ? { color: '#ef4444', backgroundColor: 'rgba(239,68,68,0.1)' }
                     : { color: theme.textFaint }
                   }
-                  aria-label="删除"
+                  aria-label="Delete"
                 >
                   {isConfirmingDelete ? (
-                    '确认?'
+                    t.deleteConfirm
                   ) : (
                     <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
                       <path d="M2 2L10 10M10 2L2 10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
