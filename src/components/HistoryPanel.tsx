@@ -1,0 +1,213 @@
+/**
+ * HistoryPanel — 历史记录 + 统计图表 + 连续打卡
+ * 全屏面板，从底部滑入
+ */
+import { useState, useMemo } from 'react';
+import { useTheme } from '../hooks/useTheme';
+import { MiniCalendar } from './MiniCalendar';
+import { BarChart } from './BarChart';
+import { GrowthIcon } from './GrowthIcon';
+import { formatDateKey, getRecentDays, getDayMinutes, getStreak, getSummary, formatMinutes } from '../utils/stats';
+import type { PomodoroRecord } from '../types';
+import { getGrowthStage } from '../types';
+
+interface HistoryPanelProps {
+  records: PomodoroRecord[];
+  onClose: () => void;
+}
+
+type Tab = 'history' | 'stats';
+
+export function HistoryPanel({ records, onClose }: HistoryPanelProps) {
+  const theme = useTheme();
+  const today = formatDateKey(new Date());
+  const [tab, setTab] = useState<Tab>('history');
+  const [selectedDate, setSelectedDate] = useState(today);
+  const [chartRange, setChartRange] = useState<7 | 30>(7);
+
+  // All dates that have records
+  const recordDates = useMemo(() => new Set(records.map((r) => r.date)), [records]);
+
+  // Records for selected date
+  const selectedRecords = useMemo(
+    () => records.filter((r) => r.date === selectedDate).sort(
+      (a, b) => new Date(b.completedAt).getTime() - new Date(a.completedAt).getTime()
+    ),
+    [records, selectedDate]
+  );
+
+  // Chart data
+  const chartData = useMemo(() => {
+    const days = getRecentDays(chartRange);
+    return days.map((d) => ({ date: d, minutes: getDayMinutes(records, d) }));
+  }, [records, chartRange]);
+
+  // Streak
+  const streak = useMemo(() => getStreak(records), [records]);
+
+  // Summary
+  const summary = useMemo(() => getSummary(records), [records]);
+
+  // Format selected date for display
+  const selectedDateLabel = useMemo(() => {
+    if (selectedDate === today) return '今天';
+    const yesterday = formatDateKey(new Date(Date.now() - 86400000));
+    if (selectedDate === yesterday) return '昨天';
+    const [, m, d] = selectedDate.split('-');
+    return `${parseInt(m)}月${parseInt(d)}日`;
+  }, [selectedDate, today]);
+
+  const selectedDayMinutes = selectedRecords.reduce((s, r) => s + (r.durationMinutes || 25), 0);
+
+  return (
+    <div className="fixed inset-0 z-[90] flex items-end justify-center" onClick={onClose}>
+      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
+      <div
+        className="relative w-full max-w-lg max-h-[85vh] rounded-t-3xl overflow-y-auto animate-slide-up"
+        style={{ backgroundColor: theme.surface, color: theme.text }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Handle bar */}
+        <div className="sticky top-0 z-10 pt-3 pb-2 flex justify-center" style={{ backgroundColor: theme.surface }}>
+          <div className="w-10 h-1 rounded-full" style={{ backgroundColor: theme.textFaint }} />
+        </div>
+
+        {/* Tabs */}
+        <div className="flex gap-1 px-5 mb-4">
+          {(['history', 'stats'] as Tab[]).map((t) => (
+            <button
+              key={t}
+              onClick={() => setTab(t)}
+              className="px-4 py-1.5 rounded-lg text-sm font-medium transition-all cursor-pointer"
+              style={{
+                backgroundColor: tab === t ? `${theme.accent}20` : 'transparent',
+                color: tab === t ? theme.accent : theme.textMuted,
+              }}
+            >
+              {t === 'history' ? '📅 历史' : '📊 统计'}
+            </button>
+          ))}
+        </div>
+
+        <div className="px-5 pb-8">
+          {tab === 'history' ? (
+            <div className="space-y-5">
+              {/* Streak banner */}
+              {streak.current > 0 && (
+                <div className="flex items-center justify-center gap-2 py-2 rounded-xl text-sm"
+                  style={{ backgroundColor: `${theme.accent}10`, color: theme.accent }}>
+                  🔥 已连续专注 {streak.current} 天
+                </div>
+              )}
+
+              {/* Calendar */}
+              <MiniCalendar
+                recordDates={recordDates}
+                selectedDate={selectedDate}
+                onSelect={setSelectedDate}
+              />
+
+              {/* Selected day records */}
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm font-medium" style={{ color: theme.text }}>
+                    {selectedDateLabel}
+                  </span>
+                  {selectedRecords.length > 0 && (
+                    <span className="text-xs" style={{ color: theme.textMuted }}>
+                      {selectedRecords.length} 个 · {formatMinutes(selectedDayMinutes)}
+                    </span>
+                  )}
+                </div>
+
+                {selectedRecords.length === 0 ? (
+                  <div className="text-center py-6 text-sm" style={{ color: theme.textFaint }}>
+                    这天没有记录
+                  </div>
+                ) : (
+                  <div className="space-y-0.5">
+                    {selectedRecords.map((record) => {
+                      const time = new Date(record.completedAt);
+                      const timeStr = `${time.getHours().toString().padStart(2, '0')}:${time.getMinutes().toString().padStart(2, '0')}`;
+                      const duration = record.durationMinutes || 25;
+                      const stage = getGrowthStage(duration);
+                      return (
+                        <div key={record.id} className="flex items-center gap-2.5 px-3 py-2 rounded-xl"
+                          style={{ backgroundColor: theme.inputBg }}>
+                          <GrowthIcon stage={stage} size={18} />
+                          <span className="flex-1 text-sm truncate" style={{ color: theme.textMuted }}>
+                            {record.task || '未命名任务'}
+                          </span>
+                          <span className="text-xs" style={{ color: theme.textFaint }}>{duration}min</span>
+                          <span className="text-xs font-mono" style={{ color: theme.textFaint }}>{timeStr}</span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            </div>
+          ) : (
+            <div className="space-y-6">
+              {/* Streak */}
+              <div className="flex gap-3">
+                <div className="flex-1 rounded-xl p-3 text-center" style={{ backgroundColor: theme.inputBg }}>
+                  <div className="text-2xl font-semibold" style={{ color: theme.accent }}>
+                    {streak.current}
+                  </div>
+                  <div className="text-[10px] mt-0.5" style={{ color: theme.textMuted }}>当前连续</div>
+                </div>
+                <div className="flex-1 rounded-xl p-3 text-center" style={{ backgroundColor: theme.inputBg }}>
+                  <div className="text-2xl font-semibold" style={{ color: theme.text }}>
+                    {streak.longest}
+                  </div>
+                  <div className="text-[10px] mt-0.5" style={{ color: theme.textMuted }}>历史最长</div>
+                </div>
+              </div>
+
+              {/* Chart */}
+              <div>
+                <div className="flex items-center justify-between mb-3">
+                  <span className="text-sm font-medium" style={{ color: theme.text }}>专注趋势</span>
+                  <div className="flex gap-1">
+                    {([7, 30] as const).map((n) => (
+                      <button
+                        key={n}
+                        onClick={() => setChartRange(n)}
+                        className="px-2.5 py-1 rounded-lg text-xs cursor-pointer transition-all"
+                        style={{
+                          backgroundColor: chartRange === n ? `${theme.accent}20` : theme.inputBg,
+                          color: chartRange === n ? theme.accent : theme.textMuted,
+                        }}
+                      >
+                        {n}天
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <BarChart data={chartData} />
+              </div>
+
+              {/* Summary cards */}
+              <div className="grid grid-cols-2 gap-2.5">
+                <SummaryCard label="本周" value={formatMinutes(summary.weekMinutes)} theme={theme} />
+                <SummaryCard label="本月" value={formatMinutes(summary.monthMinutes)} theme={theme} />
+                <SummaryCard label="累计时长" value={formatMinutes(summary.totalMinutes)} theme={theme} />
+                <SummaryCard label="累计完成" value={`${summary.totalCount} 个`} theme={theme} />
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function SummaryCard({ label, value, theme }: { label: string; value: string; theme: { inputBg: string; text: string; textMuted: string } }) {
+  return (
+    <div className="rounded-xl p-3" style={{ backgroundColor: theme.inputBg }}>
+      <div className="text-sm font-medium" style={{ color: theme.text }}>{value}</div>
+      <div className="text-[10px] mt-0.5" style={{ color: theme.textMuted }}>{label}</div>
+    </div>
+  );
+}

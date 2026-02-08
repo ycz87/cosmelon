@@ -145,3 +145,13 @@ body {
 .animate-phase-shift {
   animation: phase-shift 0.7s ease-out forwards;
 }
+
+/* Slide up for panels */
+@keyframes slide-up {
+  0% { transform: translateY(100%); }
+  100% { transform: translateY(0); }
+}
+
+.animate-slide-up {
+  animation: slide-up 0.35s cubic-bezier(0.32, 0.72, 0, 1) forwards;
+}

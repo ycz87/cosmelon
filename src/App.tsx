@@ -2,7 +2,7 @@
  * App — 西瓜时钟主应用
  * 管理计时器状态、记录、设置，串联所有组件
  */
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useMemo } from 'react';
 import { Timer } from './components/Timer';
 import { TaskInput } from './components/TaskInput';
 import { TodayStats } from './components/TodayStats';
@@ -11,12 +11,14 @@ import { RoundProgress } from './components/RoundProgress';
 import { Settings } from './components/Settings';
 import { GuideButton } from './components/Guide';
 import { InstallPrompt } from './components/InstallPrompt';
+import { HistoryPanel } from './components/HistoryPanel';
 import { useTimer } from './hooks/useTimer';
 import type { TimerPhase } from './hooks/useTimer';
 import { ThemeProvider } from './hooks/useTheme';
 import { useLocalStorage } from './hooks/useLocalStorage';
 import { sendNotification, requestNotificationPermission, startTickSound, stopTickSound, setAlertVolume, setTickVolume } from './utils/notification';
 import { getTodayKey } from './utils/time';
+import { getStreak } from './utils/stats';
 import type { PomodoroRecord, PomodoroSettings } from './types';
 import { DEFAULT_SETTINGS, THEMES, getGrowthStage, GROWTH_EMOJI } from './types';
 import type { GrowthStage } from './types';
@@ -25,8 +27,12 @@ function App() {
   const [currentTask, setCurrentTask] = useState('');
   const [records, setRecords] = useLocalStorage<PomodoroRecord[]>('pomodoro-records', []);
   const [settings, setSettings] = useLocalStorage<PomodoroSettings>('pomodoro-settings', DEFAULT_SETTINGS);
+  const [showHistory, setShowHistory] = useState(false);
 
   const theme = THEMES[settings.theme]?.colors ?? THEMES.dark.colors;
+
+  // 连续打卡
+  const streak = useMemo(() => getStreak(records), [records]);
 
   // 初始化音量
   useEffect(() => {
@@ -160,8 +166,21 @@ function App() {
           <div className="flex items-center gap-1.5 min-w-0">
             <span className="text-base shrink-0">🍉</span>
             <span className="text-sm font-medium tracking-wide truncate" style={{ color: theme.textMuted }}>西瓜时钟</span>
+            {streak.current > 0 && (
+              <span className="text-xs font-medium shrink-0 ml-1" style={{ color: theme.accent }}>
+                🔥{streak.current}
+              </span>
+            )}
           </div>
           <div className="flex items-center gap-0.5 shrink-0">
+            <button
+              onClick={() => setShowHistory(true)}
+              className="w-8 h-8 rounded-full flex items-center justify-center transition-all cursor-pointer text-sm"
+              style={{ color: theme.textMuted }}
+              aria-label="历史记录"
+            >
+              📅
+            </button>
             <GuideButton />
             <Settings settings={settings} onChange={setSettings} disabled={timer.status !== 'idle'} onExport={handleExport} />
           </div>
@@ -194,6 +213,11 @@ function App() {
 
         {/* PWA 安装提示 */}
         <InstallPrompt />
+
+        {/* 历史记录面板 */}
+        {showHistory && (
+          <HistoryPanel records={records} onClose={() => setShowHistory(false)} />
+        )}
       </div>
     </ThemeProvider>
   );
