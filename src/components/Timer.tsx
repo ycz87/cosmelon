@@ -226,8 +226,8 @@ export function Timer({ timeLeft, totalDuration, phase, status, celebrating, cel
           </button>
         )}
 
-        {/* ✓ Complete/Skip (right) — hidden during idle and break */}
-        {status !== 'idle' && isWork && (
+        {/* ✓ Complete/Skip (right) — hidden during idle */}
+        {status !== 'idle' && (
           <button onClick={onSkip}
             className="w-11 h-11 rounded-full flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95 cursor-pointer text-base font-bold"
             style={{ backgroundColor: `${theme.accent}20`, color: theme.accent }}
