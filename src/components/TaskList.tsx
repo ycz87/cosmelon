@@ -102,6 +102,9 @@ export function TaskList({ records, onUpdate, onDelete }: TaskListProps) {
                   title={t.editHint}
                 >
                   {record.task || t.unnamed}
+                  {record.status === 'abandoned' && (
+                    <span className="ml-1 opacity-50">✗</span>
+                  )}
                 </span>
               )}
 

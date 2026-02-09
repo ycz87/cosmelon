@@ -5,6 +5,54 @@
 ## v0.4 — 番茄钟与项目模式交互重构（2026-02-09）
 
 ### 需求背景
+Charles 重新定义了番茄钟和项目模式的关系：番茄钟是"原子单位"，项目模式是"多个番茄钟的组合"。去掉长休息/轮次系统，重做退出逻辑。
+
+### 改动 1：去掉长休息/轮次系统
+- `TimerPhase` 从 `'work' | 'shortBreak' | 'longBreak'` 简化为 `'work' | 'break'`
+- 删除 `roundProgress`、`pomodorosPerRound` 相关逻辑
+- 删除 `RoundProgress.tsx` 组件
+- `PomodoroSettings` 删除 `longBreakMinutes`、`pomodorosPerRound`
+- Settings 面板删除长休息时长和间隔设置
+- 循环简化为：专注 → 休息 → 专注 → 休息（无限）
+
+### 改动 2：番茄钟退出确认
+- 点 ✗ 退出 → 弹 `ConfirmModal` 确认
+- 确认后记录标记为 `status: 'abandoned'`
+- `PomodoroRecord` 新增 `status?: 'completed' | 'abandoned'`（旧记录无此字段视为 completed）
+
+### 改动 3：默认任务名
+- 不输入任务名时自动生成"专注 #N"（N = 今天第几个，每天重置）
+- 完成/跳过/退出都会使用解析后的任务名
+
+### 改动 4：项目模式两步退出
+- 新增 `ProjectExitModal.tsx`：
+  - 第一步：确认退出当前任务 + "退出整个项目"选项
+  - 第二步：重新开始 / 下一个任务 / 返回上一个任务
+- `useProjectTimer` 新增方法：`exitCurrentTask`、`restartCurrentTask`、`goToNextTask`、`goToPreviousTask`
+- `ProjectPhase` 新增 `'exited'` 状态
+- `ProjectTaskResult.status` 新增 `'abandoned'` 和 `'overtime-continued'`
+- 边界处理：第一个任务无"返回上一个"，最后一个任务"下一个"变为"结束项目"
+
+### 改动 5：历史记录显示
+- 番茄钟记录显示任务名称（用户输入 or 默认名）
+- abandoned 记录显示 ✗ 标记
+- 项目总结页显示 abandoned 和 overtime-continued 状态
+
+### 涉及文件
+- 删除：`src/components/RoundProgress.tsx`
+- 新增：`src/components/ConfirmModal.tsx`、`src/components/ProjectExitModal.tsx`
+- 重写：`src/hooks/useTimer.ts`、`src/App.tsx`
+- 修改：`src/types.ts`、`src/types/project.ts`、`src/hooks/useProjectTimer.ts`
+- 修改：`src/components/Timer.tsx`、`src/components/Settings.tsx`
+- 修改：`src/components/ProjectSummary.tsx`、`src/components/ProjectMode.tsx`
+- 修改：`src/components/TaskList.tsx`
+- 修改：`src/i18n/types.ts`、`src/i18n/locales/zh.ts`、`src/i18n/locales/en.ts`
+
+---
+
+## v0.4 — 番茄钟与项目模式交互重构（2026-02-09）
+
+### 需求背景
 Charles 重新定义了番茄钟和项目模式的关系：番茄钟是"原子单位"，项目模式是"多个番茄钟的组合"。长休息/轮次系统不再需要，退出逻辑需要重做。
 
 ### 改动概览
