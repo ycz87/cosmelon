@@ -6,9 +6,10 @@ import { GrowthIcon } from './GrowthIcon';
 
 interface TodayStatsProps {
   records: PomodoroRecord[];
+  idle?: boolean;
 }
 
-export function TodayStats({ records }: TodayStatsProps) {
+export function TodayStats({ records, idle }: TodayStatsProps) {
   const theme = useTheme();
   const t = useI18n();
 
@@ -34,7 +35,7 @@ export function TodayStats({ records }: TodayStatsProps) {
           return (
             <span
               key={record.id}
-              className="animate-bounce-in"
+              className={`animate-bounce-in ${idle ? 'animate-breathe' : ''}`}
               style={{ animationDelay: `${i * 60}ms` }}
               title={`${record.task || t.unnamed} · ${t.formatMinutes(record.durationMinutes || 25)}`}
             >

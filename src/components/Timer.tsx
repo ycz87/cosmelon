@@ -90,7 +90,7 @@ export function Timer({ timeLeft, totalDuration, phase, status, celebrating, cel
 
       {/* Circular timer */}
       <div className="relative w-[260px] h-[260px] sm:w-[320px] sm:h-[320px] flex items-center justify-center overflow-visible">
-        <svg className={`absolute inset-0 overflow-visible ${celebrating ? 'animate-ring-pulse' : ''} ${isOvertime ? 'animate-ring-pulse' : ''}`} viewBox={`0 0 ${size} ${size}`} overflow="visible">
+        <svg className={`absolute inset-0 overflow-visible ${celebrating ? 'animate-ring-pulse' : ''} ${isOvertime ? 'animate-ring-pulse' : ''}`} viewBox={`0 0 ${size} ${size}`} overflow="visible" style={{ filter: `drop-shadow(0 0 12px ${colors.from}40)` }}>
           <defs>
             <linearGradient id="grad-progress" gradientUnits="userSpaceOnUse"
               x1={center} y1="0" x2={size} y2={size}>
@@ -100,12 +100,12 @@ export function Timer({ timeLeft, totalDuration, phase, status, celebrating, cel
             </linearGradient>
             <linearGradient id="grad-base" gradientUnits="userSpaceOnUse"
               x1={center} y1="0" x2={size} y2={size}>
-              <stop offset="0%" stopColor={colors.from} stopOpacity="0.35" />
-              <stop offset="100%" stopColor={colors.mid} stopOpacity="0.15" />
+              <stop offset="0%" stopColor={colors.from} stopOpacity="0.20" />
+              <stop offset="100%" stopColor={colors.mid} stopOpacity="0.08" />
             </linearGradient>
             <filter id="glow-head" x="-100%" y="-100%" width="300%" height="300%">
-              <feGaussianBlur stdDeviation="10" result="blur" />
-              <feFlood floodColor={colors.mid} floodOpacity="1" />
+              <feGaussianBlur stdDeviation="8" result="blur" />
+              <feFlood floodColor={colors.mid} floodOpacity="0.8" />
               <feComposite in2="blur" operator="in" />
               <feMerge>
                 <feMergeNode />
@@ -123,13 +123,13 @@ export function Timer({ timeLeft, totalDuration, phase, status, celebrating, cel
 
           <circle
             cx={center} cy={center} r={radius}
-            fill="none" stroke="url(#grad-base)" strokeWidth="10"
+            fill="none" stroke="url(#grad-base)" strokeWidth="8"
             transform={`rotate(-90 ${center} ${center})`}
           />
 
           <circle
             cx={center} cy={center} r={radius}
-            fill="none" stroke="url(#grad-progress)" strokeWidth="10"
+            fill="none" stroke="url(#grad-progress)" strokeWidth="8"
             strokeLinecap="round"
             strokeDasharray={circumference}
             strokeDashoffset={strokeDashoffset}
@@ -150,7 +150,7 @@ export function Timer({ timeLeft, totalDuration, phase, status, celebrating, cel
           className={`text-6xl sm:text-7xl font-timer tracking-tight select-none transition-opacity ${
             status === 'paused' ? 'animate-pulse' : ''
           } ${isOvertime ? 'animate-pulse' : ''} ${status === 'idle' && isWork && !isOvertime ? 'cursor-pointer hover:opacity-70' : ''}`}
-          style={{ fontWeight: 300, color: isOvertime ? '#ef4444' : theme.text }}
+          style={{ fontWeight: 200, color: isOvertime ? '#ef4444' : theme.text, textShadow: `0 0 40px ${isOvertime ? 'rgba(239,68,68,0.15)' : `${colors.from}25`}` }}
           onClick={() => {
             if (status === 'idle' && isWork && !isOvertime) setShowQuickPicker(!showQuickPicker);
           }}
@@ -185,10 +185,12 @@ export function Timer({ timeLeft, totalDuration, phase, status, celebrating, cel
         {/* ✗ Abandon/Skip (left) — hidden during idle and break */}
         {status !== 'idle' && isWork && (
           <button onClick={onAbandon}
-            className="w-11 h-11 rounded-full flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95 cursor-pointer text-base"
+            className="w-11 h-11 rounded-full flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95 cursor-pointer"
             style={{ backgroundColor: `${theme.textMuted}15`, color: theme.textMuted }}
             title={t.abandon}>
-            ✗
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+              <path d="M2 2L12 12M12 2L2 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+            </svg>
           </button>
         )}
 
@@ -229,10 +231,12 @@ export function Timer({ timeLeft, totalDuration, phase, status, celebrating, cel
         {/* ✓ Complete/Skip (right) — hidden during idle */}
         {status !== 'idle' && (
           <button onClick={onSkip}
-            className="w-11 h-11 rounded-full flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95 cursor-pointer text-base font-bold"
+            className="w-11 h-11 rounded-full flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95 cursor-pointer"
             style={{ backgroundColor: `${theme.accent}20`, color: theme.accent }}
             title={t.projectMarkDone}>
-            ✓
+            <svg width="16" height="12" viewBox="0 0 16 12" fill="none">
+              <path d="M1.5 6L6 10.5L14.5 1.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
           </button>
         )}
       </div>

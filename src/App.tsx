@@ -281,13 +281,14 @@ function App() {
   return (
     <I18nProvider value={t}>
     <ThemeProvider value={theme}>
-      <div className="min-h-dvh flex flex-col items-center transition-colors duration-700"
-        style={{ backgroundColor: bgColor }}>
+      <div className="min-h-dvh flex flex-col items-center transition-all duration-[1500ms]"
+        style={{ background: `linear-gradient(to bottom, ${bgColor}, ${bgColor}e6)` }}>
 
         {/* Header */}
-        <header className="w-full flex items-center justify-between px-3 sm:px-6 py-2 sm:py-4 shrink-0 z-40 relative">
+        <header className="w-full flex items-center justify-between px-3 sm:px-6 py-2 sm:py-4 shrink-0 z-40 sticky top-0 border-b"
+          style={{ backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)', backgroundColor: `${bgColor}cc`, borderColor: 'rgba(255,255,255,0.05)' }}>
           <div className="flex items-center gap-1.5 min-w-0">
-            <img src="/favicon-32x32.png" alt="" className="w-5 h-5 shrink-0" />
+            <img src="/favicon-32x32.png" alt="" className="w-5 h-5 shrink-0" style={{ filter: 'drop-shadow(0 0 6px rgba(34, 197, 94, 0.4))' }} />
             <span className="text-sm font-medium tracking-wide truncate" style={{ color: theme.textMuted }}>{t.appName}</span>
             {streak.current > 0 && (
               <span className="text-xs font-medium shrink-0 ml-1" style={{ color: theme.accent }}>
@@ -345,8 +346,10 @@ function App() {
                     overtime={pv.isOvertime ? { seconds: pv.overtimeSeconds } : undefined}
                   />
                 </div>
-                <div className="flex flex-col items-center gap-5 w-full max-w-xs sm:max-w-sm px-4 pt-4 sm:pt-6 pb-6">
-                  <TodayStats records={todayRecords} />
+                <div className="w-full max-w-xs sm:max-w-sm px-4 pt-4 sm:pt-6 pb-6">
+                  <div className="rounded-2xl p-5 border" style={{ backgroundColor: theme.surface, borderColor: 'rgba(255,255,255,0.05)' }}>
+                    <TodayStats records={todayRecords} />
+                  </div>
                 </div>
               </>
             );
@@ -371,9 +374,13 @@ function App() {
                   />
                   <TaskInput value={currentTask} onChange={setCurrentTask} disabled={timer.status !== 'idle'} />
                 </div>
-                <div className="flex flex-col items-center gap-5 w-full max-w-xs sm:max-w-sm px-4 pt-4 sm:pt-6 pb-6">
-                  <TodayStats records={todayRecords} />
-                  <TaskList records={todayRecords} onUpdate={handleUpdateRecord} onDelete={handleDeleteRecord} />
+                <div className="w-full max-w-xs sm:max-w-sm px-4 pt-4 sm:pt-6 pb-6">
+                  <div className="rounded-2xl p-5 border" style={{ backgroundColor: theme.surface, borderColor: 'rgba(255,255,255,0.05)' }}>
+                    <div className="flex flex-col items-center gap-5">
+                      <TodayStats records={todayRecords} idle={timer.status === 'idle'} />
+                      <TaskList records={todayRecords} onUpdate={handleUpdateRecord} onDelete={handleDeleteRecord} />
+                    </div>
+                  </div>
                 </div>
               </>
             );

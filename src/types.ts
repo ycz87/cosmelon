@@ -42,7 +42,7 @@ export const THEMES: Record<ThemeId, { name: string; colors: ThemeColors }> = {
     colors: {
       bg: '#0c0c0f', bgWork: '#100c0c', bgBreak: '#0c0e14',
       surface: '#1a1a20', text: 'rgba(255,255,255,0.9)', textMuted: 'rgba(255,255,255,0.4)',
-      textFaint: 'rgba(255,255,255,0.15)', accent: '#ef4444', accentEnd: '#fb923c',
+      textFaint: 'rgba(255,255,255,0.15)', accent: '#f43f5e', accentEnd: '#e11d48',
       breakAccent: '#6366f1', breakAccentEnd: '#818cf8', ring: '0.35',
       inputBg: 'rgba(255,255,255,0.04)',
     },

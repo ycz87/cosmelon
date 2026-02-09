@@ -155,3 +155,13 @@ body {
 .animate-slide-up {
   animation: slide-up 0.35s cubic-bezier(0.32, 0.72, 0, 1) forwards;
 }
+
+/* Gentle breathe for growth icons (idle state) */
+@keyframes gentle-breathe {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+.animate-breathe {
+  animation: gentle-breathe 3s ease-in-out infinite;
+}

@@ -2,6 +2,38 @@
 
 ---
 
+## v0.4.1 — UI 视觉升级（2026-02-09）
+
+### 需求背景
+Charles 觉得 UI 不够好看，参考 Tide、Forest 等标杆产品做视觉升级。
+
+### 质感提升
+- 进度环：环宽 10→8，加外发光 drop-shadow，底环透明度降低
+- 计时数字：字重 300→200，加 text-shadow 悬浮感
+- ✗/✓ 按钮：文字改为 SVG 图标（X 交叉线 / checkmark 勾号）
+- 任务输入框：加 1px 边框 + 聚焦态主题色边框 + 背景色提升
+- Header：毛玻璃效果（backdrop-blur）+ sticky + 底部分割线
+- 统计区域：卡片化容器（surface 背景 + 圆角 + 边框）
+
+### 氛围感
+- 背景：纯色改为微妙渐变（顶部→底部稍亮）
+- 阶段切换：过渡时间 0.7s→1.5s，更优雅
+- 西瓜图标：idle 时呼吸动画（scale 1→1.05，3s 循环）
+
+### 品牌感
+- Logo 光晕：绿色 drop-shadow
+- dark 主题色：番茄红 #ef4444 → 西瓜红 #f43f5e（rose-500），渐变终点 #e11d48
+
+### 涉及文件
+- `src/components/Timer.tsx` — 环宽、发光、数字样式、SVG 图标
+- `src/components/TaskInput.tsx` — 边框、聚焦态
+- `src/components/TodayStats.tsx` — 呼吸动画
+- `src/App.tsx` — 背景渐变、Header 毛玻璃、Logo 光晕、统计卡片化
+- `src/types.ts` — dark 主题色调整
+- `src/index.css` — breathe 动画 keyframes
+
+---
+
 ## v0.4 — 番茄钟与项目模式交互重构（2026-02-09）
 
 ### 需求背景

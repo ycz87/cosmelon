@@ -1,4 +1,5 @@
 import { useRef } from 'react';
+import { useTheme } from '../hooks/useTheme';
 import { useI18n } from '../i18n';
 
 interface TaskInputProps {
@@ -9,16 +10,22 @@ interface TaskInputProps {
 
 export function TaskInput({ value, onChange, disabled }: TaskInputProps) {
   const inputRef = useRef<HTMLInputElement>(null);
+  const theme = useTheme();
   const t = useI18n();
 
   return (
     <div className="w-full max-w-xs sm:max-w-sm px-4">
       <div
-        className={`flex items-center gap-3 px-4 py-3 rounded-2xl transition-all duration-300 ${
+        className={`flex items-center gap-3 px-4 py-3 rounded-2xl transition-all duration-300 border ${
           disabled
-            ? 'bg-white/[0.02] opacity-50'
-            : 'bg-white/[0.04] focus-within:bg-white/[0.07]'
+            ? 'opacity-50'
+            : ''
         }`}
+        style={{
+          backgroundColor: disabled ? 'rgba(255,255,255,0.02)' : 'rgba(255,255,255,0.06)',
+          borderColor: disabled ? 'transparent' : 'rgba(255,255,255,0.06)',
+        }}
+        onFocus={() => {}}
       >
         <input
           ref={inputRef}
@@ -27,13 +34,23 @@ export function TaskInput({ value, onChange, disabled }: TaskInputProps) {
           onChange={(e) => onChange(e.target.value)}
           disabled={disabled}
           placeholder={t.taskPlaceholder}
-          className="flex-1 bg-transparent text-white/90 placeholder-white/20 outline-none text-[15px] min-w-0"
+          className="flex-1 bg-transparent outline-none text-[15px] min-w-0 placeholder-white/30"
+          style={{ color: theme.text }}
           maxLength={100}
+          onFocus={(e) => {
+            const parent = e.currentTarget.parentElement;
+            if (parent) parent.style.borderColor = `${theme.accent}4d`;
+          }}
+          onBlur={(e) => {
+            const parent = e.currentTarget.parentElement;
+            if (parent) parent.style.borderColor = 'rgba(255,255,255,0.06)';
+          }}
         />
         {value && !disabled && (
           <button
             onClick={() => onChange('')}
-            className="text-white/15 hover:text-white/40 transition-colors shrink-0 cursor-pointer"
+            className="hover:opacity-70 transition-opacity shrink-0 cursor-pointer"
+            style={{ color: theme.textFaint }}
             aria-label={t.clearTask}
           >
             <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
