@@ -44,6 +44,7 @@ function App() {
   const [settings, setSettings] = useLocalStorage<PomodoroSettings>('pomodoro-settings', DEFAULT_SETTINGS, migrateSettings);
   const [showHistory, setShowHistory] = useState(false);
   const [mode, setMode] = useState<AppMode>('pomodoro');
+  const [showGuide, setShowGuide] = useState(false);
 
   // Modal states
   const [showAbandonConfirm, setShowAbandonConfirm] = useState(false);
@@ -124,7 +125,6 @@ function App() {
   }, []);
 
   const handleAbandonConfirm = useCallback(() => {
-    // Record as abandoned
     const totalSeconds = settings.workMinutes * 60;
     const elapsedSeconds = totalSeconds - timer.timeLeft;
     const elapsedMinutes = Math.round(elapsedSeconds / 60);
@@ -204,7 +204,6 @@ function App() {
 
   // 页面标题显示倒计时
   useEffect(() => {
-    // Project mode title
     if (project.state && (project.state.phase === 'running' || project.state.phase === 'overtime' || project.state.phase === 'break' || project.state.phase === 'paused')) {
       const ps = project.state;
       if (ps.phase === 'break') {
@@ -222,7 +221,6 @@ function App() {
       }
       return;
     }
-    // Pomodoro mode title
     if (timer.status === 'running' || timer.status === 'paused') {
       const minutes = Math.floor(timer.timeLeft / 60);
       const seconds = timer.timeLeft % 60;
@@ -284,20 +282,31 @@ function App() {
       <div className="min-h-dvh flex flex-col items-center transition-all duration-[1500ms]"
         style={{ background: `linear-gradient(to bottom, ${bgColor}, ${bgColor}e6)` }}>
 
-        {/* Header */}
-        <header className="w-full flex items-center justify-between px-3 sm:px-6 py-2 sm:py-4 shrink-0 z-40 sticky top-0 border-b"
-          style={{ backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)', backgroundColor: `${bgColor}cc`, borderColor: 'rgba(255,255,255,0.05)' }}>
-          <div className="flex items-center gap-1.5 min-w-0">
+        {/* Header — 48px, logo left, segmented center, icons right */}
+        <header
+          className="w-full h-12 flex items-center px-3 sm:px-5 shrink-0 z-40 sticky top-0 border-b"
+          style={{
+            backdropFilter: 'blur(16px)',
+            WebkitBackdropFilter: 'blur(16px)',
+            backgroundColor: `${theme.surface}cc`,
+            borderColor: 'rgba(255,255,255,0.06)',
+          }}
+        >
+          {/* Left: logo + streak */}
+          <div className="flex items-center gap-1.5 min-w-0 flex-1">
             <img src="/favicon-32x32.png" alt="" className="w-5 h-5 shrink-0" style={{ filter: 'drop-shadow(0 0 6px rgba(34, 197, 94, 0.4))' }} />
-            <span className="text-sm font-medium tracking-wide truncate" style={{ color: theme.textMuted }}>{t.appName}</span>
             {streak.current > 0 && (
-              <span className="text-xs font-medium shrink-0 ml-1" style={{ color: theme.accent }}>
+              <span className="text-xs font-medium shrink-0" style={{ color: theme.accent }}>
                 🔥{streak.current}
               </span>
             )}
           </div>
-          <div className="flex items-center gap-0.5 shrink-0">
-            <ModeSwitch mode={mode} onChange={setMode} disabled={isAnyTimerActive} />
+
+          {/* Center: Segmented Control */}
+          <ModeSwitch mode={mode} onChange={setMode} disabled={isAnyTimerActive} />
+
+          {/* Right: history + settings */}
+          <div className="flex items-center gap-0.5 flex-1 justify-end">
             <button
               onClick={() => setShowHistory(true)}
               className="w-8 h-8 rounded-full flex items-center justify-center transition-all cursor-pointer text-sm"
@@ -306,14 +315,19 @@ function App() {
             >
               📅
             </button>
-            <GuideButton />
-            <Settings settings={settings} onChange={setSettings} disabled={timer.status !== 'idle'} isWorkRunning={(timer.status === 'running' && timer.phase === 'work') || isProjectWorking === true} onExport={handleExport} />
+            <Settings
+              settings={settings}
+              onChange={setSettings}
+              disabled={timer.status !== 'idle'}
+              isWorkRunning={(timer.status === 'running' && timer.phase === 'work') || isProjectWorking === true}
+              onExport={handleExport}
+              onShowGuide={() => setShowGuide(true)}
+            />
           </div>
         </header>
 
         {/* 主内容 */}
         {(() => {
-          // Project execution: use the same Timer component
           const pv = project.timerView;
           const isProjectExecuting = pv !== null && mode === 'project';
 
@@ -322,32 +336,34 @@ function App() {
             const projGrowthStage: GrowthStage | null = null;
             return (
               <>
-                <div className="flex-1 flex flex-col items-center justify-center gap-4 sm:gap-6 w-full px-4">
+                <div className="flex-1 flex flex-col items-center w-full px-4 pt-8">
                   <ProjectTaskBar
                     projectName={project.state.name}
                     view={pv}
                   />
-                  <Timer
-                    timeLeft={pv.isOvertime ? 0 : pv.timeLeft}
-                    totalDuration={pv.totalDuration}
-                    phase={pv.phase}
-                    status={pv.status}
-                    celebrating={false}
-                    celebrationStage={projGrowthStage}
-                    celebrationIsRipe={false}
-                    workMinutes={projWorkMinutes}
-                    onCelebrationComplete={() => {}}
-                    onStart={() => {}}
-                    onPause={project.pause}
-                    onResume={project.resume}
-                    onSkip={project.completeCurrentTask}
-                    onAbandon={handleProjectExitClick}
-                    onChangeWorkMinutes={() => {}}
-                    overtime={pv.isOvertime ? { seconds: pv.overtimeSeconds } : undefined}
-                  />
+                  <div className="mt-4">
+                    <Timer
+                      timeLeft={pv.isOvertime ? 0 : pv.timeLeft}
+                      totalDuration={pv.totalDuration}
+                      phase={pv.phase}
+                      status={pv.status}
+                      celebrating={false}
+                      celebrationStage={projGrowthStage}
+                      celebrationIsRipe={false}
+                      workMinutes={projWorkMinutes}
+                      onCelebrationComplete={() => {}}
+                      onStart={() => {}}
+                      onPause={project.pause}
+                      onResume={project.resume}
+                      onSkip={project.completeCurrentTask}
+                      onAbandon={handleProjectExitClick}
+                      onChangeWorkMinutes={() => {}}
+                      overtime={pv.isOvertime ? { seconds: pv.overtimeSeconds } : undefined}
+                    />
+                  </div>
                 </div>
-                <div className="w-full max-w-xs sm:max-w-sm px-4 pt-4 sm:pt-6 pb-6">
-                  <div className="rounded-2xl p-5 border" style={{ backgroundColor: theme.surface, borderColor: 'rgba(255,255,255,0.05)' }}>
+                <div className="w-full max-w-xs sm:max-w-sm px-4 pt-6 pb-6">
+                  <div className="rounded-2xl p-5 border" style={{ backgroundColor: theme.surface, borderColor: 'rgba(255,255,255,0.06)' }}>
                     <TodayStats records={todayRecords} />
                   </div>
                 </div>
@@ -358,7 +374,8 @@ function App() {
           if (mode === 'pomodoro') {
             return (
               <>
-                <div className="flex-1 flex flex-col items-center justify-center gap-5 sm:gap-7 w-full px-4">
+                {/* 8pt grid: header→32px→phase→16px→ring→24px→controls→24px→input→24px→stats */}
+                <div className="flex-1 flex flex-col items-center w-full px-4 pt-8">
                   <Timer
                     timeLeft={timer.timeLeft} totalDuration={totalDuration}
                     phase={timer.phase} status={timer.status}
@@ -372,10 +389,12 @@ function App() {
                     onAbandon={handleAbandonClick}
                     onChangeWorkMinutes={handleChangeWorkMinutes}
                   />
-                  <TaskInput value={currentTask} onChange={setCurrentTask} disabled={timer.status !== 'idle'} />
+                  <div className="mt-6">
+                    <TaskInput value={currentTask} onChange={setCurrentTask} disabled={timer.status !== 'idle'} />
+                  </div>
                 </div>
-                <div className="w-full max-w-xs sm:max-w-sm px-4 pt-4 sm:pt-6 pb-6">
-                  <div className="rounded-2xl p-5 border" style={{ backgroundColor: theme.surface, borderColor: 'rgba(255,255,255,0.05)' }}>
+                <div className="w-full max-w-xs sm:max-w-sm px-4 pt-6 pb-6">
+                  <div className="rounded-2xl p-5 border" style={{ backgroundColor: theme.surface, borderColor: 'rgba(255,255,255,0.06)' }}>
                     <div className="flex flex-col items-center gap-5">
                       <TodayStats records={todayRecords} idle={timer.status === 'idle'} />
                       <TaskList records={todayRecords} onUpdate={handleUpdateRecord} onDelete={handleDeleteRecord} />
@@ -386,7 +405,7 @@ function App() {
             );
           }
 
-          // Project mode: setup, summary, or exited (choosing next action)
+          // Project mode: setup, summary, or exited
           return (
             <ProjectMode
               project={project}
@@ -438,6 +457,9 @@ function App() {
             onPrevious={() => { project.goToPreviousTask(); setShowProjectExit(false); }}
           />
         )}
+
+        {/* Guide modal — triggered from settings */}
+        <GuideButton externalShow={showGuide} onExternalClose={() => setShowGuide(false)} />
       </div>
     </ThemeProvider>
     </I18nProvider>

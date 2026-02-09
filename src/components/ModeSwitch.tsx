@@ -1,5 +1,5 @@
 /**
- * ModeSwitch — 番茄钟 / 项目模式切换
+ * ModeSwitch — iOS-style Segmented Control for Pomodoro / Project mode
  */
 import { useTheme } from '../hooks/useTheme';
 import { useI18n } from '../i18n';
@@ -16,24 +16,33 @@ export function ModeSwitch({ mode, onChange, disabled }: Props) {
   const t = useI18n();
 
   return (
-    <div className="flex items-center rounded-full p-0.5 gap-0.5"
-      style={{ backgroundColor: theme.inputBg }}>
+    <div
+      className="relative flex items-center rounded-full p-[3px]"
+      style={{ backgroundColor: 'rgba(255,255,255,0.08)' }}
+    >
+      {/* Sliding indicator */}
+      <div
+        className="absolute top-[3px] bottom-[3px] rounded-full transition-all duration-200 ease-out"
+        style={{
+          backgroundColor: 'rgba(255,255,255,0.12)',
+          width: 'calc(50% - 3px)',
+          left: mode === 'pomodoro' ? '3px' : 'calc(50%)',
+        }}
+      />
       <button
         onClick={() => !disabled && onChange('pomodoro')}
-        className={`px-3 py-1 rounded-full text-xs font-medium transition-all ${disabled ? 'opacity-50' : 'cursor-pointer'}`}
+        className={`relative z-10 px-3.5 py-1.5 rounded-full text-xs font-medium transition-colors duration-200 ${disabled ? 'opacity-50' : 'cursor-pointer'}`}
         style={{
-          backgroundColor: mode === 'pomodoro' ? `${theme.accent}25` : 'transparent',
-          color: mode === 'pomodoro' ? theme.accent : theme.textMuted,
+          color: mode === 'pomodoro' ? 'rgba(255,255,255,0.9)' : theme.textMuted,
         }}
       >
         🍉 {t.modePomodoro}
       </button>
       <button
         onClick={() => !disabled && onChange('project')}
-        className={`px-3 py-1 rounded-full text-xs font-medium transition-all ${disabled ? 'opacity-50' : 'cursor-pointer'}`}
+        className={`relative z-10 px-3.5 py-1.5 rounded-full text-xs font-medium transition-colors duration-200 ${disabled ? 'opacity-50' : 'cursor-pointer'}`}
         style={{
-          backgroundColor: mode === 'project' ? `${theme.accent}25` : 'transparent',
-          color: mode === 'project' ? theme.accent : theme.textMuted,
+          color: mode === 'project' ? 'rgba(255,255,255,0.9)' : theme.textMuted,
         }}
       >
         📋 {t.modeProject}

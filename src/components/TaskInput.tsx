@@ -16,16 +16,13 @@ export function TaskInput({ value, onChange, disabled }: TaskInputProps) {
   return (
     <div className="w-full max-w-xs sm:max-w-sm px-4">
       <div
-        className={`flex items-center gap-3 px-4 py-3 rounded-2xl transition-all duration-300 border ${
-          disabled
-            ? 'opacity-50'
-            : ''
+        className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 border ${
+          disabled ? 'opacity-50' : ''
         }`}
         style={{
           backgroundColor: disabled ? 'rgba(255,255,255,0.02)' : 'rgba(255,255,255,0.06)',
-          borderColor: disabled ? 'transparent' : 'rgba(255,255,255,0.06)',
+          borderColor: disabled ? 'transparent' : 'rgba(255,255,255,0.08)',
         }}
-        onFocus={() => {}}
       >
         <input
           ref={inputRef}
@@ -34,16 +31,16 @@ export function TaskInput({ value, onChange, disabled }: TaskInputProps) {
           onChange={(e) => onChange(e.target.value)}
           disabled={disabled}
           placeholder={t.taskPlaceholder}
-          className="flex-1 bg-transparent outline-none text-[15px] min-w-0 placeholder-white/30"
+          className="flex-1 bg-transparent outline-none text-[15px] min-w-0 task-input-placeholder"
           style={{ color: theme.text }}
           maxLength={100}
           onFocus={(e) => {
             const parent = e.currentTarget.parentElement;
-            if (parent) parent.style.borderColor = `${theme.accent}4d`;
+            if (parent) parent.style.borderColor = `${theme.accent}66`;
           }}
           onBlur={(e) => {
             const parent = e.currentTarget.parentElement;
-            if (parent) parent.style.borderColor = 'rgba(255,255,255,0.06)';
+            if (parent) parent.style.borderColor = 'rgba(255,255,255,0.08)';
           }}
         />
         {value && !disabled && (

@@ -1,6 +1,6 @@
 /**
  * 设置面板 — 齿轮图标展开，包含所有用户可配置项
- * v2: 自定义混音器 + 提醒音效升级
+ * v3: 分组标题 + iOS toggle 色 + 主题网格 + 帮助入口
  */
 import { useState, useRef, useEffect } from 'react';
 import type { PomodoroSettings, ThemeId } from '../types';
@@ -19,9 +19,25 @@ interface SettingsProps {
   disabled: boolean;
   isWorkRunning: boolean;
   onExport: () => void;
+  onShowGuide?: () => void;
 }
 
-/** 开关组件 */
+const TOGGLE_GREEN = '#34C759';
+
+/** Section header */
+function SectionHeader({ title }: { title: string }) {
+  const theme = useTheme();
+  return (
+    <div
+      className="text-xs font-semibold tracking-wider uppercase"
+      style={{ color: theme.accent }}
+    >
+      {title}
+    </div>
+  );
+}
+
+/** 开关组件 — iOS green when active */
 function Toggle({ label, checked, onChange }: {
   label: string; checked: boolean; onChange: (v: boolean) => void;
 }) {
@@ -32,7 +48,7 @@ function Toggle({ label, checked, onChange }: {
       <button
         onClick={() => onChange(!checked)}
         className="relative w-10 h-5.5 rounded-full transition-colors duration-200 cursor-pointer"
-        style={{ backgroundColor: checked ? `${t.accent}80` : t.inputBg }}
+        style={{ backgroundColor: checked ? TOGGLE_GREEN : t.inputBg }}
         role="switch"
         aria-checked={checked}
       >
@@ -97,8 +113,9 @@ function VolumeSlider({ label, value, onChange }: {
 
 const REPEAT_OPTIONS = [1, 2, 3, 5];
 const LOCALE_LABELS: Record<Locale, string> = { zh: '中文', en: 'EN' };
+const DIVIDER_COLOR = 'rgba(255,255,255,0.06)';
 
-export function Settings({ settings, onChange, disabled, isWorkRunning, onExport }: SettingsProps) {
+export function Settings({ settings, onChange, disabled, isWorkRunning, onExport, onShowGuide }: SettingsProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [showAmbienceModal, setShowAmbienceModal] = useState(false);
   const [showAlertModal, setShowAlertModal] = useState(false);
@@ -109,7 +126,6 @@ export function Settings({ settings, onChange, disabled, isWorkRunning, onExport
   useEffect(() => {
     if (!isOpen) return;
     const handleClick = (e: MouseEvent) => {
-      // Don't close settings if clicking inside a modal overlay (z-[100])
       const target = e.target as HTMLElement;
       if (target.closest?.('[data-modal-overlay]')) return;
       if (panelRef.current && !panelRef.current.contains(target)) setIsOpen(false);
@@ -132,7 +148,6 @@ export function Settings({ settings, onChange, disabled, isWorkRunning, onExport
     color: active ? theme.accent : theme.textMuted,
   });
 
-  // Theme labels from i18n
   const themeLabels: Record<ThemeId, string> = {
     dark: i18n.themeDark,
     light: i18n.themeLight,
@@ -141,7 +156,6 @@ export function Settings({ settings, onChange, disabled, isWorkRunning, onExport
     warm: i18n.themeWarm,
   };
 
-  // Ambience summary text
   const ambienceSummary = getActiveSoundsSummary(settings.ambienceMixer, i18n.ambienceNames);
 
   return (
@@ -159,131 +173,144 @@ export function Settings({ settings, onChange, disabled, isWorkRunning, onExport
 
         {isOpen && (
           <div className="absolute right-0 top-12 w-[calc(100vw-1.5rem)] sm:w-80 p-4 sm:p-5 rounded-2xl border shadow-2xl z-50 animate-fade-up max-h-[75vh] overflow-y-auto"
-            style={{ backgroundColor: theme.surface, borderColor: theme.textFaint }}>
-            <div className="flex flex-col gap-4">
+            style={{ backgroundColor: theme.surface, borderColor: DIVIDER_COLOR }}>
+            <div className="flex flex-col">
               {disabled && (
-                <div className="text-xs" style={{ color: '#fbbf24' }}>{i18n.timerRunningHint}</div>
+                <div className="text-xs mb-4" style={{ color: '#fbbf24' }}>{i18n.timerRunningHint}</div>
               )}
 
-              {/* 时长设置 */}
-              <NumberStepper label={i18n.workDuration} value={settings.workMinutes}
-                onChange={(v) => update({ workMinutes: v })} min={1} max={120} disabled={disabled} unit={i18n.minutes} />
-              <NumberStepper label={i18n.shortBreak} value={settings.shortBreakMinutes}
-                onChange={(v) => update({ shortBreakMinutes: v })} min={1} max={30} disabled={disabled} unit={i18n.minutes} />
+              {/* ── ⏱ 计时 ── */}
+              <SectionHeader title={i18n.sectionTimer} />
+              <div className="flex flex-col gap-4 mt-3">
+                <NumberStepper label={i18n.workDuration} value={settings.workMinutes}
+                  onChange={(v) => update({ workMinutes: v })} min={1} max={120} disabled={disabled} unit={i18n.minutes} />
+                <NumberStepper label={i18n.shortBreak} value={settings.shortBreakMinutes}
+                  onChange={(v) => update({ shortBreakMinutes: v })} min={1} max={30} disabled={disabled} unit={i18n.minutes} />
+                <Toggle label={i18n.autoStartBreak} checked={settings.autoStartBreak}
+                  onChange={(v) => update({ autoStartBreak: v })} />
+                <Toggle label={i18n.autoStartWork} checked={settings.autoStartWork}
+                  onChange={(v) => update({ autoStartWork: v })} />
+              </div>
 
-              {/* 自动开始 */}
-              <Toggle label={i18n.autoStartBreak} checked={settings.autoStartBreak}
-                onChange={(v) => update({ autoStartBreak: v })} />
-              <Toggle label={i18n.autoStartWork} checked={settings.autoStartWork}
-                onChange={(v) => update({ autoStartWork: v })} />
+              {/* ── 🔔 提醒 ── */}
+              <div className="border-t mt-6 pt-6" style={{ borderColor: DIVIDER_COLOR }}>
+                <SectionHeader title={i18n.sectionAlerts} />
+                <div className="flex flex-col gap-4 mt-3">
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="text-sm" style={{ color: theme.textMuted }}>{i18n.alertSound}</div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs truncate max-w-[100px]" style={{ color: theme.text }}>
+                        {i18n.alertNames[settings.alertSound]}
+                      </span>
+                      <button
+                        onClick={() => setShowAlertModal(true)}
+                        className="px-2.5 py-1 rounded-lg text-xs transition-all cursor-pointer"
+                        style={{ backgroundColor: `${theme.accent}20`, color: theme.accent }}>
+                        {i18n.alertCustomize}
+                      </button>
+                    </div>
+                  </div>
 
-              <div className="border-t" style={{ borderColor: theme.textFaint }} />
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="text-sm" style={{ color: theme.textMuted }}>{i18n.alertRepeatCount}</div>
+                    <div className="flex gap-1">
+                      {REPEAT_OPTIONS.map((n) => (
+                        <button key={n} onClick={() => update({ alertRepeatCount: n })}
+                          className={optBtn(settings.alertRepeatCount === n)}
+                          style={optStyle(settings.alertRepeatCount === n)}>
+                          {i18n.repeatTimes(n)}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
 
-              {/* ── 提醒音效 ── */}
-              <div className="flex items-center justify-between gap-3">
-                <div className="text-sm" style={{ color: theme.textMuted }}>{i18n.alertSound}</div>
-                <div className="flex items-center gap-2">
-                  <span className="text-xs truncate max-w-[100px]" style={{ color: theme.text }}>
-                    {i18n.alertNames[settings.alertSound]}
-                  </span>
+                  <VolumeSlider label={i18n.alertVolume} value={settings.alertVolume}
+                    onChange={(v) => update({ alertVolume: v })} />
+
+                  {/* 专注背景音 */}
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="text-sm" style={{ color: theme.textMuted }}>{i18n.focusAmbience}</div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs truncate max-w-[120px]" style={{ color: ambienceSummary ? theme.text : theme.textFaint }}>
+                        {ambienceSummary || i18n.ambienceOff}
+                      </span>
+                      <button
+                        onClick={() => setShowAmbienceModal(true)}
+                        className="px-2.5 py-1 rounded-lg text-xs transition-all cursor-pointer"
+                        style={{ backgroundColor: `${theme.accent}20`, color: theme.accent }}>
+                        {i18n.ambienceCustomize}
+                      </button>
+                    </div>
+                  </div>
+
+                  {ambienceSummary && (
+                    <VolumeSlider label={i18n.ambienceVolume} value={settings.ambienceVolume}
+                      onChange={(v) => update({ ambienceVolume: v })} />
+                  )}
+                </div>
+              </div>
+
+              {/* ── 🎨 外观 ── */}
+              <div className="border-t mt-6 pt-6" style={{ borderColor: DIVIDER_COLOR }}>
+                <SectionHeader title={i18n.sectionAppearance} />
+                <div className="flex flex-col gap-4 mt-3">
+                  {/* 主题选择 — 3 列网格 */}
+                  <div className="grid grid-cols-3 gap-1.5">
+                    {(Object.keys(THEMES) as ThemeId[]).map((id) => (
+                      <button key={id} onClick={() => update({ theme: id })}
+                        className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs transition-all cursor-pointer"
+                        style={{
+                          backgroundColor: settings.theme === id ? `${THEMES[id].colors.accent}30` : theme.inputBg,
+                          color: settings.theme === id ? THEMES[id].colors.accent : theme.textMuted,
+                        }}>
+                        <span className="w-3 h-3 rounded-full shrink-0" style={{ backgroundColor: THEMES[id].colors.accent }} />
+                        {themeLabels[id]}
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* 语言切换 */}
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="text-sm" style={{ color: theme.textMuted }}>{i18n.language}</div>
+                    <div className="flex gap-1.5">
+                      {(Object.keys(LOCALE_LABELS) as Locale[]).map((loc) => (
+                        <button key={loc} onClick={() => update({ language: loc })}
+                          className={optBtn(settings.language === loc)}
+                          style={optStyle(settings.language === loc)}>
+                          {LOCALE_LABELS[loc]}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* ── ⚙ 通用 ── */}
+              <div className="border-t mt-6 pt-6" style={{ borderColor: DIVIDER_COLOR }}>
+                <SectionHeader title={i18n.sectionGeneral} />
+                <div className="flex flex-col gap-3 mt-3">
                   <button
-                    onClick={() => setShowAlertModal(true)}
-                    className="px-2.5 py-1 rounded-lg text-xs transition-all cursor-pointer"
-                    style={{ backgroundColor: `${theme.accent}20`, color: theme.accent }}>
-                    {i18n.alertCustomize}
+                    onClick={onExport}
+                    className="w-full py-2 rounded-lg text-xs transition-all cursor-pointer"
+                    style={{ backgroundColor: theme.inputBg, color: theme.textMuted }}
+                  >
+                    {i18n.exportData}
                   </button>
-                </div>
-              </div>
 
-              {/* 循环次数 */}
-              <div className="flex items-center justify-between gap-3">
-                <div className="text-sm" style={{ color: theme.textMuted }}>{i18n.alertRepeatCount}</div>
-                <div className="flex gap-1">
-                  {REPEAT_OPTIONS.map((n) => (
-                    <button key={n} onClick={() => update({ alertRepeatCount: n })}
-                      className={optBtn(settings.alertRepeatCount === n)}
-                      style={optStyle(settings.alertRepeatCount === n)}>
-                      {i18n.repeatTimes(n)}
+                  {onShowGuide && (
+                    <button
+                      onClick={() => { onShowGuide(); setIsOpen(false); }}
+                      className="w-full py-2 rounded-lg text-xs transition-all cursor-pointer"
+                      style={{ backgroundColor: theme.inputBg, color: theme.textMuted }}
+                    >
+                      {i18n.settingsGuide}
                     </button>
-                  ))}
+                  )}
                 </div>
               </div>
-
-              <VolumeSlider label={i18n.alertVolume} value={settings.alertVolume}
-                onChange={(v) => update({ alertVolume: v })} />
-
-              <div className="border-t" style={{ borderColor: theme.textFaint }} />
-
-              {/* ── 专注背景音 ── */}
-              <div className="flex items-center justify-between gap-3">
-                <div className="text-sm" style={{ color: theme.textMuted }}>{i18n.focusAmbience}</div>
-                <div className="flex items-center gap-2">
-                  <span className="text-xs truncate max-w-[120px]" style={{ color: ambienceSummary ? theme.text : theme.textFaint }}>
-                    {ambienceSummary || i18n.ambienceOff}
-                  </span>
-                  <button
-                    onClick={() => setShowAmbienceModal(true)}
-                    className="px-2.5 py-1 rounded-lg text-xs transition-all cursor-pointer"
-                    style={{ backgroundColor: `${theme.accent}20`, color: theme.accent }}>
-                    {i18n.ambienceCustomize}
-                  </button>
-                </div>
-              </div>
-
-              {ambienceSummary && (
-                <VolumeSlider label={i18n.ambienceVolume} value={settings.ambienceVolume}
-                  onChange={(v) => update({ ambienceVolume: v })} />
-              )}
-
-              <div className="border-t" style={{ borderColor: theme.textFaint }} />
-
-              {/* 主题选择 */}
-              <div className="flex flex-col gap-2">
-                <div className="text-sm" style={{ color: theme.textMuted }}>{i18n.theme}</div>
-                <div className="flex flex-wrap gap-1.5">
-                  {(Object.keys(THEMES) as ThemeId[]).map((id) => (
-                    <button key={id} onClick={() => update({ theme: id })}
-                      className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs transition-all cursor-pointer"
-                      style={{
-                        backgroundColor: settings.theme === id ? `${THEMES[id].colors.accent}30` : theme.inputBg,
-                        color: settings.theme === id ? THEMES[id].colors.accent : theme.textMuted,
-                      }}>
-                      <span className="w-3 h-3 rounded-full shrink-0" style={{ backgroundColor: THEMES[id].colors.accent }} />
-                      {themeLabels[id]}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div className="border-t" style={{ borderColor: theme.textFaint }} />
-
-              {/* 语言切换 */}
-              <div className="flex items-center justify-between gap-3">
-                <div className="text-sm" style={{ color: theme.textMuted }}>{i18n.language}</div>
-                <div className="flex gap-1.5">
-                  {(Object.keys(LOCALE_LABELS) as Locale[]).map((loc) => (
-                    <button key={loc} onClick={() => update({ language: loc })}
-                      className={optBtn(settings.language === loc)}
-                      style={optStyle(settings.language === loc)}>
-                      {LOCALE_LABELS[loc]}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div className="border-t" style={{ borderColor: theme.textFaint }} />
-
-              {/* 导出数据 */}
-              <button
-                onClick={onExport}
-                className="w-full py-2 rounded-lg text-xs transition-all cursor-pointer"
-                style={{ backgroundColor: theme.inputBg, color: theme.textMuted }}
-              >
-                {i18n.exportData}
-              </button>
 
               {/* 版本号 */}
-              <div className="text-center pt-1 pb-0.5">
+              <div className="text-center pt-4 pb-1">
                 <span className="text-[11px]" style={{ color: theme.textFaint }}>
                   v{__APP_VERSION__}
                 </span>
@@ -293,7 +320,7 @@ export function Settings({ settings, onChange, disabled, isWorkRunning, onExport
         )}
       </div>
 
-      {/* Modals — rendered outside the settings panel */}
+      {/* Modals */}
       {showAmbienceModal && (
         <AmbienceMixerModal
           config={settings.ambienceMixer}

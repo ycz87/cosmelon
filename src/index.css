@@ -165,3 +165,8 @@ body {
 .animate-breathe {
   animation: gentle-breathe 3s ease-in-out infinite;
 }
+
+/* Task input placeholder color */
+.task-input-placeholder::placeholder {
+  color: rgba(255, 255, 255, 0.25);
+}

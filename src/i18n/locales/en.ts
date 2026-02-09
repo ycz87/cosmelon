@@ -265,4 +265,16 @@ export const en: Messages = {
   projectHistory: 'Projects',
   projectHistoryEstimated: 'Est.',
   projectHistoryActual: 'Actual',
+
+  // Settings section headers
+  sectionTimer: '⏱ TIMER',
+  sectionAlerts: '🔔 ALERTS',
+  sectionAppearance: '🎨 APPEARANCE',
+  sectionGeneral: '⚙ GENERAL',
+
+  // Empty state
+  emptyTodayHint: 'No records yet today',
+
+  // Guide in settings
+  settingsGuide: 'User Guide',
 };

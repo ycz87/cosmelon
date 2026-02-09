@@ -40,8 +40,8 @@ export const THEMES: Record<ThemeId, { name: string; colors: ThemeColors }> = {
   dark: {
     name: '经典暗色',
     colors: {
-      bg: '#0c0c0f', bgWork: '#100c0c', bgBreak: '#0c0e14',
-      surface: '#1a1a20', text: 'rgba(255,255,255,0.9)', textMuted: 'rgba(255,255,255,0.4)',
+      bg: '#111114', bgWork: '#141012', bgBreak: '#101218',
+      surface: '#1c1c24', text: 'rgba(255,255,255,0.9)', textMuted: 'rgba(255,255,255,0.4)',
       textFaint: 'rgba(255,255,255,0.15)', accent: '#f43f5e', accentEnd: '#e11d48',
       breakAccent: '#6366f1', breakAccentEnd: '#818cf8', ring: '0.35',
       inputBg: 'rgba(255,255,255,0.04)',

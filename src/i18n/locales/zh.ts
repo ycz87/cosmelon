@@ -265,4 +265,16 @@ export const zh: Messages = {
   projectHistory: '项目记录',
   projectHistoryEstimated: '预计',
   projectHistoryActual: '实际',
+
+  // Settings section headers
+  sectionTimer: '⏱ 计时',
+  sectionAlerts: '🔔 提醒',
+  sectionAppearance: '🎨 外观',
+  sectionGeneral: '⚙ 通用',
+
+  // Empty state
+  emptyTodayHint: '今日尚无记录',
+
+  // Guide in settings
+  settingsGuide: '使用说明',
 };

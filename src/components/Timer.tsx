@@ -70,7 +70,7 @@ export function Timer({ timeLeft, totalDuration, phase, status, celebrating, cel
     : t.phaseShortBreak;
 
   return (
-    <div ref={containerRef} className="flex flex-col items-center gap-4 sm:gap-6 relative">
+    <div ref={containerRef} className="flex flex-col items-center relative">
       {/* Celebration overlay */}
       {celebrating && celebrationStage && (
         <CelebrationOverlay
@@ -80,16 +80,22 @@ export function Timer({ timeLeft, totalDuration, phase, status, celebrating, cel
         />
       )}
 
-      {/* Phase indicator */}
-      <div className={`text-sm font-medium tracking-widest transition-all duration-500 ${
-        !isWork && status !== 'idle' ? 'text-base' : ''
-      }`}
-        style={{ color: isWork ? theme.accent : theme.breakAccent }}>
+      {/* Phase indicator — capsule label */}
+      <div
+        className="text-sm font-semibold tracking-widest transition-all duration-500 rounded-full"
+        style={{
+          color: isOvertime ? '#ef4444' : isWork ? theme.accent : theme.breakAccent,
+          backgroundColor: isOvertime ? 'rgba(239,68,68,0.12)' : isWork ? `${theme.accent}1f` : `${theme.breakAccent}1f`,
+          padding: '6px 14px',
+          fontSize: '14px',
+          fontWeight: 600,
+        }}
+      >
         {phaseLabel}
       </div>
 
       {/* Circular timer */}
-      <div className="relative w-[260px] h-[260px] sm:w-[320px] sm:h-[320px] flex items-center justify-center overflow-visible">
+      <div className="relative w-[260px] h-[260px] sm:w-[320px] sm:h-[320px] flex items-center justify-center overflow-visible mt-4">
         <svg className={`absolute inset-0 overflow-visible ${celebrating ? 'animate-ring-pulse' : ''} ${isOvertime ? 'animate-ring-pulse' : ''}`} viewBox={`0 0 ${size} ${size}`} overflow="visible" style={{ filter: `drop-shadow(0 0 12px ${colors.from}40)` }}>
           <defs>
             <linearGradient id="grad-progress" gradientUnits="userSpaceOnUse"
@@ -150,7 +156,7 @@ export function Timer({ timeLeft, totalDuration, phase, status, celebrating, cel
           className={`text-6xl sm:text-7xl font-timer tracking-tight select-none transition-opacity ${
             status === 'paused' ? 'animate-pulse' : ''
           } ${isOvertime ? 'animate-pulse' : ''} ${status === 'idle' && isWork && !isOvertime ? 'cursor-pointer hover:opacity-70' : ''}`}
-          style={{ fontWeight: 200, color: isOvertime ? '#ef4444' : theme.text, textShadow: `0 0 40px ${isOvertime ? 'rgba(239,68,68,0.15)' : `${colors.from}25`}` }}
+          style={{ fontWeight: 300, color: isOvertime ? '#ef4444' : 'rgba(255,255,255,0.95)', fontVariantNumeric: 'tabular-nums' }}
           onClick={() => {
             if (status === 'idle' && isWork && !isOvertime) setShowQuickPicker(!showQuickPicker);
           }}
@@ -180,7 +186,7 @@ export function Timer({ timeLeft, totalDuration, phase, status, celebrating, cel
       </div>
 
       {/* Controls */}
-      <div className="flex items-center gap-3 sm:gap-4 h-16">
+      <div className="flex items-center gap-3 sm:gap-4 h-16 mt-6">
 
         {/* ✗ Abandon/Skip (left) — hidden during idle and break */}
         {status !== 'idle' && isWork && (
@@ -197,8 +203,8 @@ export function Timer({ timeLeft, totalDuration, phase, status, celebrating, cel
         {/* ▶ Start — idle only */}
         {status === 'idle' && (
           <button onClick={onStart}
-            className="w-14 h-14 rounded-full flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95 cursor-pointer"
-            style={{ background: `linear-gradient(135deg, ${colors.from}, ${colors.to})`, boxShadow: `0 4px 24px ${colors.from}66` }}>
+            className="w-[52px] h-[52px] rounded-full flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95 cursor-pointer"
+            style={{ background: `linear-gradient(135deg, ${colors.from}, ${colors.to})`, boxShadow: `0 2px 16px ${colors.from}40` }}>
             <svg width="20" height="24" viewBox="0 0 20 24" fill="none" className="ml-0.5">
               <path d="M2 2L18 12L2 22V2Z" fill="white" />
             </svg>
@@ -208,7 +214,7 @@ export function Timer({ timeLeft, totalDuration, phase, status, celebrating, cel
         {/* ⏸ Pause (center) */}
         {status === 'running' && (
           <button onClick={onPause}
-            className="w-14 h-14 rounded-full flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95 cursor-pointer border"
+            className="w-[52px] h-[52px] rounded-full flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95 cursor-pointer border"
             style={{ backgroundColor: `${colors.from}20`, borderColor: `${colors.from}40` }}>
             <svg width="16" height="20" viewBox="0 0 16 20" fill="none">
               <rect x="1" y="1" width="4.5" height="18" rx="1.5" fill={colors.from} fillOpacity="0.7" />
@@ -220,8 +226,8 @@ export function Timer({ timeLeft, totalDuration, phase, status, celebrating, cel
         {/* ▶ Resume (center) */}
         {status === 'paused' && (
           <button onClick={onResume}
-            className="w-14 h-14 rounded-full flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95 cursor-pointer"
-            style={{ background: `linear-gradient(135deg, ${colors.from}, ${colors.to})`, boxShadow: `0 4px 24px ${colors.from}66` }}>
+            className="w-[52px] h-[52px] rounded-full flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95 cursor-pointer"
+            style={{ background: `linear-gradient(135deg, ${colors.from}, ${colors.to})`, boxShadow: `0 2px 16px ${colors.from}40` }}>
             <svg width="20" height="24" viewBox="0 0 20 24" fill="none" className="ml-0.5">
               <path d="M2 2L18 12L2 22V2Z" fill="white" />
             </svg>

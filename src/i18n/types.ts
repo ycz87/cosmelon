@@ -192,4 +192,16 @@ export interface Messages {
   projectHistory: string;
   projectHistoryEstimated: string;
   projectHistoryActual: string;
+
+  // Settings section headers
+  sectionTimer: string;
+  sectionAlerts: string;
+  sectionAppearance: string;
+  sectionGeneral: string;
+
+  // Empty state
+  emptyTodayHint: string;
+
+  // Guide in settings
+  settingsGuide: string;
 }

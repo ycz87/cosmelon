@@ -20,9 +20,8 @@ export function TaskList({ records, onUpdate, onDelete }: TaskListProps) {
 
   if (records.length === 0) {
     return (
-      <div className="text-center py-8">
-        <p className="text-[15px]" style={{ color: theme.textMuted }}>{t.emptyTitle}</p>
-        <p className="text-sm mt-1.5" style={{ color: theme.textFaint }}>{t.emptySubtitle}</p>
+      <div className="text-center py-4">
+        <p className="text-xs" style={{ color: theme.textFaint }}>{t.emptyTodayHint}</p>
       </div>
     );
   }

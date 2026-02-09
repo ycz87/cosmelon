@@ -2,23 +2,26 @@
 
 ---
 
-## v0.4.2 — 设置菜单显示版本号（2026-02-09）
+## v0.4.2 — UI 系统性改版（2026-02-09）
 
 ### 需求背景
-Charles 需要从界面上直接看到当前版本号，判断是不是最新版本。
+当前 UI 缺乏设计系统，间距混乱、视觉层级不清晰、设置页无分组。以 Apple HIG + Material 3 为标准做系统性提升。核心原则：时间是绝对主角。
 
-### 改动
-- `package.json` — version 从 `0.0.0` 更新为 `0.4.0`
-- `vite.config.ts` — 读取 package.json version，通过 `define: { __APP_VERSION__ }` 注入
-- `src/vite-env.d.ts` — 新增，声明 `__APP_VERSION__` 全局常量的 TypeScript 类型
-- `src/components/Settings.tsx` — 设置面板最底部（导出按钮下方）显示 `v{__APP_VERSION__}`，11px 浅色小字
-
-### 技术方案
-用 Vite 的 `define` 在构建时将 package.json 的 version 注入为全局常量 `__APP_VERSION__`。这样以后只需改 package.json 一处，界面自动同步。
+### 改动文件
+- `src/types.ts` — dark 主题 bg/bgWork/bgBreak/surface 四色微调
+- `src/App.tsx` — Header 重构（去文字、居中 Segmented Control、去帮助按钮）、间距 8pt 网格、分割线统一、Guide 外部控制
+- `src/components/ModeSwitch.tsx` — 重写为 iOS Segmented Control（滑动指示器）
+- `src/components/Timer.tsx` — 数字提权（300/纯白/tabular-nums）、按钮降权（52px/弱阴影）、Phase 胶囊标签、间距独立控制
+- `src/components/TaskInput.tsx` — 圆角 12px、边框 0.08、聚焦 accent 40%、placeholder 0.25
+- `src/components/TaskList.tsx` — 空状态改为一行浅色小字
+- `src/components/Settings.tsx` — 四组分组标题、Toggle 绿色 #34C759、Theme grid-cols-3、帮助按钮入口
+- `src/components/Guide.tsx` — 支持外部 show/close 控制（从设置页触发）
+- `src/i18n/types.ts` + `locales/zh.ts` + `locales/en.ts` — 新增分组标题、空状态、帮助按钮文案
+- `src/index.css` — task-input-placeholder 样式
 
 ---
 
-## v0.4.1 — UI 视觉升级（2026-02-09）
+## v0.4.1 — UI 视觉升级 + 版本号显示（2026-02-09）
 
 ### 需求背景
 Charles 觉得 UI 不够好看，参考 Tide、Forest 等标杆产品做视觉升级。

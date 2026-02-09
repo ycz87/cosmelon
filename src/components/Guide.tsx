@@ -1,5 +1,5 @@
 /**
- * 使用说明弹窗 — 首次访问自动弹出，之后可通过 ? 图标手动打开
+ * 使用说明弹窗 — 首次访问自动弹出，之后通过设置页手动打开
  */
 import { useState, useEffect } from 'react';
 import { useTheme } from '../hooks/useTheme';
@@ -70,10 +70,12 @@ function Guide({ onClose }: GuideProps) {
   );
 }
 
-/** 使用说明入口 — 管理首次弹出 + 手动打开 */
-export function GuideButton() {
+/** 使用说明入口 — 首次自动弹出 + 外部控制 */
+export function GuideButton({ externalShow, onExternalClose }: {
+  externalShow?: boolean;
+  onExternalClose?: () => void;
+}) {
   const [showGuide, setShowGuide] = useState(false);
-  const theme = useTheme();
 
   // 首次访问自动弹出
   useEffect(() => {
@@ -83,22 +85,16 @@ export function GuideButton() {
     }
   }, []);
 
+  // External trigger
+  useEffect(() => {
+    if (externalShow) setShowGuide(true);
+  }, [externalShow]);
+
   const handleClose = () => {
     setShowGuide(false);
     localStorage.setItem('pomodoro-guide-seen', '1');
+    onExternalClose?.();
   };
 
-  return (
-    <>
-      <button
-        onClick={() => setShowGuide(true)}
-        className="w-8 h-8 rounded-full flex items-center justify-center transition-all cursor-pointer text-sm"
-        style={{ color: theme.textMuted }}
-        aria-label="Guide"
-      >
-        ?
-      </button>
-      {showGuide && <Guide onClose={handleClose} />}
-    </>
-  );
+  return showGuide ? <Guide onClose={handleClose} /> : null;
 }
