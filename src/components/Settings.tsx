@@ -96,7 +96,6 @@ function VolumeSlider({ label, value, onChange }: {
 }
 
 const REPEAT_OPTIONS = [1, 2, 3, 5];
-const ROUND_OPTIONS = [2, 3, 4, 5, 6];
 const LOCALE_LABELS: Record<Locale, string> = { zh: '中文', en: 'EN' };
 
 export function Settings({ settings, onChange, disabled, isWorkRunning, onExport }: SettingsProps) {
@@ -171,19 +170,6 @@ export function Settings({ settings, onChange, disabled, isWorkRunning, onExport
                 onChange={(v) => update({ workMinutes: v })} min={1} max={120} disabled={disabled} unit={i18n.minutes} />
               <NumberStepper label={i18n.shortBreak} value={settings.shortBreakMinutes}
                 onChange={(v) => update({ shortBreakMinutes: v })} min={1} max={30} disabled={disabled} unit={i18n.minutes} />
-              <NumberStepper label={i18n.longBreak} value={settings.longBreakMinutes}
-                onChange={(v) => update({ longBreakMinutes: v })} min={1} max={60} disabled={disabled} unit={i18n.minutes} />
-
-              <div className="flex items-center justify-between gap-3">
-                <div className={`text-sm ${disabled ? 'opacity-40' : ''}`} style={{ color: theme.textMuted }}>{i18n.longBreakInterval}</div>
-                <div className={`flex gap-1 ${disabled ? 'opacity-40 pointer-events-none' : ''}`}>
-                  {ROUND_OPTIONS.map((n) => (
-                    <button key={n} onClick={() => update({ pomodorosPerRound: n })}
-                      className={optBtn(settings.pomodorosPerRound === n)}
-                      style={optStyle(settings.pomodorosPerRound === n)}>{n}</button>
-                  ))}
-                </div>
-              </div>
 
               {/* 自动开始 */}
               <Toggle label={i18n.autoStartBreak} checked={settings.autoStartBreak}

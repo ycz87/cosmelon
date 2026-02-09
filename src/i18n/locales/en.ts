@@ -8,8 +8,7 @@ export const en: Messages = {
 
   // Timer phases
   phaseWork: '🍉 Focus',
-  phaseShortBreak: '☕ Short Break',
-  phaseLongBreak: '🌙 Long Break',
+  phaseShortBreak: '☕ Break',
 
   // Timer controls
   abandon: 'Give Up',
@@ -36,8 +35,6 @@ export const en: Messages = {
   skipComplete: (emoji: string) => `${emoji} Manually completed`,
   breakOver: '☕ Break over',
   breakOverBody: 'Ready for the next session?',
-  longBreakOver: '🌙 Long break over',
-  longBreakOverBody: 'New round — ready to go?',
 
   // Celebration
   celebrationRipe: ['Amazing! 🎉', 'Well done! ✨', 'Perfect focus! 🔥', 'Keep it up! 💪'],
@@ -47,9 +44,7 @@ export const en: Messages = {
   settings: 'Settings',
   timerRunningHint: '⏳ Timer is running — adjust after it stops',
   workDuration: 'Focus',
-  shortBreak: 'Short Break',
-  longBreak: 'Long Break',
-  longBreakInterval: 'Long Break Every',
+  shortBreak: 'Break',
   autoStartBreak: 'Auto-start Break',
   autoStartWork: 'Auto-start Work',
 
@@ -144,11 +139,11 @@ export const en: Messages = {
   // Guide
   guideTitle: '🍉 How to Use',
   guidePomodoro: 'Pomodoro Technique',
-  guidePomodoroDesc: 'Watermelon Clock uses the Pomodoro Technique to help you stay focused. Work for 25 min → short break 5 min → repeat 4 rounds → long break 15 min.',
+  guidePomodoroDesc: 'Watermelon Clock uses the Pomodoro Technique to help you stay focused. Focus → Break → Focus → Break, simple cycle.',
   guideBasic: 'Getting Started',
   guideBasicItems: [
     'Tap play to start focusing',
-    'Pause or give up anytime',
+    'Pause, complete early, or exit anytime',
     'Breaks start automatically after each session',
     'Tap the timer digits to quickly adjust duration',
   ],
@@ -238,6 +233,27 @@ export const en: Messages = {
   projectCompleted: 'completed',
   projectSkipped: 'skipped',
   projectDone: 'Done',
+
+  // Confirm modal
+  confirmExitTitle: 'Exit this session?',
+  confirmExitMessage: 'Progress will be marked as incomplete',
+  confirm: 'Exit',
+  cancel: 'Cancel',
+
+  // Default task name
+  defaultTaskName: (n: number) => `Focus #${n}`,
+
+  // Project exit modal
+  projectExitConfirmTitle: 'Exit current task?',
+  projectExitConfirm: 'Exit Task',
+  projectExitAll: 'Exit Entire Project',
+  projectExitChooseTitle: 'What next?',
+  projectExitRestart: 'Restart This Task',
+  projectExitNext: 'Next Task',
+  projectExitPrevious: 'Back to Previous (Overtime)',
+  projectExitFinish: 'Finish Project',
+  projectAbandoned: 'abandoned',
+  projectOvertimeContinued: 'overtime',
 
   // Recovery
   projectRecoveryTitle: 'Unfinished Project Found',

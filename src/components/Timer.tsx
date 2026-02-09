@@ -67,7 +67,6 @@ export function Timer({ timeLeft, totalDuration, phase, status, celebrating, cel
 
   const phaseLabel = isOvertime ? t.projectOvertime
     : phase === 'work' ? t.phaseWork
-    : phase === 'longBreak' ? t.phaseLongBreak
     : t.phaseShortBreak;
 
   return (

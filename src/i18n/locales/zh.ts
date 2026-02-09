@@ -9,7 +9,6 @@ export const zh: Messages = {
   // Timer phases
   phaseWork: '🍉 专注时间',
   phaseShortBreak: '☕ 休息一下',
-  phaseLongBreak: '🌙 长休息',
 
   // Timer controls
   abandon: '放弃本次',
@@ -36,8 +35,6 @@ export const zh: Messages = {
   skipComplete: (emoji: string) => `${emoji} 手动完成`,
   breakOver: '☕ 休息结束',
   breakOverBody: '准备好开始下一个西瓜钟了吗？',
-  longBreakOver: '🌙 长休息结束',
-  longBreakOverBody: '新一轮开始，准备好了吗？',
 
   // Celebration
   celebrationRipe: ['太棒了！🎉', '干得漂亮！✨', '完美专注！🔥', '继续保持！💪'],
@@ -47,9 +44,7 @@ export const zh: Messages = {
   settings: '设置',
   timerRunningHint: '⏳ 计时进行中，完成或重置后可调整',
   workDuration: '专注时长',
-  shortBreak: '短休息',
-  longBreak: '长休息',
-  longBreakInterval: '长休息间隔',
+  shortBreak: '休息时长',
   autoStartBreak: '自动开始休息',
   autoStartWork: '自动开始工作',
 
@@ -144,12 +139,12 @@ export const zh: Messages = {
   // Guide
   guideTitle: '🍉 西瓜时钟使用指南',
   guidePomodoro: '番茄工作法',
-  guidePomodoroDesc: '西瓜时钟采用番茄工作法（Pomodoro Technique）计时，帮助你高效专注。专注工作 25 分钟 → 短休息 5 分钟 → 重复 4 轮 → 长休息 15 分钟。',
+  guidePomodoroDesc: '西瓜时钟采用番茄工作法（Pomodoro Technique）计时，帮助你高效专注。专注工作 → 休息 → 专注 → 休息，简单循环。',
   guideBasic: '基本操作',
   guideBasicItems: [
     '点击播放按钮开始专注',
-    '计时中可暂停或放弃',
-    '完成后自动进入休息，每 4 轮触发长休息',
+    '计时中可暂停、提前完成或退出',
+    '完成后自动进入休息',
     'idle 时点击时间数字可快速调整时长',
   ],
   guideGrowth: '🌱 西瓜生长',
@@ -238,6 +233,27 @@ export const zh: Messages = {
   projectCompleted: '已完成',
   projectSkipped: '已跳过',
   projectDone: '完成',
+
+  // Confirm modal
+  confirmExitTitle: '退出本次专注？',
+  confirmExitMessage: '当前进度将标记为未完成',
+  confirm: '确认退出',
+  cancel: '取消',
+
+  // Default task name
+  defaultTaskName: (n: number) => `专注 #${n}`,
+
+  // Project exit modal
+  projectExitConfirmTitle: '退出当前任务？',
+  projectExitConfirm: '确认退出',
+  projectExitAll: '退出整个项目',
+  projectExitChooseTitle: '接下来做什么？',
+  projectExitRestart: '重新开始本任务',
+  projectExitNext: '下一个任务',
+  projectExitPrevious: '返回上一个任务（超时继续）',
+  projectExitFinish: '结束项目',
+  projectAbandoned: '已退出',
+  projectOvertimeContinued: '超时继续',
 
   // Recovery
   projectRecoveryTitle: '发现未完成的项目',

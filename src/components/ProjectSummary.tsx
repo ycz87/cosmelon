@@ -30,6 +30,7 @@ export function ProjectSummary({ state, onFinish }: Props) {
 
   const completedTasks = state.results.filter((r) => r.status === 'completed');
   const skippedTasks = state.results.filter((r) => r.status === 'skipped');
+  const abandonedTasks = state.results.filter((r) => r.status === 'abandoned');
 
   return (
     <div className="w-full max-w-md mx-auto flex flex-col gap-5 px-4 py-6">
@@ -91,14 +92,20 @@ export function ProjectSummary({ state, onFinish }: Props) {
 
           return (
             <div key={result.taskId} className="flex flex-col gap-1 px-3 py-2 rounded-lg"
-              style={{ backgroundColor: theme.inputBg, opacity: result.status === 'skipped' ? 0.5 : 1 }}>
+              style={{ backgroundColor: theme.inputBg, opacity: (result.status === 'skipped' || result.status === 'abandoned') ? 0.5 : 1 }}>
               <div className="flex items-center gap-2">
                 <span className="text-xs">{emoji}</span>
                 <span className="flex-1 text-sm truncate"
-                  style={{ color: result.status === 'skipped' ? theme.textFaint : theme.text }}>
+                  style={{ color: (result.status === 'skipped' || result.status === 'abandoned') ? theme.textFaint : theme.text }}>
                   {result.name}
                   {result.status === 'skipped' && (
                     <span className="ml-1 text-xs" style={{ color: theme.textFaint }}>({t.projectSkipped})</span>
+                  )}
+                  {result.status === 'abandoned' && (
+                    <span className="ml-1 text-xs" style={{ color: theme.textFaint }}>({t.projectAbandoned})</span>
+                  )}
+                  {result.status === 'overtime-continued' && (
+                    <span className="ml-1 text-xs" style={{ color: theme.textFaint }}>({t.projectOvertimeContinued})</span>
                   )}
                 </span>
                 <span className="text-xs tabular-nums shrink-0" style={{ color: theme.textMuted }}>
@@ -129,6 +136,7 @@ export function ProjectSummary({ state, onFinish }: Props) {
       <div className="flex justify-center gap-4 text-xs" style={{ color: theme.textMuted }}>
         <span>✓ {completedTasks.length} {t.projectCompleted}</span>
         {skippedTasks.length > 0 && <span>⏭ {skippedTasks.length} {t.projectSkipped}</span>}
+        {abandonedTasks.length > 0 && <span>✗ {abandonedTasks.length} {t.projectAbandoned}</span>}
       </div>
 
       {/* Done button */}

@@ -16,12 +16,12 @@ export interface ProjectTaskResult {
   name: string;
   estimatedMinutes: number;
   actualSeconds: number;      // 实际用时（秒）
-  status: 'completed' | 'skipped';
+  status: 'completed' | 'skipped' | 'abandoned' | 'overtime-continued';
   completedAt: string;        // ISO timestamp
 }
 
 /** 项目执行状态 */
-export type ProjectPhase = 'setup' | 'running' | 'break' | 'overtime' | 'paused' | 'summary';
+export type ProjectPhase = 'setup' | 'running' | 'break' | 'overtime' | 'paused' | 'exited' | 'summary';
 
 /** 项目运行时状态（持久化到 localStorage 用于中断恢复） */
 export interface ProjectState {

@@ -13,6 +13,8 @@ export interface PomodoroRecord {
   durationMinutes: number; // 本次专注时长（分钟）
   completedAt: string;     // ISO 时间戳
   date: string;            // YYYY-MM-DD，用于按天筛选
+  /** 完成状态：completed=正常完成, abandoned=中途退出。旧记录无此字段视为 completed */
+  status?: 'completed' | 'abandoned';
 }
 
 // ─── 主题系统 ───
@@ -93,8 +95,6 @@ export const THEMES: Record<ThemeId, { name: string; colors: ThemeColors }> = {
 export interface PomodoroSettings {
   workMinutes: number;
   shortBreakMinutes: number;
-  longBreakMinutes: number;
-  pomodorosPerRound: number;
   // Alert sound
   alertSound: AlertSoundId;
   alertRepeatCount: number;    // 循环次数: 1/2/3/5
@@ -112,8 +112,6 @@ export interface PomodoroSettings {
 export const DEFAULT_SETTINGS: PomodoroSettings = {
   workMinutes: 25,
   shortBreakMinutes: 5,
-  longBreakMinutes: 15,
-  pomodorosPerRound: 4,
   alertSound: 'chime',
   alertRepeatCount: 2,
   alertVolume: 80,
@@ -138,8 +136,7 @@ export function migrateSettings(raw: unknown): PomodoroSettings {
   // Direct numeric/boolean fields
   if (typeof s.workMinutes === 'number') result.workMinutes = s.workMinutes;
   if (typeof s.shortBreakMinutes === 'number') result.shortBreakMinutes = s.shortBreakMinutes;
-  if (typeof s.longBreakMinutes === 'number') result.longBreakMinutes = s.longBreakMinutes;
-  if (typeof s.pomodorosPerRound === 'number') result.pomodorosPerRound = s.pomodorosPerRound;
+  // Migrate old longBreakMinutes/pomodorosPerRound — just ignore them
   if (typeof s.alertVolume === 'number') result.alertVolume = s.alertVolume;
   if (typeof s.autoStartBreak === 'boolean') result.autoStartBreak = s.autoStartBreak;
   if (typeof s.autoStartWork === 'boolean') result.autoStartWork = s.autoStartWork;

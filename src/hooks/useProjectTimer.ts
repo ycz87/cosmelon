@@ -78,13 +78,24 @@ export interface UseProjectTimerReturn {
   completeCurrentTask: () => void;
   skipCurrentTask: () => void;
 
+  // Exit actions (two-step exit flow)
+  /** Exit current task (mark as abandoned), returns to a "choosing" state */
+  exitCurrentTask: () => void;
+  /** After exit: restart the same task from zero */
+  restartCurrentTask: () => void;
+  /** After exit: go to next task (or finish project if last) */
+  goToNextTask: () => void;
+  /** After exit: go back to previous task (overtime-continued) */
+  goToPreviousTask: () => void;
+  /** Exit entire project immediately */
+  abandonProject: () => void;
+
   // Mid-execution edits
   insertTask: (afterIndex: number, task: ProjectTask) => void;
   removeTask: (index: number) => void;
 
   // Finish
   finishProject: () => ProjectRecord;
-  abandonProject: () => void;
 }
 
 export function useProjectTimer(
@@ -169,7 +180,7 @@ export function useProjectTimer(
 
   // ─── Compute timer view ───
   const timerView: ProjectTimerView | null = (() => {
-    if (!state || state.phase === 'setup' || state.phase === 'summary') return null;
+    if (!state || state.phase === 'setup' || state.phase === 'summary' || state.phase === 'exited') return null;
 
     const currentTask = state.tasks[state.currentTaskIndex];
     const completedCount = state.results.length;
@@ -183,12 +194,12 @@ export function useProjectTimer(
     let status: TimerStatus;
 
     if (isBreak) {
-      phase = 'shortBreak';
+      phase = 'break';
       status = 'running';
     } else if (state.phase === 'paused') {
       // Figure out if we were in break or work before pausing
       const wasBreak = state.results.length > state.currentTaskIndex;
-      phase = wasBreak ? 'shortBreak' : 'work';
+      phase = wasBreak ? 'break' : 'work';
       status = 'paused';
     } else {
       phase = 'work';
@@ -364,9 +375,7 @@ export function useProjectTimer(
   const completeCurrentTask = useCallback(() => {
     setState((prev) => {
       if (!prev) return prev;
-      // Only allow during work/overtime/paused-work phases (not break)
-      if (prev.phase === 'break' || prev.phase === 'setup' || prev.phase === 'summary') return prev;
-      // If paused, check if we were in break (results.length > currentTaskIndex means break)
+      if (prev.phase === 'break' || prev.phase === 'setup' || prev.phase === 'summary' || prev.phase === 'exited') return prev;
       if (prev.phase === 'paused' && prev.results.length > prev.currentTaskIndex) return prev;
       return recordTaskResult(prev, 'completed');
     });
@@ -375,11 +384,95 @@ export function useProjectTimer(
   const skipCurrentTask = useCallback(() => {
     setState((prev) => {
       if (!prev) return prev;
-      if (prev.phase === 'break' || prev.phase === 'setup' || prev.phase === 'summary') return prev;
+      if (prev.phase === 'break' || prev.phase === 'setup' || prev.phase === 'summary' || prev.phase === 'exited') return prev;
       if (prev.phase === 'paused' && prev.results.length > prev.currentTaskIndex) return prev;
       return recordTaskResult(prev, 'skipped');
     });
   }, [recordTaskResult]);
+
+  // ─── Exit flow (two-step) ───
+
+  /** Step 1: Exit current task — record as abandoned, enter 'exited' phase */
+  const exitCurrentTask = useCallback(() => {
+    setState((prev) => {
+      if (!prev) return prev;
+      if (prev.phase === 'setup' || prev.phase === 'summary' || prev.phase === 'exited') return prev;
+      // If in break, just exit (no task to abandon)
+      if (prev.phase === 'break') {
+        return { ...prev, phase: 'exited', lastTickAt: new Date().toISOString() };
+      }
+      // Record current task as abandoned
+      const task = prev.tasks[prev.currentTaskIndex];
+      const result: ProjectTaskResult = {
+        taskId: task.id,
+        name: task.name,
+        estimatedMinutes: task.estimatedMinutes,
+        actualSeconds: prev.elapsedSeconds,
+        status: 'abandoned',
+        completedAt: new Date().toISOString(),
+      };
+      onTaskCompleteRef.current(result);
+      return {
+        ...prev,
+        results: [...prev.results, result],
+        phase: 'exited',
+        lastTickAt: new Date().toISOString(),
+      };
+    });
+  }, []);
+
+  /** Step 2a: Restart the same task from zero */
+  const restartCurrentTask = useCallback(() => {
+    setState((prev) => {
+      if (!prev || prev.phase !== 'exited') return prev;
+      const task = prev.tasks[prev.currentTaskIndex];
+      return {
+        ...prev,
+        phase: 'running',
+        timeLeft: task.estimatedMinutes * 60,
+        elapsedSeconds: 0,
+        lastTickAt: new Date().toISOString(),
+      };
+    });
+  }, []);
+
+  /** Step 2b: Go to next task (or finish if last) */
+  const goToNextTask = useCallback(() => {
+    setState((prev) => {
+      if (!prev || prev.phase !== 'exited') return prev;
+      const nextIndex = prev.currentTaskIndex + 1;
+      if (nextIndex >= prev.tasks.length) {
+        // Last task — go to summary
+        return { ...prev, phase: 'summary', timeLeft: 0, lastTickAt: new Date().toISOString() };
+      }
+      // Enter break before next task
+      const currentTask = prev.tasks[prev.currentTaskIndex];
+      return {
+        ...prev,
+        phase: 'break',
+        timeLeft: currentTask.breakMinutes * 60,
+        lastTickAt: new Date().toISOString(),
+      };
+    });
+  }, []);
+
+  /** Step 2c: Go back to previous task (overtime-continued) */
+  const goToPreviousTask = useCallback(() => {
+    setState((prev) => {
+      if (!prev || prev.phase !== 'exited') return prev;
+      if (prev.currentTaskIndex === 0) return prev; // Can't go back from first
+      const prevIndex = prev.currentTaskIndex - 1;
+      const prevTask = prev.tasks[prevIndex];
+      return {
+        ...prev,
+        currentTaskIndex: prevIndex,
+        phase: 'overtime', // Start in overtime since task was already completed before
+        timeLeft: 0,
+        elapsedSeconds: prevTask.estimatedMinutes * 60, // Already past estimate
+        lastTickAt: new Date().toISOString(),
+      };
+    });
+  }, []);
 
   // ─── Mid-execution edits ───
 
@@ -442,9 +535,13 @@ export function useProjectTimer(
     resume,
     completeCurrentTask,
     skipCurrentTask,
+    exitCurrentTask,
+    restartCurrentTask,
+    goToNextTask,
+    goToPreviousTask,
+    abandonProject,
     insertTask,
     removeTask,
     finishProject,
-    abandonProject,
   };
 }

@@ -45,6 +45,6 @@ export function ProjectMode({ project, onSwitchToPomodoro }: Props) {
   }
 
   // Execution phases (running/break/overtime/paused) are handled by App.tsx
-  // using the Timer component — this shouldn't render in those states
+  // using the Timer component. 'exited' phase is handled by ProjectExitModal in App.tsx.
   return null;
 }

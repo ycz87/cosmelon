@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import type { PomodoroSettings } from '../types';
 
-export type TimerPhase = 'work' | 'shortBreak' | 'longBreak';
+export type TimerPhase = 'work' | 'break';
 export type TimerStatus = 'idle' | 'running' | 'paused';
 
 interface UseTimerOptions {
@@ -14,7 +14,6 @@ interface UseTimerReturn {
   timeLeft: number;
   phase: TimerPhase;
   status: TimerStatus;
-  roundProgress: number;
   celebrating: boolean;
   celebrationStage: TimerPhase | null;
   dismissCelebration: () => void;
@@ -27,38 +26,25 @@ interface UseTimerReturn {
 }
 
 function getDuration(phase: TimerPhase, settings: PomodoroSettings): number {
-  switch (phase) {
-    case 'work': return settings.workMinutes * 60;
-    case 'shortBreak': return settings.shortBreakMinutes * 60;
-    case 'longBreak': return settings.longBreakMinutes * 60;
-  }
+  return phase === 'work'
+    ? settings.workMinutes * 60
+    : settings.shortBreakMinutes * 60;
 }
 
 export function useTimer({ settings, onComplete, onSkipWork }: UseTimerOptions): UseTimerReturn {
   const [phase, setPhase] = useState<TimerPhase>('work');
   const [status, setStatus] = useState<TimerStatus>('idle');
   const [timeLeft, setTimeLeft] = useState(settings.workMinutes * 60);
-  const [roundProgress, setRoundProgress] = useState(0);
   const [celebrating, setCelebrating] = useState(false);
   const [celebrationStage, setCelebrationStage] = useState<TimerPhase | null>(null);
-  // Generation counter — increments on phase transitions to force interval restart
-  // when auto-start keeps status as 'running'
   const [generation, setGeneration] = useState(0);
   const onCompleteRef = useRef(onComplete);
   const onSkipWorkRef = useRef(onSkipWork);
   const settingsRef = useRef(settings);
 
-  useEffect(() => {
-    onCompleteRef.current = onComplete;
-  }, [onComplete]);
-
-  useEffect(() => {
-    onSkipWorkRef.current = onSkipWork;
-  }, [onSkipWork]);
-
-  useEffect(() => {
-    settingsRef.current = settings;
-  }, [settings]);
+  useEffect(() => { onCompleteRef.current = onComplete; }, [onComplete]);
+  useEffect(() => { onSkipWorkRef.current = onSkipWork; }, [onSkipWork]);
+  useEffect(() => { settingsRef.current = settings; }, [settings]);
 
   // Update timeLeft when settings change and timer is idle
   useEffect(() => {
@@ -81,7 +67,7 @@ export function useTimer({ settings, onComplete, onSkipWork }: UseTimerOptions):
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [status, generation]); // generation forces restart on auto-start transitions
+  }, [status, generation]);
 
   // Handle timer completion
   useEffect(() => {
@@ -89,24 +75,8 @@ export function useTimer({ settings, onComplete, onSkipWork }: UseTimerOptions):
       const completedPhase = phase;
       const s = settingsRef.current;
 
-      let nextPhase: TimerPhase;
-      let nextRoundProgress = roundProgress;
-
-      if (completedPhase === 'work') {
-        nextRoundProgress = roundProgress + 1;
-        if (nextRoundProgress >= s.pomodorosPerRound) {
-          nextPhase = 'longBreak';
-        } else {
-          nextPhase = 'shortBreak';
-        }
-      } else {
-        if (completedPhase === 'longBreak') {
-          nextRoundProgress = 0;
-        }
-        nextPhase = 'work';
-      }
-
-      setRoundProgress(nextRoundProgress);
+      // Simple cycle: work → break → work → break
+      const nextPhase: TimerPhase = completedPhase === 'work' ? 'break' : 'work';
 
       if (completedPhase === 'work') {
         setCelebrating(true);
@@ -122,7 +92,6 @@ export function useTimer({ settings, onComplete, onSkipWork }: UseTimerOptions):
         : s.autoStartWork;
 
       if (shouldAutoStart) {
-        // Keep status as 'running' but bump generation to restart the interval
         setGeneration((g) => g + 1);
       } else {
         setStatus('idle');
@@ -130,7 +99,7 @@ export function useTimer({ settings, onComplete, onSkipWork }: UseTimerOptions):
 
       onCompleteRef.current(completedPhase);
     }
-  }, [timeLeft, status, phase, roundProgress]);
+  }, [timeLeft, status, phase]);
 
   const start = useCallback(() => {
     setGeneration((g) => g + 1);
@@ -148,8 +117,6 @@ export function useTimer({ settings, onComplete, onSkipWork }: UseTimerOptions):
 
   const skip = useCallback(() => {
     const s = settingsRef.current;
-    let nextPhase: TimerPhase;
-    let nextRoundProgress = roundProgress;
 
     if (phase === 'work') {
       const totalSeconds = getDuration('work', s);
@@ -157,24 +124,13 @@ export function useTimer({ settings, onComplete, onSkipWork }: UseTimerOptions):
       if (elapsedSeconds > 0) {
         onSkipWorkRef.current(elapsedSeconds);
       }
-      nextRoundProgress = roundProgress + 1;
-      if (nextRoundProgress >= s.pomodorosPerRound) {
-        nextPhase = 'longBreak';
-      } else {
-        nextPhase = 'shortBreak';
-      }
-    } else {
-      if (phase === 'longBreak') {
-        nextRoundProgress = 0;
-      }
-      nextPhase = 'work';
     }
 
-    setRoundProgress(nextRoundProgress);
+    const nextPhase: TimerPhase = phase === 'work' ? 'break' : 'work';
     setPhase(nextPhase);
     setTimeLeft(getDuration(nextPhase, s));
     setStatus('idle');
-  }, [phase, roundProgress, timeLeft]);
+  }, [phase, timeLeft]);
 
   const abandon = useCallback(() => {
     const s = settingsRef.current;
@@ -188,7 +144,6 @@ export function useTimer({ settings, onComplete, onSkipWork }: UseTimerOptions):
     setPhase('work');
     setTimeLeft(settingsRef.current.workMinutes * 60);
     setStatus('idle');
-    setRoundProgress(0);
     setCelebrating(false);
     setCelebrationStage(null);
   }, []);
@@ -198,5 +153,5 @@ export function useTimer({ settings, onComplete, onSkipWork }: UseTimerOptions):
     setCelebrationStage(null);
   }, []);
 
-  return { timeLeft, phase, status, roundProgress, celebrating, celebrationStage, dismissCelebration, start, pause, resume, skip, abandon, reset };
+  return { timeLeft, phase, status, celebrating, celebrationStage, dismissCelebration, start, pause, resume, skip, abandon, reset };
 }

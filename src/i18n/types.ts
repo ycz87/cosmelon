@@ -7,7 +7,6 @@ export interface Messages {
   appNameShort: string;
   phaseWork: string;
   phaseShortBreak: string;
-  phaseLongBreak: string;
   abandon: string;
   quickTimeHint: string;
   taskPlaceholder: string;
@@ -24,16 +23,12 @@ export interface Messages {
   skipComplete: (emoji: string) => string;
   breakOver: string;
   breakOverBody: string;
-  longBreakOver: string;
-  longBreakOverBody: string;
   celebrationRipe: readonly string[];
   celebrationShort: readonly string[];
   settings: string;
   timerRunningHint: string;
   workDuration: string;
   shortBreak: string;
-  longBreak: string;
-  longBreakInterval: string;
   autoStartBreak: string;
   autoStartWork: string;
 
@@ -165,6 +160,27 @@ export interface Messages {
   projectCompleted: string;
   projectSkipped: string;
   projectDone: string;
+
+  // Confirm modal
+  confirmExitTitle: string;
+  confirmExitMessage: string;
+  confirm: string;
+  cancel: string;
+
+  // Default task name
+  defaultTaskName: (n: number) => string;
+
+  // Project exit modal
+  projectExitConfirmTitle: string;
+  projectExitConfirm: string;
+  projectExitAll: string;
+  projectExitChooseTitle: string;
+  projectExitRestart: string;
+  projectExitNext: string;
+  projectExitPrevious: string;
+  projectExitFinish: string;
+  projectAbandoned: string;
+  projectOvertimeContinued: string;
 
   // Recovery
   projectRecoveryTitle: string;
