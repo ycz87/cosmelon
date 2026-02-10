@@ -2,6 +2,26 @@
 
 ---
 
+## v0.4.7 — Logo 替换 + 品牌文字（2026-02-10）
+
+### 需求背景
+Charles 提供了新的西瓜时钟 logo 原图（`watermelon-logo-original.jpg`），要求替换左上角太小的 logo 并加上品牌名称。
+
+### 改动文件
+- `public/icon.svg` — 基于原图手绘矢量 SVG（绿色瓜皮 + 白色过渡 + 红色果肉渐变 + 西瓜籽 + 时钟指针 + Kawaii 表情）
+- `logo-source.png` — 从 SVG 渲染的 1024x1024 PNG 源文件
+- `public/favicon-*.png`, `public/favicon.ico`, `public/icon-*.png`, `public/apple-touch-icon.png` — 全套重新生成
+- `src-tauri/icons/*` — Tauri 桌面端图标重新生成
+- `src/App.tsx` — Header 左侧：Logo 从 w-5 增大到 w-7/w-8，改用 icon.svg；新增品牌文字 `t.appName`（sm: 以上显示）
+- `package.json` — version 0.4.6→0.4.7
+
+### 技术决策
+- 选择手绘 SVG 而非自动转换，因为原图是 JPG（有白色背景和压缩噪点），自动 trace 效果不佳
+- 品牌文字用 `hidden sm:inline` 做响应式，移动端只显示 Logo 避免挤压中间的 ModeSwitch
+- Logo 改用 `/icon.svg` 而非 `/favicon-32x32.png`，SVG 在 Retina 屏上无损缩放
+
+---
+
 ## v0.4.6 — Bug 修复（2026-02-10）
 
 ### 需求背景

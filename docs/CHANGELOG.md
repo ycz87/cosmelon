@@ -2,6 +2,21 @@
 
 ---
 
+## v0.4.7 — Logo 替换 + 品牌文字（2026-02-10）
+
+### 新 Logo（矢量 SVG）
+- 基于 Charles 提供的原图手绘矢量 SVG，替换旧的 base64 嵌入式 PNG
+- 核心元素：绿色瓜皮外圈、白色过渡环、红色果肉表盘（径向渐变）、6 颗西瓜籽、深绿色时钟指针（10:10）、Kawaii 表情（圆点眼睛 + 微笑弧线）
+- 全套图标重新生成：favicon（16/32/48 + .ico）、PWA（192/512）、Apple touch icon（180）、Tauri 桌面端（32/128/256/512 + .ico）
+
+### Header 品牌升级
+- Logo 尺寸从 w-5 (20px) 增大到 w-7/w-8 (28-32px)，改用 SVG 源文件（无损缩放）
+- 新增品牌文字 `t.appName`：中文显示「西瓜时钟」，英文显示「Watermelon Clock」
+- 文字样式：`text-sm font-semibold`，颜色跟随 `theme.text`
+- 移动端响应式：窄屏隐藏文字（`hidden sm:inline`），只显示 Logo，避免挤压 ModeSwitch
+
+---
+
 ## v0.4.6 — Bug 修复（2026-02-10）
 
 ### Bug 1（P2）：项目模式两步退出弹窗文案与动作不一致
