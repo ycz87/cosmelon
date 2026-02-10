@@ -9,6 +9,7 @@ export interface Messages {
   phaseShortBreak: string;
   abandon: string;
   quickTimeHint: string;
+  toggleTimerMode: string;
   taskPlaceholder: string;
   clearTask: string;
   emptyTitle: string;

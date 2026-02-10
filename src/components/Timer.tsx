@@ -13,9 +13,12 @@
  * - Break phase: hides ✗/✓, only shows ⏸/▶
  * - Overtime: progress ring turns red with pulse animation, digits show "+MM:SS"
  * - Celebration: overlay with confetti + bouncing growth icon
+ * - Count-up/down toggle: click digits during running/paused to switch display mode
  *
  * v0.4.6: ✓/✗ buttons use a 300ms debounce lock (guardedAction) to prevent
  * race conditions from rapid taps.
+ * v0.5.0: Click timer digits to toggle between countdown and count-up display.
+ *         Preference saved to localStorage, persists across sessions.
  */
 import { useEffect, useRef, useState, useCallback } from 'react';
 import type { TimerPhase, TimerStatus } from '../hooks/useTimer';
@@ -24,6 +27,11 @@ import { formatTime } from '../utils/time';
 import { useTheme } from '../hooks/useTheme';
 import { useI18n } from '../i18n';
 import { CelebrationOverlay } from './CelebrationOverlay';
+
+/** Timer display mode: countdown (default) or count-up */
+type TimerDisplayMode = 'countdown' | 'countup';
+
+const DISPLAY_MODE_KEY = 'pomodoro-timer-display-mode';
 
 /** Available quick-pick durations shown when user clicks the timer digits in idle state */
 const QUICK_DURATIONS = [5, 10, 15, 20, 25, 30, 45, 60];
@@ -51,6 +59,14 @@ interface TimerProps {
   overtime?: { seconds: number };
 }
 
+/** Read saved display mode from localStorage */
+function loadDisplayMode(): TimerDisplayMode {
+  try {
+    const v = localStorage.getItem(DISPLAY_MODE_KEY);
+    return v === 'countup' ? 'countup' : 'countdown';
+  } catch { return 'countdown'; }
+}
+
 export function Timer({ timeLeft, totalDuration, phase, status, celebrating, celebrationStage, celebrationIsRipe, workMinutes, onCelebrationComplete, onStart, onPause, onResume, onSkip, onAbandon, onChangeWorkMinutes, overtime }: TimerProps) {
   const isWork = phase === 'work';
   const isOvertime = !!overtime;
@@ -58,6 +74,21 @@ export function Timer({ timeLeft, totalDuration, phase, status, celebrating, cel
   const containerRef = useRef<HTMLDivElement>(null);
   const prevStatusRef = useRef<TimerStatus>(status);
   const [showQuickPicker, setShowQuickPicker] = useState(false);
+
+  // ─── Count-up / countdown toggle ───
+  const [displayMode, setDisplayMode] = useState<TimerDisplayMode>(loadDisplayMode);
+  const [digitBounce, setDigitBounce] = useState(false);
+
+  const toggleDisplayMode = useCallback(() => {
+    setDisplayMode((prev) => {
+      const next: TimerDisplayMode = prev === 'countdown' ? 'countup' : 'countdown';
+      try { localStorage.setItem(DISPLAY_MODE_KEY, next); } catch { /* ignore */ }
+      return next;
+    });
+    // Trigger bounce animation
+    setDigitBounce(true);
+    setTimeout(() => setDigitBounce(false), 200);
+  }, []);
 
   // Bug 2 fix: debounce ✓ and ✗ to prevent race conditions
   const actionLockRef = useRef(false);
@@ -195,18 +226,43 @@ export function Timer({ timeLeft, totalDuration, phase, status, celebrating, cel
           )}
         </svg>
 
-        <span
-          className={`text-6xl sm:text-7xl font-timer tracking-tight select-none transition-opacity ${
-            status === 'paused' ? 'animate-pulse' : ''
-          } ${isOvertime ? 'animate-pulse' : ''} ${status === 'idle' && isWork && !isOvertime ? 'cursor-pointer hover:opacity-70' : ''}`}
-          style={{ fontWeight: 300, color: isOvertime ? '#ef4444' : theme.text, fontVariantNumeric: 'tabular-nums' }}
-          onClick={() => {
-            if (status === 'idle' && isWork && !isOvertime) setShowQuickPicker(!showQuickPicker);
-          }}
-          title={status === 'idle' && isWork && !isOvertime ? t.quickTimeHint : undefined}
-        >
-          {isOvertime ? `+${formatTime(overtime!.seconds)}` : formatTime(timeLeft)}
-        </span>
+        {/* Compute displayed time based on display mode */}
+        {(() => {
+          // Determine what to show and whether the digit area is clickable for toggle
+          const isActive = status === 'running' || status === 'paused';
+          const canToggle = isActive && !isOvertime;
+          const canQuickPick = status === 'idle' && isWork && !isOvertime;
+
+          let displayText: string;
+          if (isOvertime) {
+            displayText = `+${formatTime(overtime!.seconds)}`;
+          } else if (canToggle && displayMode === 'countup') {
+            // Count-up: show elapsed time
+            const elapsed = totalDuration - timeLeft;
+            displayText = formatTime(elapsed);
+          } else {
+            displayText = formatTime(timeLeft);
+          }
+
+          return (
+            <span
+              className={`text-6xl sm:text-7xl font-timer tracking-tight select-none transition-all ${
+                status === 'paused' ? 'animate-pulse' : ''
+              } ${isOvertime ? 'animate-pulse' : ''} ${canQuickPick || canToggle ? 'cursor-pointer hover:opacity-70' : ''} ${digitBounce ? 'scale-95' : 'scale-100'}`}
+              style={{ fontWeight: 300, color: isOvertime ? '#ef4444' : theme.text, fontVariantNumeric: 'tabular-nums', transition: 'transform 0.15s ease-out, opacity 0.2s' }}
+              onClick={() => {
+                if (canToggle) {
+                  toggleDisplayMode();
+                } else if (canQuickPick) {
+                  setShowQuickPicker(!showQuickPicker);
+                }
+              }}
+              title={canToggle ? t.toggleTimerMode : canQuickPick ? t.quickTimeHint : undefined}
+            >
+              {displayText}
+            </span>
+          );
+        })()}
 
         {/* Quick duration picker */}
         {showQuickPicker && status === 'idle' && isWork && (

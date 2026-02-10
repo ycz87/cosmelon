@@ -13,6 +13,7 @@ export const zh: Messages = {
   // Timer controls
   abandon: '放弃本次',
   quickTimeHint: '点击快速调整时长',
+  toggleTimerMode: '点击切换正计时/倒计时',
 
   // Task input
   taskPlaceholder: '这个西瓜钟要做什么？',

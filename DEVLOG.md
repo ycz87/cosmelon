@@ -2,6 +2,31 @@
 
 ---
 
+## v0.5.0 — 正计时/倒计时切换（2026-02-10）
+
+### 需求背景
+Charles 提出有些用户喜欢正计时（看已经过了多久），有些喜欢倒计时（看还剩多久）。希望在现有基础上增加切换能力。
+
+### 设计思路
+- **纯显示层改动**：计时逻辑（useTimer / useProjectTimer）完全不动，只在 Timer.tsx 渲染层做切换
+- **计算方式**：正计时 = `totalDuration - timeLeft`（已经过的时间），倒计时 = `timeLeft`（剩余时间）
+- **点击区域复用**：idle 时点击数字 = 快速调时间（原有），running/paused 时点击数字 = 切换显示模式
+- **超时不切换**：overtime 已经是正计时（+MM:SS），不需要也不应该切换
+
+### 实现细节
+- `Timer.tsx` 新增 `TimerDisplayMode` 类型（`'countdown' | 'countup'`）
+- `loadDisplayMode()` 从 localStorage 读取偏好，默认 `'countdown'`
+- `toggleDisplayMode()` 切换并写入 localStorage，同时触发 200ms 的 `digitBounce` 动画
+- 动画用 Tailwind `scale-95` → `scale-100` 过渡实现，轻量不抢眼
+- i18n 新增 `toggleTimerMode` 字段作为 title 提示
+
+### 技术决策
+- **为什么不用 useLocalStorage hook？** Timer 组件不需要响应外部变化，直接 useState + localStorage 更简洁
+- **为什么不在 useTimer 里做？** 这是纯 UI 展示逻辑，不应该污染计时状态机
+- **为什么 overtime 不支持切换？** overtime 本身就是正计时（+MM:SS），切换成倒计时没有意义（倒计时到什么？）
+
+---
+
 ## v0.4.9 — Bug 修复（2026-02-10）
 
 ### 需求背景

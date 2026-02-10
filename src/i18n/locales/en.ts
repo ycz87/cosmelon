@@ -13,6 +13,7 @@ export const en: Messages = {
   // Timer controls
   abandon: 'Give Up',
   quickTimeHint: 'Tap to adjust duration',
+  toggleTimerMode: 'Tap to toggle count up/down',
 
   // Task input
   taskPlaceholder: 'What are you working on?',
