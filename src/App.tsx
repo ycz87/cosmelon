@@ -38,6 +38,7 @@ import type { TimerPhase } from './hooks/useTimer';
 import { useProjectTimer } from './hooks/useProjectTimer';
 import { ThemeProvider } from './hooks/useTheme';
 import { useLocalStorage } from './hooks/useLocalStorage';
+import { useDragScroll } from './hooks/useDragScroll';
 import {
   requestNotificationPermission, sendBrowserNotification,
   playAlertRepeated, stopAlert,
@@ -61,6 +62,9 @@ function App() {
   const [showHistory, setShowHistory] = useState(false);
   const [mode, setMode] = useState<AppMode>('pomodoro');
   const [showGuide, setShowGuide] = useState(false);
+
+  // PC drag-to-scroll (mouse drag = touch scroll)
+  useDragScroll();
 
   // Modal states
   const [showAbandonConfirm, setShowAbandonConfirm] = useState(false);

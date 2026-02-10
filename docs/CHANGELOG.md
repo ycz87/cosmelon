@@ -2,6 +2,23 @@
 
 ---
 
+## v0.5.2 — PC 鼠标拖拽滚动（2026-02-10）
+
+### 新功能：鼠标拖拽滚动页面
+- PC 端按住鼠标左键上下拖动即可滚动页面，体验接近手机触摸滑动
+- 松手后有惯性滚动效果（friction 0.95 衰减）
+- 拖拽中鼠标显示 `grabbing` 光标
+- 智能排除交互元素：button/input/select/textarea/a/label/[role=button]/[role=slider] 及其子元素不触发拖拽
+- 支持 `data-no-drag-scroll` 属性手动排除特定区域
+- 手机端触摸滑动不受影响
+
+### 技术实现
+- 新增 `useDragScroll` hook（`src/hooks/useDragScroll.ts`）
+- 全局 window 级 mousedown/mousemove/mouseup 监听，passive 模式
+- 速度计算使用指数移动平均（EMA），惯性用 requestAnimationFrame 驱动
+
+---
+
 ## v0.5.1 — 隐藏滚动条（2026-02-10）
 
 ### 优化：隐藏页面滚动条
