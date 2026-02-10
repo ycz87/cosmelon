@@ -262,12 +262,16 @@ function App() {
 
   const isProjectWorking = project.state?.phase === 'running' || project.state?.phase === 'overtime';
   useEffect(() => {
-    if ((timer.status === 'running' && timer.phase === 'work') || isProjectWorking) {
-      applyMixerConfig(settings.ambienceMixer);
-    } else {
-      stopAllAmbience();
+    try {
+      if ((timer.status === 'running' && timer.phase === 'work') || isProjectWorking) {
+        applyMixerConfig(settings.ambienceMixer);
+      } else {
+        stopAllAmbience();
+      }
+    } catch (err) {
+      console.error('[App] ambience error:', err);
     }
-    return () => stopAllAmbience();
+    return () => { try { stopAllAmbience(); } catch { /* ignore */ } };
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [timer.status, timer.phase, ambienceMixerKey, isProjectWorking]);
 
@@ -498,6 +502,15 @@ function App() {
 
         {/* PWA 安装提示 */}
         <InstallPrompt />
+
+        {/* Debug: version badge — helps confirm PWA cache is updated */}
+        <div style={{
+          position: 'fixed', bottom: 4, right: 8, zIndex: 9999,
+          fontSize: '10px', color: 'rgba(255,255,255,0.2)',
+          fontFamily: 'monospace', pointerEvents: 'none',
+        }}>
+          v{__APP_VERSION__}
+        </div>
 
         {/* 历史记录面板 */}
         {showHistory && (

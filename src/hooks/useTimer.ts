@@ -104,32 +104,36 @@ export function useTimer({ settings, onComplete, onSkipWork }: UseTimerOptions):
   // and respects auto-start settings.
   useEffect(() => {
     if (timeLeft === 0 && status === 'running') {
-      const completedPhase = phase;
-      const s = settingsRef.current;
+      try {
+        const completedPhase = phase;
+        const s = settingsRef.current;
 
-      // Simple cycle: work → break → work → break
-      const nextPhase: TimerPhase = completedPhase === 'work' ? 'break' : 'work';
+        // Simple cycle: work → break → work → break
+        const nextPhase: TimerPhase = completedPhase === 'work' ? 'break' : 'work';
 
-      if (completedPhase === 'work') {
-        setCelebrating(true);
-        setCelebrationStage(completedPhase);
+        if (completedPhase === 'work') {
+          setCelebrating(true);
+          setCelebrationStage(completedPhase);
+        }
+
+        setPhase(nextPhase);
+        setTimeLeft(getDuration(nextPhase, s));
+
+        // Auto-start logic
+        const shouldAutoStart = completedPhase === 'work'
+          ? s.autoStartBreak
+          : s.autoStartWork;
+
+        if (shouldAutoStart) {
+          setGeneration((g) => g + 1);
+        } else {
+          setStatus('idle');
+        }
+
+        onCompleteRef.current(completedPhase);
+      } catch (err) {
+        console.error('[useTimer] phase completion error:', err);
       }
-
-      setPhase(nextPhase);
-      setTimeLeft(getDuration(nextPhase, s));
-
-      // Auto-start logic
-      const shouldAutoStart = completedPhase === 'work'
-        ? s.autoStartBreak
-        : s.autoStartWork;
-
-      if (shouldAutoStart) {
-        setGeneration((g) => g + 1);
-      } else {
-        setStatus('idle');
-      }
-
-      onCompleteRef.current(completedPhase);
     }
   }, [timeLeft, status, phase]);
 

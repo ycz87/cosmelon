@@ -2,6 +2,22 @@
 
 ---
 
+## v0.5.5 — 安卓黑屏深度排查 + 全局错误捕获（2026-02-10）
+
+### 排查背景
+v0.5.4 的 Notification fix 没有解决问题。Charles 确认 ErrorBoundary 的恢复 UI 也没出现，说明：
+1. 可能不是 React render 错误（ErrorBoundary 只捕获 render 阶段的错误）
+2. 可能是 PWA 缓存导致 Charles 还在跑旧版本
+3. 可能是 useEffect 中的异步错误（ErrorBoundary 捕获不到）
+
+### 策略：不再猜测，加诊断工具
+- 全局 `window.onerror` + `window.onunhandledrejection` → 错误直接渲染到 DOM（红色面板），不依赖 React
+- 版本号角标（右下角 `v0.5.5`）→ 确认 Charles 看到的是哪个版本
+- 所有 useEffect 回调加 try-catch → 防止任何 effect 崩溃
+- 让 Charles 清除 PWA 缓存后重试，看到版本号后截图
+
+---
+
 ## v0.5.4 — 修复安卓黑屏 + 错误边界（2026-02-10）
 
 ### 需求背景

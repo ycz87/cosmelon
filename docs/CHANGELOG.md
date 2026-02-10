@@ -2,6 +2,22 @@
 
 ---
 
+## v0.5.5 — 安卓黑屏深度排查 + 全局错误捕获（2026-02-10）
+
+### 排查：安卓黑屏问题持续（v0.5.4 未完全修复）
+- Charles 确认 v0.5.4 仍然黑屏，且 ErrorBoundary 的恢复 UI 未显示
+- 说明可能不是 React render 错误，或者 Charles 手机上 PWA 缓存了旧版本
+
+### 修复 & 诊断措施
+1. **全局错误捕获** — `window.onerror` + `window.onunhandledrejection`，错误直接渲染到页面底部红色面板（不依赖 React）
+2. **ErrorBoundary 增强** — 显示具体错误信息，帮助远程诊断
+3. **useTimer 相位切换 try-catch** — 包裹整个 phase completion effect
+4. **ambience effect try-catch** — 包裹 applyMixerConfig/stopAllAmbience
+5. **版本号角标** — 页面右下角显示 `v0.5.5`，确认 PWA 缓存已更新
+6. **请 Charles 清除 PWA 缓存后重试**
+
+---
+
 ## v0.5.4 — 修复安卓黑屏 + 错误边界（2026-02-10）
 
 ### 修复：安卓 Chrome 专注结束后黑屏（P0）
