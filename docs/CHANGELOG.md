@@ -2,6 +2,22 @@
 
 ---
 
+## v0.5.4 — 修复安卓黑屏 + 错误边界（2026-02-10）
+
+### 修复：安卓 Chrome 专注结束后黑屏（P0）
+- **根因：** `new Notification()` 在安卓 Chrome 中会抛出 TypeError（安卓要求通过 ServiceWorker 发送通知）。该错误发生在 `handleTimerComplete` 回调中，未被捕获，导致 React 渲染崩溃，整个组件树卸载，页面只剩深色背景（黑屏）
+- **修复：**
+  - `sendBrowserNotification` 改为优先使用 `ServiceWorkerRegistration.showNotification()`，桌面端回退到 `new Notification()`，外层加 try-catch
+  - `handleTimerComplete` 和 `handleSkipWork` 回调加 try-catch 防护，错误只 console.error 不崩溃
+  - 新增 `ErrorBoundary` 组件包裹整个 App，即使未来有未捕获的渲染错误也显示友好的恢复 UI 而非黑屏
+
+### 防御性改进
+- 新增 `ErrorBoundary` 组件（`src/components/ErrorBoundary.tsx`）
+- 显示 🍉 图标 + "出了点问题" + 刷新按钮，替代空白黑屏
+- 所有 timer 完成回调加 try-catch 防护
+
+---
+
 ## v0.5.3 — 修复手机端专注结束黑屏（2026-02-10）
 
 ### 修复：专注时间结束后页面黑屏（P0）

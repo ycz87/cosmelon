@@ -24,7 +24,20 @@ export function requestNotificationPermission(): void {
 }
 
 export function sendBrowserNotification(title: string, body: string): void {
-  if ('Notification' in window && Notification.permission === 'granted') {
-    new Notification(title, { body });
+  try {
+    if ('Notification' in window && Notification.permission === 'granted') {
+      // On Android Chrome, `new Notification()` throws TypeError —
+      // notifications must go through ServiceWorker.showNotification().
+      // Try SW first, fall back to direct constructor for desktop browsers.
+      if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+        navigator.serviceWorker.ready.then((reg) => {
+          reg.showNotification(title, { body });
+        }).catch(() => { /* SW not available */ });
+      } else {
+        new Notification(title, { body });
+      }
+    }
+  } catch {
+    // Notification API not available or threw — silently ignore
   }
 }

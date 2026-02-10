@@ -2,6 +2,30 @@
 
 ---
 
+## v0.5.4 — 修复安卓黑屏 + 错误边界（2026-02-10）
+
+### 需求背景
+Charles 补充信息：安卓手机亮屏正常使用时就会黑屏，刷新能恢复但状态丢失。说明不是 CSS 问题，是 JS 层面崩溃。
+
+### 排查过程（第二轮）
+1. v0.5.3 的 CSS 修复（transition-all → transition-colors）是正确的优化，但不是根因
+2. "刷新能恢复但状态丢失" → 说明 React 组件树被卸载了（JS 崩溃）
+3. 没有 ErrorBoundary → 任何未捕获的渲染错误都会导致整个 App 消失
+4. 追踪 `handleTimerComplete` 调用链 → `sendBrowserNotification` → `new Notification()`
+5. **发现根因：** 安卓 Chrome 不支持 `new Notification()` 构造函数，必须通过 ServiceWorker 的 `showNotification()` 发送。`new Notification()` 抛出 TypeError，未被捕获，React 崩溃
+
+### 为什么之前没发现
+- 开发和测试都在桌面浏览器，`new Notification()` 在桌面端正常工作
+- 安卓 Chrome 的 `Notification.permission` 返回 `'granted'`（权限检查通过），但构造函数抛异常
+- 没有 ErrorBoundary，崩溃后只剩深色背景，看起来像"黑屏"
+
+### 修复方案
+1. `sendBrowserNotification` 改为 SW 优先 + 桌面回退 + try-catch
+2. 所有 timer 完成回调加 try-catch 防护
+3. 新增 ErrorBoundary 作为最后防线
+
+---
+
 ## v0.5.3 — 修复手机端专注结束黑屏（2026-02-10）
 
 ### 需求背景

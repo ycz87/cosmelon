@@ -109,44 +109,53 @@ function App() {
   }, []);
 
   const handleTimerComplete = useCallback((phase: TimerPhase) => {
-    if (phase === 'work') {
+    try {
+      if (phase === 'work') {
+        const taskName = currentTask.trim() || t.defaultTaskName(records.filter((r) => r.date === getTodayKey()).length + 1);
+        const stage = getGrowthStage(settings.workMinutes);
+        const emoji = GROWTH_EMOJI[stage];
+        const record: PomodoroRecord = {
+          id: Date.now().toString(),
+          task: taskName,
+          durationMinutes: settings.workMinutes,
+          completedAt: new Date().toISOString(),
+          date: getTodayKey(),
+          status: 'completed',
+        };
+        setRecords((prev) => [record, ...prev]);
+        sendBrowserNotification(t.workComplete(emoji), `"${taskName}" · ${settings.workMinutes}${t.minutes}`);
+        playAlertRepeated(settings.alertSound, settings.alertRepeatCount);
+      } else {
+        sendBrowserNotification(t.breakOver, t.breakOverBody);
+        playAlertRepeated(settings.alertSound, settings.alertRepeatCount);
+      }
+    } catch (err) {
+      // Prevent timer completion errors from crashing the app
+      console.error('[Timer] onComplete error:', err);
+    }
+  }, [currentTask, records, setRecords, settings.alertSound, settings.alertRepeatCount, settings.workMinutes, t]);
+
+  const handleSkipWork = useCallback((elapsedSeconds: number) => {
+    try {
+      const elapsedMinutes = Math.round(elapsedSeconds / 60);
+      if (elapsedMinutes < 1) return;
       const taskName = currentTask.trim() || t.defaultTaskName(records.filter((r) => r.date === getTodayKey()).length + 1);
-      const stage = getGrowthStage(settings.workMinutes);
+      const stage = getGrowthStage(elapsedMinutes);
       const emoji = GROWTH_EMOJI[stage];
       const record: PomodoroRecord = {
         id: Date.now().toString(),
         task: taskName,
-        durationMinutes: settings.workMinutes,
+        durationMinutes: elapsedMinutes,
         completedAt: new Date().toISOString(),
         date: getTodayKey(),
         status: 'completed',
       };
       setRecords((prev) => [record, ...prev]);
-      sendBrowserNotification(t.workComplete(emoji), `"${taskName}" · ${settings.workMinutes}${t.minutes}`);
-      playAlertRepeated(settings.alertSound, settings.alertRepeatCount);
-    } else {
-      sendBrowserNotification(t.breakOver, t.breakOverBody);
-      playAlertRepeated(settings.alertSound, settings.alertRepeatCount);
+      sendBrowserNotification(t.skipComplete(emoji), `"${taskName}" · ${elapsedMinutes}${t.minutes}`);
+      playAlertRepeated(settings.alertSound, 1);
+    } catch (err) {
+      console.error('[Timer] onSkipWork error:', err);
     }
-  }, [currentTask, records, setRecords, settings.alertSound, settings.alertRepeatCount, settings.workMinutes, t]);
-
-  const handleSkipWork = useCallback((elapsedSeconds: number) => {
-    const elapsedMinutes = Math.round(elapsedSeconds / 60);
-    if (elapsedMinutes < 1) return;
-    const taskName = currentTask.trim() || t.defaultTaskName(records.filter((r) => r.date === getTodayKey()).length + 1);
-    const stage = getGrowthStage(elapsedMinutes);
-    const emoji = GROWTH_EMOJI[stage];
-    const record: PomodoroRecord = {
-      id: Date.now().toString(),
-      task: taskName,
-      durationMinutes: elapsedMinutes,
-      completedAt: new Date().toISOString(),
-      date: getTodayKey(),
-      status: 'completed',
-    };
-    setRecords((prev) => [record, ...prev]);
-    sendBrowserNotification(t.skipComplete(emoji), `"${taskName}" · ${elapsedMinutes}${t.minutes}`);
-    playAlertRepeated(settings.alertSound, 1);
   }, [currentTask, records, setRecords, settings.alertSound, t]);
 
   const timer = useTimer({ settings, onComplete: handleTimerComplete, onSkipWork: handleSkipWork });
