@@ -2,6 +2,36 @@
 
 ---
 
+## v0.4.8 — 多项修复 + 新功能（2026-02-10）
+
+### P0 修复：刷新后拒绝继续仍自动倒计时
+- 恢复 `useTimer` countdown interval 的 `status !== 'running'` guard（上一版文档 commit 误删）
+- 修复后 idle/paused 状态下 interval 不再运行
+
+### 新功能：Logo 替换 + 品牌文字
+- 替换为 Charles 提供的透明背景 PNG logo（640x640 RGBA）
+- Header 左上角：更大的 Logo（w-7/w-8）+ 品牌文字（跟随 i18n：西瓜时钟 / Watermelon Clock）
+- 移动端响应式：窄屏隐藏文字，只显示 Logo
+- 全套 favicon / PWA / Tauri 图标重新生成
+
+### 新功能：提醒音持续循环选项
+- 新增 `alertRepeatCount = 0` 表示持续循环直到用户操作
+- 设置面板新增「持续」/「Loop」选项按钮
+- `playAlertRepeated` 支持 setInterval 循环模式
+- 新增 `stopAlert()` 函数，全局 click/keydown 监听自动停止
+
+### 修复：项目模式 3 个逻辑 Bug
+- **休息结束无视 autoStartWork**：break 结束时检查设置，未开启则暂停等用户操作
+- **退出→重新开始进度虚增**：`restartCurrentTask` 移除 abandoned result，进度不再 +1
+- **返回上一个任务超时不累计**：从历史 result 恢复实际 elapsedSeconds，移除旧 result 防重复
+
+### 修复：延迟 abandoned callback 防止重复奖励
+- `exitCurrentTask` 不再立即触发 App 层 callback
+- callback 延迟到最终确认时刻（goToNextTask / abandonProject）
+- 重新开始 / 返回上一个任务路径不触发 callback，避免重复记录
+
+---
+
 ## v0.4.7 — Logo 替换 + 品牌文字（2026-02-10）
 
 ### 新 Logo（矢量 SVG）

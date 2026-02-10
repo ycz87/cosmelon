@@ -2,6 +2,45 @@
 
 ---
 
+## v0.4.8 — 多项修复 + 新功能（2026-02-10）
+
+### 需求背景
+v0.4.7 发布后 Charles 密集测试，发现多个项目模式逻辑 bug + 提出新功能需求。
+
+### 改动总览（按 commit 顺序）
+
+#### 1. P0 fix: useTimer status guard 恢复
+- **根因：** v0.4.7 文档注释 commit 误删了 `if (status !== 'running') return;`
+- **修复：** 恢复 guard，idle/paused 不再创建 countdown interval
+- **教训：** 注释类改动也必须 `git diff` 逐行确认
+
+#### 2. feat: Logo 替换为 PNG + 品牌文字
+- Charles 提供透明背景 PNG（640x640 RGBA），替换手绘 SVG
+- Header：Logo 从 w-5 增大到 w-7/w-8，新增品牌文字 `t.appName`
+- 移动端 `hidden sm:inline` 隐藏文字
+
+#### 3. feat: 提醒音持续循环
+- `alertRepeatCount = 0` 表示持续循环
+- `playAlertRepeated` 用 setInterval 实现循环，新增 `stopAlert()` 清除
+- App.tsx 全局 click/keydown 监听（capture 阶段）调用 `stopAlert()`
+- i18n: `repeatTimes(0)` → '持续' / 'Loop'
+
+#### 4. fix: 项目模式 3 个逻辑 bug
+- **Bug ①** break 结束无视 autoStartWork → 新增 `autoStartWork` 参数，break 结束时检查
+- **Bug ②** 退出→重新开始进度 +1 → `restartCurrentTask` 移除 abandoned result
+- **Bug ③** 返回上一个任务超时不累计 → 从 result 恢复 actualSeconds，移除旧 result
+
+#### 5. fix: 延迟 abandoned callback
+- **根因：** `exitCurrentTask` 立即触发 App callback，导致 records 无法撤回
+- **修复：** callback 延迟到 goToNextTask / abandonProject，restart / goToPrevious 不触发
+
+### 技术决策
+- 提醒音停止监听始终挂载（不按需），简化状态管理
+- abandoned callback 延迟而非"先写入再撤回"，更干净
+- `goToPreviousTask` 用 for 循环替代 `findLastIndex`（ES2022 兼容）
+
+---
+
 ## v0.4.7 — Logo 替换 + 品牌文字（2026-02-10）
 
 ### 需求背景
