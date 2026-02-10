@@ -53,7 +53,7 @@ export const en: Messages = {
   alertRepeatCount: 'Repeat',
   alertVolume: 'Alert Volume',
   alertCustomize: 'Customize',
-  repeatTimes: (n: number) => `${n}×`,
+  repeatTimes: (n: number) => n === 0 ? 'Loop' : `${n}×`,
 
   // Ambience
   focusAmbience: 'Focus Ambience',

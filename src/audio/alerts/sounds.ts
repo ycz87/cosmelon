@@ -330,14 +330,41 @@ export function playAlertOnce(id: AlertSoundId): void {
   } catch { /* Audio not available */ }
 }
 
-/** Play alert sound with repeat count */
+/** Active looping alert state — used by stopAlert() to cancel continuous playback */
+let loopIntervalId: ReturnType<typeof setInterval> | null = null;
+let pendingTimeouts: ReturnType<typeof setTimeout>[] = [];
+
+/** Play alert sound with repeat count. 0 = loop continuously until stopAlert() */
 export function playAlertRepeated(id: AlertSoundId, repeats: number): void {
   try {
+    // Always clear any previous loop/timeouts first
+    stopAlert();
+
     const cycleDur = ALERT_CYCLE_DURATION[id] ?? 1;
-    for (let i = 0; i < repeats; i++) {
-      setTimeout(() => playAlertOnce(id), i * cycleDur * 1000);
+
+    if (repeats === 0) {
+      // Continuous loop: play immediately, then repeat on interval
+      playAlertOnce(id);
+      loopIntervalId = setInterval(() => playAlertOnce(id), cycleDur * 1000);
+    } else {
+      for (let i = 0; i < repeats; i++) {
+        const t = setTimeout(() => playAlertOnce(id), i * cycleDur * 1000);
+        pendingTimeouts.push(t);
+      }
     }
   } catch { /* Audio not available */ }
+}
+
+/** Stop any currently playing alert (clears loop interval and pending timeouts) */
+export function stopAlert(): void {
+  if (loopIntervalId !== null) {
+    clearInterval(loopIntervalId);
+    loopIntervalId = null;
+  }
+  for (const t of pendingTimeouts) {
+    clearTimeout(t);
+  }
+  pendingTimeouts = [];
 }
 
 /** All alert sound IDs in display order */

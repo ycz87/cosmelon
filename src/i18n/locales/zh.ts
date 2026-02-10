@@ -53,7 +53,7 @@ export const zh: Messages = {
   alertRepeatCount: '循环次数',
   alertVolume: '提醒音量',
   alertCustomize: '自定义',
-  repeatTimes: (n: number) => `${n}次`,
+  repeatTimes: (n: number) => n === 0 ? '持续' : `${n}次`,
 
   // Ambience
   focusAmbience: '专注背景音',

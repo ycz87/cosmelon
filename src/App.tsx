@@ -40,7 +40,7 @@ import { ThemeProvider } from './hooks/useTheme';
 import { useLocalStorage } from './hooks/useLocalStorage';
 import {
   requestNotificationPermission, sendBrowserNotification,
-  playAlertRepeated,
+  playAlertRepeated, stopAlert,
   setMasterAlertVolume, setMasterAmbienceVolume,
   applyMixerConfig, stopAllAmbience,
 } from './audio';
@@ -91,6 +91,18 @@ function App() {
     setMasterAlertVolume(settings.alertVolume);
     setMasterAmbienceVolume(settings.ambienceVolume);
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // ─── Stop looping alert on any user interaction ───
+  // When alertRepeatCount is 0 (continuous loop), clicking or pressing any key stops the alert.
+  useEffect(() => {
+    const handler = () => stopAlert();
+    document.addEventListener('click', handler, { capture: true });
+    document.addEventListener('keydown', handler, { capture: true });
+    return () => {
+      document.removeEventListener('click', handler, { capture: true });
+      document.removeEventListener('keydown', handler, { capture: true });
+    };
+  }, []);
 
   const handleTimerComplete = useCallback((phase: TimerPhase) => {
     if (phase === 'work') {

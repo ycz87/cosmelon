@@ -3,7 +3,7 @@
  * Replaces the old notification.ts
  */
 export { getCtx, setMasterAlertVolume, setMasterAmbienceVolume } from './context';
-export { playAlertOnce, playAlertRepeated, ALL_ALERT_IDS, ALERT_CYCLE_DURATION } from './alerts/sounds';
+export { playAlertOnce, playAlertRepeated, stopAlert, ALL_ALERT_IDS, ALERT_CYCLE_DURATION } from './alerts/sounds';
 export type { AlertSoundId } from './alerts/sounds';
 export {
   ALL_AMBIENCE_SOUNDS,
