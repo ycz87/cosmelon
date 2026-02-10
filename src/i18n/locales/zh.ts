@@ -278,4 +278,36 @@ export const zh: Messages = {
 
   // Guide in settings
   settingsGuide: '使用说明',
+
+  // Encouragement banner
+  encourageEmpty: [
+    '新的一天，开始第一个番茄吧 🍉',
+    '准备好了吗？开始专注吧',
+    '今天也要加油哦 💪',
+  ],
+  encourageFirst: [
+    '好的开始！第一个番茄完成 🍉',
+    '今天的第一步，迈出去了！',
+    '开局顺利，继续保持 ✨',
+  ],
+  encourageSecond: [
+    '保持节奏！已完成 2 个',
+    '第二个也拿下了，不错 👍',
+    '节奏稳了，继续！',
+  ],
+  encourageThird: [
+    '今天状态不错 💪',
+    '3 个了，效率很高！',
+    '越来越顺了，继续加油',
+  ],
+  encourageMany: [
+    '已完成 {n} 个，超过大多数人了！',
+    '{n} 个番茄，今天太强了 🔥',
+    '已完成 {n} 个，生产力爆表！',
+  ],
+  encourageBeatYesterday: (count, diff) => `已完成 ${count} 个，比昨天多了 ${diff} 个 💪`,
+  encourageTiedYesterday: (count) => `已完成 ${count} 个，和昨天持平`,
+  streakShort: (days) => `🔥 连续 ${days} 天`,
+  streakMedium: (days) => `🔥 连续 ${days} 天，习惯正在养成`,
+  streakLong: (days) => `🔥 连续 ${days} 天！了不起的坚持`,
 };

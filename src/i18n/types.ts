@@ -205,4 +205,16 @@ export interface Messages {
 
   // Guide in settings
   settingsGuide: string;
+
+  // Encouragement banner
+  encourageEmpty: readonly string[];
+  encourageFirst: readonly string[];
+  encourageSecond: readonly string[];
+  encourageThird: readonly string[];
+  encourageMany: readonly string[];  // {n} placeholder for count
+  encourageBeatYesterday: (count: number, diff: number) => string;
+  encourageTiedYesterday: (count: number) => string;
+  streakShort: (days: number) => string;
+  streakMedium: (days: number) => string;
+  streakLong: (days: number) => string;
 }

@@ -19,11 +19,7 @@ export function TaskList({ records, onUpdate, onDelete }: TaskListProps) {
   const t = useI18n();
 
   if (records.length === 0) {
-    return (
-      <div className="text-center py-4">
-        <p className="text-xs" style={{ color: theme.textFaint }}>🌱 {t.emptyTodayHint}</p>
-      </div>
-    );
+    return null;
   }
 
   const startEdit = (record: PomodoroRecord) => {

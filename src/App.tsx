@@ -33,6 +33,7 @@ import { ProjectTaskBar } from './components/ProjectTaskBar';
 import { ProjectRecoveryModal } from './components/ProjectRecoveryModal';
 import { ConfirmModal } from './components/ConfirmModal';
 import { ProjectExitModal } from './components/ProjectExitModal';
+import { EncouragementBanner } from './components/EncouragementBanner';
 import { useTimer } from './hooks/useTimer';
 import type { TimerPhase } from './hooks/useTimer';
 import { useProjectTimer } from './hooks/useProjectTimer';
@@ -450,7 +451,10 @@ function App() {
                 </div>
                 <div className="w-full max-w-xs sm:max-w-sm px-4 pt-4 pb-6">
                   <div className="rounded-2xl p-5 border" style={{ backgroundColor: theme.surface, borderColor: theme.border }}>
-                    <TodayStats records={todayRecords} />
+                    <div className="flex flex-col items-center gap-5">
+                      <EncouragementBanner todayRecords={todayRecords} allRecords={records} />
+                      <TodayStats records={todayRecords} hideTitle />
+                    </div>
                   </div>
                 </div>
               </>
@@ -482,7 +486,8 @@ function App() {
                 <div className="w-full max-w-xs sm:max-w-sm px-4 pt-4 pb-6">
                   <div className="rounded-2xl p-5 border" style={{ backgroundColor: theme.surface, borderColor: theme.border }}>
                     <div className="flex flex-col items-center gap-5">
-                      <TodayStats records={todayRecords} idle={timer.status === 'idle'} />
+                      <EncouragementBanner todayRecords={todayRecords} allRecords={records} />
+                      <TodayStats records={todayRecords} idle={timer.status === 'idle'} hideTitle />
                       <TaskList records={todayRecords} onUpdate={handleUpdateRecord} onDelete={handleDeleteRecord} />
                     </div>
                   </div>

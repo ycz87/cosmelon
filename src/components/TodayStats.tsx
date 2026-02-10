@@ -7,9 +7,11 @@ import { GrowthIcon } from './GrowthIcon';
 interface TodayStatsProps {
   records: PomodoroRecord[];
   idle?: boolean;
+  /** Hide the title — EncouragementBanner replaces it */
+  hideTitle?: boolean;
 }
 
-export function TodayStats({ records, idle }: TodayStatsProps) {
+export function TodayStats({ records, idle, hideTitle }: TodayStatsProps) {
   const theme = useTheme();
   const t = useI18n();
 
@@ -25,10 +27,12 @@ export function TodayStats({ records, idle }: TodayStatsProps) {
 
   return (
     <div className="flex flex-col items-center gap-3">
-      <div className="text-xs tracking-wider font-medium uppercase"
-        style={{ color: theme.textMuted }}>
-        {t.todayHarvest}
-      </div>
+      {!hideTitle && (
+        <div className="text-xs tracking-wider font-medium uppercase"
+          style={{ color: theme.textMuted }}>
+          {t.todayHarvest}
+        </div>
+      )}
       <div className="flex items-center gap-1 flex-wrap justify-center">
         {visibleRecords.map((record, i) => {
           const stage = getGrowthStage(record.durationMinutes || 25);

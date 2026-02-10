@@ -278,4 +278,36 @@ export const en: Messages = {
 
   // Guide in settings
   settingsGuide: 'User Guide',
+
+  // Encouragement banner
+  encourageEmpty: [
+    'New day, start your first focus 🍉',
+    'Ready to go? Let\'s focus!',
+    'Time to get things done 💪',
+  ],
+  encourageFirst: [
+    'Great start! First one done 🍉',
+    'First step taken, keep going!',
+    'Off to a good start ✨',
+  ],
+  encourageSecond: [
+    'Keep it up! 2 done',
+    'Second one down, nice 👍',
+    'Good rhythm, keep going!',
+  ],
+  encourageThird: [
+    'You\'re on fire today 💪',
+    '3 done, great productivity!',
+    'Getting into the zone!',
+  ],
+  encourageMany: [
+    '{n} done — you\'re crushing it!',
+    '{n} sessions, what a day 🔥',
+    '{n} done, unstoppable!',
+  ],
+  encourageBeatYesterday: (count, diff) => `${count} done, ${diff} more than yesterday 💪`,
+  encourageTiedYesterday: (count) => `${count} done, same as yesterday`,
+  streakShort: (days) => `🔥 ${days}-day streak`,
+  streakMedium: (days) => `🔥 ${days}-day streak, building a habit`,
+  streakLong: (days) => `🔥 ${days}-day streak! Incredible!`,
 };
