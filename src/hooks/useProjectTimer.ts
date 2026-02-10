@@ -102,16 +102,20 @@ export function useProjectTimer(
   onTaskComplete: (result: ProjectTaskResult) => void,
   onProjectComplete: (record: ProjectRecord) => void,
   onOvertimeStart?: () => void,
+  /** Whether to auto-start work after break ends (from user settings) */
+  autoStartWork?: boolean,
 ): UseProjectTimerReturn {
   const [state, setState] = useState<ProjectState | null>(null);
   const [hasSavedProject, setHasSavedProject] = useState(false);
   const onTaskCompleteRef = useRef(onTaskComplete);
   const onProjectCompleteRef = useRef(onProjectComplete);
   const onOvertimeStartRef = useRef(onOvertimeStart);
+  const autoStartWorkRef = useRef(autoStartWork ?? false);
 
   useEffect(() => { onTaskCompleteRef.current = onTaskComplete; }, [onTaskComplete]);
   useEffect(() => { onProjectCompleteRef.current = onProjectComplete; }, [onProjectComplete]);
   useEffect(() => { onOvertimeStartRef.current = onOvertimeStart; }, [onOvertimeStart]);
+  useEffect(() => { autoStartWorkRef.current = autoStartWork ?? false; }, [autoStartWork]);
 
   // Check for saved project on mount
   useEffect(() => {
@@ -161,18 +165,31 @@ export function useProjectTimer(
         if (prev.phase === 'break') {
           const newTimeLeft = prev.timeLeft - 1;
           if (newTimeLeft <= 0) {
-            // Break over — start the next task (currentTaskIndex already advanced)
+            // Break over — check if we should auto-start or pause
             if (prev.currentTaskIndex >= prev.tasks.length) {
               return { ...prev, timeLeft: 0, phase: 'summary', lastTickAt: now };
             }
             const nextTask = prev.tasks[prev.currentTaskIndex];
-            return {
-              ...prev,
-              timeLeft: nextTask.estimatedMinutes * 60,
-              elapsedSeconds: 0,
-              phase: 'running',
-              lastTickAt: now,
-            };
+            if (autoStartWorkRef.current) {
+              // Auto-start: immediately begin next task
+              return {
+                ...prev,
+                timeLeft: nextTask.estimatedMinutes * 60,
+                elapsedSeconds: 0,
+                phase: 'running',
+                lastTickAt: now,
+              };
+            } else {
+              // Pause: wait for user to manually start
+              return {
+                ...prev,
+                timeLeft: nextTask.estimatedMinutes * 60,
+                elapsedSeconds: 0,
+                phase: 'paused',
+                pausedFrom: 'running',
+                lastTickAt: now,
+              };
+            }
           }
           return { ...prev, timeLeft: newTimeLeft, lastTickAt: now };
         }
@@ -465,13 +482,20 @@ export function useProjectTimer(
     });
   }, []);
 
-  /** Step 2a: Restart the same task from zero */
+  /** Step 2a: Restart the same task from zero — removes the abandoned result from exit */
   const restartCurrentTask = useCallback(() => {
     setState((prev) => {
       if (!prev || prev.phase !== 'exited') return prev;
       const task = prev.tasks[prev.currentTaskIndex];
+      // Remove the abandoned result that was added during exitCurrentTask,
+      // since the user chose to restart (the abandoned attempt shouldn't count)
+      const lastResult = prev.results[prev.results.length - 1];
+      const cleanedResults = (lastResult && lastResult.taskId === task.id && lastResult.status === 'abandoned')
+        ? prev.results.slice(0, -1)
+        : prev.results;
       return {
         ...prev,
+        results: cleanedResults,
         phase: 'running',
         timeLeft: task.estimatedMinutes * 60,
         elapsedSeconds: 0,
@@ -501,19 +525,49 @@ export function useProjectTimer(
     });
   }, []);
 
-  /** Step 2c: Go back to previous task (overtime-continued) */
+  /**
+   * Step 2c: Go back to previous task (overtime-continued).
+   * Restores the actual elapsed time from the previous result so overtime
+   * continues from where it left off. Removes the previous result to avoid
+   * duplicate rewards when the task is completed again.
+   */
   const goToPreviousTask = useCallback(() => {
     setState((prev) => {
       if (!prev || prev.phase !== 'exited') return prev;
       if (prev.currentTaskIndex === 0) return prev; // Can't go back from first
       const prevIndex = prev.currentTaskIndex - 1;
       const prevTask = prev.tasks[prevIndex];
+
+      // Find and remove the previous result for this task to avoid duplicate rewards
+      let prevResultIndex = -1;
+      for (let i = prev.results.length - 1; i >= 0; i--) {
+        if (prev.results[i].taskId === prevTask.id) { prevResultIndex = i; break; }
+      }
+      let restoredElapsed = prevTask.estimatedMinutes * 60; // fallback
+      let cleanedResults = prev.results;
+
+      if (prevResultIndex !== -1) {
+        // Restore the actual elapsed time from the previous attempt
+        restoredElapsed = prev.results[prevResultIndex].actualSeconds;
+        // Remove that result — it will be re-recorded when the task completes again
+        cleanedResults = [...prev.results];
+        cleanedResults.splice(prevResultIndex, 1);
+      }
+
+      // Also remove the abandoned result from the current task's exit (if any)
+      const currentTask = prev.tasks[prev.currentTaskIndex];
+      const lastResult = cleanedResults[cleanedResults.length - 1];
+      if (lastResult && lastResult.taskId === currentTask.id && lastResult.status === 'abandoned') {
+        cleanedResults = cleanedResults.slice(0, -1);
+      }
+
       return {
         ...prev,
+        results: cleanedResults,
         currentTaskIndex: prevIndex,
-        phase: 'overtime', // Start in overtime since task was already completed before
+        phase: 'overtime',
         timeLeft: 0,
-        elapsedSeconds: prevTask.estimatedMinutes * 60, // Already past estimate
+        elapsedSeconds: restoredElapsed,
         lastTickAt: new Date().toISOString(),
       };
     });

@@ -209,7 +209,7 @@ function App() {
     playAlertRepeated(settings.alertSound, settings.alertRepeatCount);
   }, [settings.alertSound, settings.alertRepeatCount, t]);
 
-  const project = useProjectTimer(handleProjectTaskComplete, handleProjectComplete, handleProjectOvertimeStart);
+  const project = useProjectTimer(handleProjectTaskComplete, handleProjectComplete, handleProjectOvertimeStart, settings.autoStartWork);
 
   // ─── Project exit flow ───
   const handleProjectExitClick = useCallback(() => {
