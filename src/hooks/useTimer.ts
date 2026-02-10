@@ -84,6 +84,7 @@ export function useTimer({ settings, onComplete, onSkipWork }: UseTimerOptions):
   // Core countdown interval — ticks every 1s while running.
   // Depends on `generation` to force restart on phase transitions with auto-start.
   useEffect(() => {
+    if (status !== 'running') return;
 
     const interval = setInterval(() => {
       setTimeLeft((prev) => {
