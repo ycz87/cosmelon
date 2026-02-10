@@ -2,6 +2,32 @@
 
 ---
 
+## v0.4.6 — Bug 修复（2026-02-10）
+
+### Bug 1（P2）：项目模式两步退出弹窗文案与动作不一致
+- `ProjectExitModal` 新增 `isBreak` prop，break 阶段跳过 step 1（无任务可退出），直接显示选择面板
+- 弹窗挂载时 `useEffect` 重置 step 为 'confirm'，避免重复打开时残留旧状态
+- 所有按钮加 300ms 互斥锁，防止快速连点导致状态分叉
+
+### Bug 2（P2）：Break 阶段 ✓ 按钮与退出操作状态冲突
+- `Timer.tsx` 新增 `guardedAction` 包装 ✓ 和 ✗ 按钮回调，300ms 内互斥
+- 使用 `useRef` 锁而非 state 锁，避免额外渲染
+
+### Bug 3（P3）：亮色主题下部分次级文字对比度不足
+- Light 主题 `textMuted` 从 `rgba(0,0,0,0.6)` 提升至 `rgba(0,0,0,0.65)`
+- Light 主题 `textFaint` 从 `rgba(0,0,0,0.25)` 提升至 `rgba(0,0,0,0.35)`
+- Light 主题 `border` 从 `rgba(0,0,0,0.08)` 提升至 `rgba(0,0,0,0.10)`
+
+### Bug 4（P3）：中英文切换后个别标签延迟刷新
+- `App.tsx` 主容器 `<div>` 添加 `key={settings.language}`，语言切换时强制重建整个 UI 树，确保所有组件即时获取新翻译
+
+### Bug 5（P2）：移动端窄屏下按钮换行导致点击热区不稳定
+- `Timer.tsx` 所有控制按钮添加 `min-w-[44px] min-h-[44px]` / `min-w-[52px] min-h-[52px]`
+- `ProjectExitModal` 所有按钮添加 `min-h-[44px]`
+- `ConfirmModal` 按钮添加 `min-h-[44px]` + `whitespace-nowrap`
+
+---
+
 ## v0.4.5 — Bug 修复（2026-02-10）
 
 ### Bug 1（P0）：项目模式退出后选"下一个"跳过任务

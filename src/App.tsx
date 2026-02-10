@@ -282,7 +282,7 @@ function App() {
   return (
     <I18nProvider value={t}>
     <ThemeProvider value={theme}>
-      <div className="min-h-dvh flex flex-col items-center transition-all duration-[1500ms]"
+      <div key={settings.language} className="min-h-dvh flex flex-col items-center transition-all duration-[1500ms]"
         style={{ background: `linear-gradient(to bottom, ${bgColor}, ${bgColor}e6)` }}>
 
         {/* Header — 48px, logo left, segmented center, icons right */}
@@ -452,6 +452,7 @@ function App() {
             taskName={project.state.tasks[project.state.currentTaskIndex]?.name || ''}
             isFirstTask={project.state.currentTaskIndex === 0}
             isLastTask={project.state.currentTaskIndex >= project.state.tasks.length - 1}
+            isBreak={project.state.phase === 'break' || (project.state.phase === 'paused' && project.state.pausedFrom === 'break')}
             onCancel={() => setShowProjectExit(false)}
             onExitTask={() => project.exitCurrentTask()}
             onAbandonProject={() => { project.abandonProject(); setShowProjectExit(false); setMode('pomodoro'); }}

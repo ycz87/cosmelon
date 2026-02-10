@@ -1,6 +1,7 @@
 /**
  * ConfirmModal — 通用确认弹窗
  * 用于番茄钟退出确认等场景
+ * v0.4.6: min-h-[44px] for stable mobile touch targets
  */
 import { useTheme } from '../hooks/useTheme';
 
@@ -30,13 +31,13 @@ export function ConfirmModal({ title, message, confirmText, cancelText, onConfir
         <div className="flex gap-2">
           <button
             onClick={onCancel}
-            className="flex-1 py-2.5 rounded-xl text-sm font-medium transition-all cursor-pointer"
+            className="flex-1 min-h-[44px] py-2.5 rounded-xl text-sm font-medium transition-all cursor-pointer whitespace-nowrap"
             style={{ backgroundColor: theme.inputBg, color: theme.textMuted }}>
             {cancelText}
           </button>
           <button
             onClick={onConfirm}
-            className="flex-1 py-2.5 rounded-xl text-sm font-medium transition-all cursor-pointer"
+            className="flex-1 min-h-[44px] py-2.5 rounded-xl text-sm font-medium transition-all cursor-pointer whitespace-nowrap"
             style={{ backgroundColor: `${accentColor}20`, color: accentColor }}>
             {confirmText}
           </button>

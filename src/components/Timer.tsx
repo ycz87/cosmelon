@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import type { TimerPhase, TimerStatus } from '../hooks/useTimer';
 import type { GrowthStage } from '../types';
 import { formatTime } from '../utils/time';
@@ -7,6 +7,7 @@ import { useI18n } from '../i18n';
 import { CelebrationOverlay } from './CelebrationOverlay';
 
 const QUICK_DURATIONS = [5, 10, 15, 20, 25, 30, 45, 60];
+const ACTION_DEBOUNCE_MS = 300;
 
 interface TimerProps {
   timeLeft: number;
@@ -35,6 +36,21 @@ export function Timer({ timeLeft, totalDuration, phase, status, celebrating, cel
   const containerRef = useRef<HTMLDivElement>(null);
   const prevStatusRef = useRef<TimerStatus>(status);
   const [showQuickPicker, setShowQuickPicker] = useState(false);
+
+  // Bug 2 fix: debounce ✓ and ✗ to prevent race conditions
+  const actionLockRef = useRef(false);
+  const actionLockTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+
+  const guardedAction = useCallback((fn: () => void) => {
+    if (actionLockRef.current) return;
+    actionLockRef.current = true;
+    fn();
+    actionLockTimer.current = setTimeout(() => { actionLockRef.current = false; }, ACTION_DEBOUNCE_MS);
+  }, []);
+
+  useEffect(() => {
+    return () => { if (actionLockTimer.current) clearTimeout(actionLockTimer.current); };
+  }, []);
 
   useEffect(() => {
     if (status === 'running' && prevStatusRef.current === 'idle' && containerRef.current) {
@@ -190,8 +206,8 @@ export function Timer({ timeLeft, totalDuration, phase, status, celebrating, cel
 
         {/* ✗ Abandon/Skip (left) — hidden during idle and break */}
         {status !== 'idle' && isWork && (
-          <button onClick={onAbandon}
-            className="w-11 h-11 rounded-full flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95 cursor-pointer"
+          <button onClick={() => guardedAction(onAbandon)}
+            className="w-11 h-11 min-w-[44px] min-h-[44px] rounded-full flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95 cursor-pointer"
             style={{ backgroundColor: `${theme.textMuted}15`, color: theme.textMuted }}
             title={t.abandon}>
             <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
@@ -203,7 +219,7 @@ export function Timer({ timeLeft, totalDuration, phase, status, celebrating, cel
         {/* ▶ Start — idle only */}
         {status === 'idle' && (
           <button onClick={onStart}
-            className="w-[52px] h-[52px] rounded-full flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95 cursor-pointer"
+            className="w-[52px] h-[52px] min-w-[52px] min-h-[52px] rounded-full flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95 cursor-pointer"
             style={{ background: `linear-gradient(135deg, ${colors.from}, ${colors.to})`, boxShadow: `0 2px 12px ${colors.from}30` }}>
             <svg width="18" height="22" viewBox="0 0 20 24" fill="none" className="ml-0.5">
               <path d="M2 2L18 12L2 22V2Z" fill="white" />
@@ -214,7 +230,7 @@ export function Timer({ timeLeft, totalDuration, phase, status, celebrating, cel
         {/* ⏸ Pause (center) */}
         {status === 'running' && (
           <button onClick={onPause}
-            className="w-[52px] h-[52px] rounded-full flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95 cursor-pointer border"
+            className="w-[52px] h-[52px] min-w-[52px] min-h-[52px] rounded-full flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95 cursor-pointer border"
             style={{ backgroundColor: `${colors.from}20`, borderColor: `${colors.from}40` }}>
             <svg width="16" height="20" viewBox="0 0 16 20" fill="none">
               <rect x="1" y="1" width="4.5" height="18" rx="1.5" fill={colors.from} fillOpacity="0.7" />
@@ -226,7 +242,7 @@ export function Timer({ timeLeft, totalDuration, phase, status, celebrating, cel
         {/* ▶ Resume (center) */}
         {status === 'paused' && (
           <button onClick={onResume}
-            className="w-[52px] h-[52px] rounded-full flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95 cursor-pointer"
+            className="w-[52px] h-[52px] min-w-[52px] min-h-[52px] rounded-full flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95 cursor-pointer"
             style={{ background: `linear-gradient(135deg, ${colors.from}, ${colors.to})`, boxShadow: `0 2px 12px ${colors.from}30` }}>
             <svg width="18" height="22" viewBox="0 0 20 24" fill="none" className="ml-0.5">
               <path d="M2 2L18 12L2 22V2Z" fill="white" />
@@ -236,8 +252,8 @@ export function Timer({ timeLeft, totalDuration, phase, status, celebrating, cel
 
         {/* ✓ Complete/Skip (right) — hidden during idle */}
         {status !== 'idle' && (
-          <button onClick={onSkip}
-            className="w-11 h-11 rounded-full flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95 cursor-pointer"
+          <button onClick={() => guardedAction(onSkip)}
+            className="w-11 h-11 min-w-[44px] min-h-[44px] rounded-full flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95 cursor-pointer"
             style={{ backgroundColor: `${theme.accent}20`, color: theme.accent }}
             title={t.projectMarkDone}>
             <svg width="16" height="12" viewBox="0 0 16 12" fill="none">

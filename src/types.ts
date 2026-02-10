@@ -53,11 +53,11 @@ export const THEMES: Record<ThemeId, { name: string; colors: ThemeColors }> = {
     name: '纯净亮色',
     colors: {
       bg: '#f8f8fa', bgWork: '#fef2f2', bgBreak: '#eef2ff',
-      surface: '#ffffff', text: 'rgba(0,0,0,0.87)', textMuted: 'rgba(0,0,0,0.6)',
-      textFaint: 'rgba(0,0,0,0.25)', accent: '#dc2626', accentEnd: '#f97316',
+      surface: '#ffffff', text: 'rgba(0,0,0,0.87)', textMuted: 'rgba(0,0,0,0.65)',
+      textFaint: 'rgba(0,0,0,0.35)', accent: '#dc2626', accentEnd: '#f97316',
       breakAccent: '#4f46e5', breakAccentEnd: '#818cf8', ring: '0.15',
       inputBg: 'rgba(0,0,0,0.06)',
-      border: 'rgba(0,0,0,0.08)',
+      border: 'rgba(0,0,0,0.10)',
     },
   },
   forest: {

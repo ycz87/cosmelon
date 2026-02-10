@@ -2,6 +2,27 @@
 
 ---
 
+## v0.4.6 — Bug 修复（2026-02-10）
+
+### 需求背景
+v0.4.5 全面排查发现 5 个 bug（2P2 + 3P3），Charles 要求在进入 v0.5 前全部修掉。
+
+### 改动文件
+- `src/components/ProjectExitModal.tsx` — Bug 1: 新增 `isBreak` prop，break 阶段跳过 step 1；挂载时重置 step；所有按钮加 300ms 互斥锁 + min-h-[44px]
+- `src/components/Timer.tsx` — Bug 2: `guardedAction` 包装 ✓/✗ 按钮，300ms 互斥；Bug 5: 所有按钮加 min-w/min-h
+- `src/types.ts` — Bug 3: Light 主题 textMuted 0.6→0.65, textFaint 0.25→0.35, border 0.08→0.10
+- `src/App.tsx` — Bug 1: 传 `isBreak` prop 给 ProjectExitModal；Bug 4: 主容器加 `key={settings.language}` 强制重建
+- `src/components/ConfirmModal.tsx` — Bug 5: 按钮加 min-h-[44px] + whitespace-nowrap
+- `package.json` — version 0.4.5→0.4.6
+- 文档：DEVLOG.md, docs/CHANGELOG.md, docs/PRODUCT.md, README.md
+
+### 技术决策
+- Bug 1 选择在 break 阶段跳过 step 1 而非显示不同文案，因为 break 阶段没有"当前任务"可退出，显示"退出当前任务？"语义不对
+- Bug 2 用 useRef 锁而非 useState，避免锁状态变化触发额外渲染
+- Bug 4 用 `key` 强制重建而非逐个组件排查 stale closure，因为成本低且彻底
+
+---
+
 ## v0.4.5 — Bug 修复（2026-02-10）
 
 ### 需求背景

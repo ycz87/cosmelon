@@ -190,3 +190,7 @@ src-tauri/                     # Tauri 桌面应用（Rust）
 ## License
 
 MIT
+
+---
+
+**Current version: v0.4.6**
