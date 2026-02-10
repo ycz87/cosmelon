@@ -101,14 +101,17 @@ export interface UseProjectTimerReturn {
 export function useProjectTimer(
   onTaskComplete: (result: ProjectTaskResult) => void,
   onProjectComplete: (record: ProjectRecord) => void,
+  onOvertimeStart?: () => void,
 ): UseProjectTimerReturn {
   const [state, setState] = useState<ProjectState | null>(null);
   const [hasSavedProject, setHasSavedProject] = useState(false);
   const onTaskCompleteRef = useRef(onTaskComplete);
   const onProjectCompleteRef = useRef(onProjectComplete);
+  const onOvertimeStartRef = useRef(onOvertimeStart);
 
   useEffect(() => { onTaskCompleteRef.current = onTaskComplete; }, [onTaskComplete]);
   useEffect(() => { onProjectCompleteRef.current = onProjectComplete; }, [onProjectComplete]);
+  useEffect(() => { onOvertimeStartRef.current = onOvertimeStart; }, [onOvertimeStart]);
 
   // Check for saved project on mount
   useEffect(() => {
@@ -140,7 +143,8 @@ export function useProjectTimer(
           const newTimeLeft = prev.timeLeft - 1;
 
           if (newTimeLeft <= 0) {
-            // Time's up — enter overtime (silent, just keep counting)
+            // Time's up — enter overtime, fire alert
+            onOvertimeStartRef.current?.();
             return { ...prev, timeLeft: 0, elapsedSeconds: newElapsed, phase: 'overtime', lastTickAt: now };
           }
           return { ...prev, timeLeft: newTimeLeft, elapsedSeconds: newElapsed, lastTickAt: now };
@@ -183,7 +187,7 @@ export function useProjectTimer(
     const currentTask = state.tasks[state.currentTaskIndex];
     const completedCount = state.results.length;
     const totalCount = state.tasks.length;
-    const isOvertime = state.phase === 'overtime';
+    const isOvertime = state.phase === 'overtime' || (state.phase === 'paused' && state.pausedFrom === 'overtime');
     const isBreak = state.phase === 'break';
     const overtimeSeconds = isOvertime ? state.elapsedSeconds - (currentTask.estimatedMinutes * 60) : 0;
 

@@ -173,7 +173,12 @@ function App() {
     playAlertRepeated(settings.alertSound, settings.alertRepeatCount);
   }, [setProjectRecords, settings.alertSound, settings.alertRepeatCount, t]);
 
-  const project = useProjectTimer(handleProjectTaskComplete, handleProjectComplete);
+  const handleProjectOvertimeStart = useCallback(() => {
+    sendBrowserNotification(t.projectOvertime, t.phaseWork);
+    playAlertRepeated(settings.alertSound, settings.alertRepeatCount);
+  }, [settings.alertSound, settings.alertRepeatCount, t]);
+
+  const project = useProjectTimer(handleProjectTaskComplete, handleProjectComplete, handleProjectOvertimeStart);
 
   // ─── Project exit flow ───
   const handleProjectExitClick = useCallback(() => {

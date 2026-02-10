@@ -3,6 +3,7 @@
  * v3: 分组标题 + iOS toggle 色 + 主题网格 + 帮助入口
  */
 import { useState, useRef, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import type { PomodoroSettings, ThemeId } from '../types';
 import { THEMES } from '../types';
 import { setMasterAlertVolume, setMasterAmbienceVolume, getActiveSoundsSummary } from '../audio';
@@ -320,21 +321,23 @@ export function Settings({ settings, onChange, disabled, isWorkRunning, onExport
         )}
       </div>
 
-      {/* Modals */}
-      {showAmbienceModal && (
+      {/* Modals — portaled to document.body to escape header's backdrop-filter containing block */}
+      {showAmbienceModal && createPortal(
         <AmbienceMixerModal
           config={settings.ambienceMixer}
           onChange={(mixer: AmbienceMixerConfig) => update({ ambienceMixer: mixer })}
           onClose={() => setShowAmbienceModal(false)}
           keepOnClose={isWorkRunning}
-        />
+        />,
+        document.body,
       )}
-      {showAlertModal && (
+      {showAlertModal && createPortal(
         <AlertPickerModal
           selected={settings.alertSound}
           onSelect={(id) => update({ alertSound: id })}
           onClose={() => setShowAlertModal(false)}
-        />
+        />,
+        document.body,
       )}
     </>
   );
