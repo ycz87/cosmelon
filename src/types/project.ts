@@ -18,6 +18,8 @@ export interface ProjectTaskResult {
   actualSeconds: number;      // 实际用时（秒）
   status: 'completed' | 'skipped' | 'abandoned' | 'overtime-continued';
   completedAt: string;        // ISO timestamp
+  /** If this task was revisited via goToPreviousTask, the seconds already recorded before */
+  previousSeconds?: number;
 }
 
 /** 项目执行状态 */
@@ -40,6 +42,9 @@ export interface ProjectState {
   /** Timestamp when timer was last ticked — for recovery delta calc */
   lastTickAt: string;
   startedAt: string;
+  /** When revisiting a previous task, the seconds already recorded in the first attempt.
+   *  Used to calculate incremental time for rewards/stats. */
+  revisitPreviousSeconds?: number;
 }
 
 /** 完成的项目记录（存入历史） */

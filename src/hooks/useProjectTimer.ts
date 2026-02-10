@@ -236,11 +236,21 @@ export function useProjectTimer(
       status = isOvertime ? 'running' : 'running';
     }
 
-    const totalDuration = (isBreak || (state.phase === 'paused' && state.pausedFrom === 'break'))
-      ? currentTask.breakMinutes * 60
-      : currentTask.estimatedMinutes * 60;
+    // totalDuration for the progress ring.
+    // During break, currentTaskIndex already points to the NEXT task,
+    // but the break duration was set from the PREVIOUS task's breakMinutes.
+    // Use the previous task's breakMinutes for accurate ring display.
+    const isInBreakPhase = isBreak || (state.phase === 'paused' && state.pausedFrom === 'break');
+    let totalDuration: number;
+    if (isInBreakPhase) {
+      const prevTaskIndex = state.currentTaskIndex - 1;
+      const breakTask = prevTaskIndex >= 0 ? state.tasks[prevTaskIndex] : currentTask;
+      totalDuration = breakTask.breakMinutes * 60;
+    } else {
+      totalDuration = currentTask.estimatedMinutes * 60;
+    }
 
-    const showBreakProgress = isBreak || (state.phase === 'paused' && state.pausedFrom === 'break');
+    const showBreakProgress = isInBreakPhase;
 
     return {
       timeLeft: isOvertime ? overtimeSeconds : state.timeLeft,
@@ -387,6 +397,7 @@ export function useProjectTimer(
       actualSeconds: prev.elapsedSeconds,
       status,
       completedAt: new Date().toISOString(),
+      ...(prev.revisitPreviousSeconds != null ? { previousSeconds: prev.revisitPreviousSeconds } : {}),
     };
 
     onTaskCompleteRef.current(result);
@@ -401,6 +412,7 @@ export function useProjectTimer(
         results: newResults,
         phase: 'summary',
         timeLeft: 0,
+        revisitPreviousSeconds: undefined,
         lastTickAt: new Date().toISOString(),
       };
     }
@@ -412,6 +424,7 @@ export function useProjectTimer(
       currentTaskIndex: nextIndex,
       phase: 'break',
       timeLeft: task.breakMinutes * 60,
+      revisitPreviousSeconds: undefined,
       lastTickAt: new Date().toISOString(),
     };
   }, []);
@@ -578,6 +591,7 @@ export function useProjectTimer(
         phase: 'overtime',
         timeLeft: 0,
         elapsedSeconds: restoredElapsed,
+        revisitPreviousSeconds: restoredElapsed,
         lastTickAt: new Date().toISOString(),
       };
     });

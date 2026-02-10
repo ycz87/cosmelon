@@ -176,23 +176,46 @@ function App() {
   // ─── Project timer callbacks ───
   // When a project task completes, also create a PomodoroRecord for unified daily stats.
   // Only records tasks ≥1min to avoid noise from instant skips.
+  // If result.previousSeconds is set, this is a revisited task — update existing record instead of creating new.
   const handleProjectTaskComplete = useCallback((result: import('./types/project').ProjectTaskResult) => {
-    const minutes = Math.round(result.actualSeconds / 60);
-    if (minutes >= 1 && (result.status === 'completed' || result.status === 'abandoned')) {
-      const stage = getGrowthStage(minutes);
-      const emoji = GROWTH_EMOJI[stage];
+    const isRevisit = result.previousSeconds != null;
+    const incrementalSeconds = isRevisit
+      ? result.actualSeconds - result.previousSeconds!
+      : result.actualSeconds;
+    const incrementalMinutes = Math.round(incrementalSeconds / 60);
+    const totalMinutes = Math.round(result.actualSeconds / 60);
+
+    if (totalMinutes >= 1 && (result.status === 'completed' || result.status === 'abandoned')) {
       const pomodoroStatus = result.status === 'completed' ? 'completed' : 'abandoned';
-      const record: PomodoroRecord = {
-        id: Date.now().toString(),
-        task: result.name,
-        durationMinutes: minutes,
-        completedAt: result.completedAt,
-        date: getTodayKey(),
-        status: pomodoroStatus,
-      };
-      setRecords((prev) => [record, ...prev]);
-      if (result.status === 'completed') {
-        sendBrowserNotification(t.workComplete(emoji), `"${result.name}" · ${minutes}${t.minutes}`);
+
+      if (isRevisit) {
+        // Revisit: update the existing record's duration (total time, not incremental)
+        setRecords((prev) => {
+          const idx = prev.findIndex(r => r.task === result.name && r.date === getTodayKey());
+          if (idx !== -1) {
+            const updated = [...prev];
+            updated[idx] = { ...updated[idx], durationMinutes: totalMinutes, status: pomodoroStatus };
+            return updated;
+          }
+          // Fallback: no existing record found, create with incremental time only
+          return [{ id: Date.now().toString(), task: result.name, durationMinutes: incrementalMinutes, completedAt: result.completedAt, date: getTodayKey(), status: pomodoroStatus }, ...prev];
+        });
+      } else {
+        // Normal: create a new record
+        const stage = getGrowthStage(totalMinutes);
+        const emoji = GROWTH_EMOJI[stage];
+        const record: PomodoroRecord = {
+          id: Date.now().toString(),
+          task: result.name,
+          durationMinutes: totalMinutes,
+          completedAt: result.completedAt,
+          date: getTodayKey(),
+          status: pomodoroStatus,
+        };
+        setRecords((prev) => [record, ...prev]);
+        if (result.status === 'completed') {
+          sendBrowserNotification(t.workComplete(emoji), `"${result.name}" · ${totalMinutes}${t.minutes}`);
+        }
       }
     }
     playAlertRepeated(settings.alertSound, 1);

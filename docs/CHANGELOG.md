@@ -2,6 +2,22 @@
 
 ---
 
+## v0.4.9 — Bug 修复（2026-02-10）
+
+### 修复：返回上一个任务再完成不再重复累加记录/奖励/时间
+- `ProjectTaskResult` 新增 `previousSeconds` 字段，标记 revisit 场景
+- `ProjectState` 新增 `revisitPreviousSeconds` 字段，`goToPreviousTask` 时记录已有秒数
+- `recordTaskResult` 完成时携带 `previousSeconds`，完成后清除标记
+- `handleProjectTaskComplete`（App 层）根据 `previousSeconds` 判断：
+  - 正常完成：创建新 PomodoroRecord
+  - Revisit 完成：更新已有记录的 durationMinutes（总时间），不新增
+
+### 修复：休息阶段进度环从正确位置开始
+- **根因：** break 阶段 `currentTaskIndex` 已指向下一个任务，但 `totalDuration` 错误地取了下一个任务的 `breakMinutes`，而 `timeLeft` 是用上一个任务的 `breakMinutes` 初始化的
+- **修复：** break 阶段 `totalDuration` 改为取 `tasks[currentTaskIndex - 1].breakMinutes`，与 `timeLeft` 一致
+
+---
+
 ## v0.4.8 — 多项修复 + 新功能（2026-02-10）
 
 ### P0 修复：刷新后拒绝继续仍自动倒计时

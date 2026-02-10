@@ -86,6 +86,7 @@
 | v0.4.6 | ✅ 完成 | Bug 修复 — 退出弹窗文案一致性、break/✓ 互斥、亮色主题对比度、i18n 即时刷新、移动端按钮热区 |
 | v0.4.7 | ✅ 完成 | Logo 替换 + 品牌文字 — 矢量 SVG 新 Logo、Header 品牌名称、全套图标重新生成 |
 | v0.4.8 | ✅ 完成 | 多项修复 + 新功能 — useTimer guard 恢复、PNG Logo、提醒音持续循环、项目模式 3 bug 修复、abandoned callback 延迟 |
+| v0.4.9 | ✅ 完成 | Bug 修复 — 返回上一个任务记录累加修复（previousSeconds 机制）、休息进度环 totalDuration 修复 |
 | v0.5 | ⏳ 计划 | 切瓜（待定） |
 | v0.6 | ⏳ 计划 | Chrome 扩展等多端覆盖 |
 | v0.7 | ⏳ 计划 | 时间追踪（项目/标签分类） |

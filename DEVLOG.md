@@ -2,6 +2,30 @@
 
 ---
 
+## v0.4.9 — Bug 修复（2026-02-10）
+
+### 需求背景
+v0.4.8 的 goToPreviousTask 修复不彻底：返回上一个任务再完成时，App 层 records 仍然重复累加。另外休息阶段进度环显示位置不对。
+
+### Bug ①：返回上一个任务再完成 → 记录/奖励/时间重复累加
+- **根因：** `goToPreviousTask` 从 `state.results` 移除了旧 result，但 App 层的 `records`（PomodoroRecord[]）已经被之前的 callback 写入，无法撤回。完成时又创建新 record，导致重复。
+- **修复：** 引入 `previousSeconds` 机制：
+  - `ProjectState.revisitPreviousSeconds`：goToPreviousTask 时记录已有秒数
+  - `ProjectTaskResult.previousSeconds`：recordTaskResult 时携带
+  - App 层 `handleProjectTaskComplete`：检测到 previousSeconds 时更新已有 record 而非新增
+- **技术决策：** 选择在 result 里带 previousSeconds 而非在 App 层做 taskId 去重，因为 PomodoroRecord 没有 taskId 字段，按 name+date 匹配更可靠
+
+### Bug ②：休息阶段进度环从 3/4 处开始
+- **根因：** break 阶段 `currentTaskIndex` 已指向下一个任务（v0.4.5 设计），但 timerView 的 `totalDuration` 取了 `tasks[currentTaskIndex].breakMinutes`（下一个任务的），而 `state.timeLeft` 是用上一个任务的 `breakMinutes` 初始化的。两者不匹配导致 progress 计算错误。
+- **修复：** break 阶段 `totalDuration` 改为 `tasks[currentTaskIndex - 1].breakMinutes * 60`
+
+### 改动文件
+- `src/types/project.ts` — ProjectTaskResult 加 previousSeconds，ProjectState 加 revisitPreviousSeconds
+- `src/hooks/useProjectTimer.ts` — goToPreviousTask 设 revisitPreviousSeconds，recordTaskResult 携带并清除，break totalDuration 修复
+- `src/App.tsx` — handleProjectTaskComplete 支持 revisit 更新逻辑
+
+---
+
 ## v0.4.8 — 多项修复 + 新功能（2026-02-10）
 
 ### 需求背景
