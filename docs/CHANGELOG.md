@@ -2,6 +2,14 @@
 
 ---
 
+## v0.5.1 — 隐藏滚动条（2026-02-10）
+
+### 优化：隐藏页面滚动条
+- 全局 CSS 隐藏滚动条，保留滚动功能（鼠标滚轮、触摸滑动正常）
+- 兼容 Chrome/Safari（`::-webkit-scrollbar`）、Firefox（`scrollbar-width: none`）、IE/Edge（`-ms-overflow-style: none`）
+
+---
+
 ## v0.5.0 — 正计时/倒计时切换（2026-02-10）
 
 ### 新功能：点击时钟数字切换正计时/倒计时

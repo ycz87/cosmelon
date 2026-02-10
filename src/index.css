@@ -1,9 +1,15 @@
 @import "tailwindcss";
 
-/* Smooth scrolling */
+/* Smooth scrolling + hide scrollbar (keep scroll functional) */
 html {
   scroll-behavior: smooth;
   -webkit-tap-highlight-color: transparent;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE/Edge */
+}
+
+html::-webkit-scrollbar {
+  display: none; /* Chrome/Safari/Edge */
 }
 
 /* Prevent overscroll bounce on mobile */

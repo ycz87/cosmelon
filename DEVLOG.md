@@ -2,6 +2,17 @@
 
 ---
 
+## v0.5.1 — 隐藏滚动条（2026-02-10）
+
+### 需求背景
+Charles 发现页面右侧有可见滚动条，影响视觉美观。
+
+### 实现
+- `index.css` 全局隐藏滚动条：`::-webkit-scrollbar { display: none }` + `scrollbar-width: none` + `-ms-overflow-style: none`
+- 作用于 `html` 元素，不影响弹窗内部滚动
+
+---
+
 ## v0.5.0 — 正计时/倒计时切换（2026-02-10）
 
 ### 需求背景
