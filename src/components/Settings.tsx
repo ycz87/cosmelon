@@ -86,7 +86,7 @@ function NumberStepper({ label, value, onChange, min, max, step = 1, unit, disab
         <button onClick={() => onChange(clamp(value + step))}
           className="w-8 h-8 rounded-lg flex items-center justify-center transition-all cursor-pointer text-sm"
           style={{ backgroundColor: t.inputBg, color: t.textMuted }}>+</button>
-        <span className="text-xs ml-0.5 w-8" style={{ color: t.textFaint }}>{unit}</span>
+        <span className="text-xs ml-0.5 w-8" style={{ color: t.textMuted }}>{unit}</span>
       </div>
     </div>
   );
@@ -105,7 +105,7 @@ function VolumeSlider({ label, value, onChange }: {
           onChange={(e) => onChange(parseInt(e.target.value, 10))}
           className="flex-1 h-1 rounded-full appearance-none cursor-pointer accent-current"
           style={{ accentColor: t.accent }} />
-        <span className="text-xs w-8 text-right tabular-nums" style={{ color: t.textFaint }}>{value}%</span>
+        <span className="text-xs w-8 text-right tabular-nums" style={{ color: t.textMuted }}>{value}%</span>
       </div>
     </div>
   );

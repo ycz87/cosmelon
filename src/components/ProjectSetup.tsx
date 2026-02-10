@@ -121,15 +121,15 @@ export function ProjectSetup({ onStart, onCancel }: Props) {
               <div className="flex items-center gap-0.5 shrink-0">
                 <button onClick={() => moveTask(index, -1)}
                   className="w-6 h-6 rounded flex items-center justify-center text-xs cursor-pointer transition-colors"
-                  style={{ color: index === 0 ? theme.textFaint : theme.textMuted }}
+                  style={{ color: theme.textMuted, opacity: index === 0 ? 0.5 : 1 }}
                   disabled={index === 0}>↑</button>
                 <button onClick={() => moveTask(index, 1)}
                   className="w-6 h-6 rounded flex items-center justify-center text-xs cursor-pointer transition-colors"
-                  style={{ color: index === tasks.length - 1 ? theme.textFaint : theme.textMuted }}
+                  style={{ color: theme.textMuted, opacity: index === tasks.length - 1 ? 0.5 : 1 }}
                   disabled={index === tasks.length - 1}>↓</button>
                 <button onClick={() => removeTask(task.id)}
                   className="w-6 h-6 rounded flex items-center justify-center text-xs cursor-pointer transition-colors"
-                  style={{ color: tasks.length <= 1 ? theme.textFaint : theme.textMuted }}
+                  style={{ color: theme.textMuted, opacity: tasks.length <= 1 ? 0.5 : 1 }}
                   disabled={tasks.length <= 1}>✕</button>
               </div>
             </div>
