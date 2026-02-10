@@ -175,55 +175,6 @@ Charles 重新定义了番茄钟和项目模式的关系：番茄钟是"原子�
 
 ---
 
-## v0.4 — 番茄钟与项目模式交互重构（2026-02-09）
-
-### 需求背景
-Charles 重新定义了番茄钟和项目模式的关系：番茄钟是"原子单位"，项目模式是"多个番茄钟的组合"。长休息/轮次系统不再需要，退出逻辑需要重做。
-
-### 改动概览
-
-#### 1. 去掉长休息/轮次
-- `TimerPhase` 从 `'work' | 'shortBreak' | 'longBreak'` 简化为 `'work' | 'break'`
-- 删除 `roundProgress`、`pomodorosPerRound` 相关逻辑
-- 删除 `RoundProgress.tsx` 组件
-- 设置面板删除长休息时长、长休息间隔
-- i18n 删除 `phaseLongBreak`、`longBreak`、`longBreakInterval` 等
-
-#### 2. 退出确认弹窗
-- 新增 `ConfirmModal.tsx` — 通用确认弹窗
-- 番茄钟 ✗ 按钮 → 弹确认 → 确认后记录为 abandoned
-- `PomodoroRecord` 新增 `status?: 'completed' | 'abandoned'`
-
-#### 3. 项目模式两步退出
-- 新增 `ProjectExitModal.tsx` — 两步退出弹窗
-- Step 1: 确认退出当前任务 + 退出整个项目选项
-- Step 2: 重新开始 / 下一个任务 / 返回上一个任务
-- `useProjectTimer` 新增：`exitCurrentTask`、`restartCurrentTask`、`goToNextTask`、`goToPreviousTask`
-- `ProjectPhase` 新增 `'exited'` 状态
-- `ProjectTaskResult.status` 新增 `'abandoned'` 和 `'overtime-continued'`
-
-#### 4. 默认任务名
-- 不输入任务名时自动生成"专注 #N"（N = 今天第几个）
-
-### 涉及文件
-- `src/types.ts` — 删除 longBreak 设置，PomodoroRecord 加 status
-- `src/types/project.ts` — 加 'exited' phase，扩展 result status
-- `src/hooks/useTimer.ts` — 重写，去掉长休息/轮次
-- `src/hooks/useProjectTimer.ts` — 加退出方法，'exited' phase
-- `src/components/Timer.tsx` — 去掉 longBreak 分支
-- `src/components/Settings.tsx` — 删除长休息设置
-- `src/components/RoundProgress.tsx` — 删除
-- `src/components/ConfirmModal.tsx` — 新增
-- `src/components/ProjectExitModal.tsx` — 新增
-- `src/components/ProjectSummary.tsx` — 支持新 status 类型
-- `src/components/ProjectMode.tsx` — 注释更新
-- `src/App.tsx` — 大改：退出弹窗、默认任务名、去掉 RoundProgress
-- `src/i18n/types.ts` — 删除/新增 key
-- `src/i18n/locales/zh.ts` — 同步
-- `src/i18n/locales/en.ts` — 同步
-
----
-
 ## v0.3.1 — 项目模式交互优化（2026-02-08）
 
 ### 需求背景

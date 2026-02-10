@@ -1,3 +1,22 @@
+/**
+ * Timer — Core timer display component
+ *
+ * Renders the circular SVG progress ring, countdown/overtime digits,
+ * phase label capsule, and control buttons (✗ / ▶⏸ / ✓).
+ *
+ * Shared by both Pomodoro mode and Project mode — the parent maps
+ * its state into the props defined below.
+ *
+ * Key behaviors:
+ * - Idle: shows ▶ start button + quick duration picker on digit click
+ * - Running: shows ✗ (abandon) + ⏸ (pause) + ✓ (complete)
+ * - Break phase: hides ✗/✓, only shows ⏸/▶
+ * - Overtime: progress ring turns red with pulse animation, digits show "+MM:SS"
+ * - Celebration: overlay with confetti + bouncing growth icon
+ *
+ * v0.4.6: ✓/✗ buttons use a 300ms debounce lock (guardedAction) to prevent
+ * race conditions from rapid taps.
+ */
 import { useEffect, useRef, useState, useCallback } from 'react';
 import type { TimerPhase, TimerStatus } from '../hooks/useTimer';
 import type { GrowthStage } from '../types';
@@ -6,7 +25,10 @@ import { useTheme } from '../hooks/useTheme';
 import { useI18n } from '../i18n';
 import { CelebrationOverlay } from './CelebrationOverlay';
 
+/** Available quick-pick durations shown when user clicks the timer digits in idle state */
 const QUICK_DURATIONS = [5, 10, 15, 20, 25, 30, 45, 60];
+
+/** Debounce window (ms) for ✓/✗ button actions to prevent double-tap race conditions */
 const ACTION_DEBOUNCE_MS = 300;
 
 interface TimerProps {
@@ -62,12 +84,15 @@ export function Timer({ timeLeft, totalDuration, phase, status, celebrating, cel
     prevStatusRef.current = status;
   }, [status]);
 
+  // ─── SVG progress ring geometry ───
+  // The ring is drawn as a circle with stroke-dasharray/dashoffset to show progress.
   const size = 320;
   const center = size / 2;
   const radius = 136;
   const circumference = 2 * Math.PI * radius;
   const strokeDashoffset = circumference * (1 - progress);
 
+  // Glowing head dot position — follows the progress arc
   const angle = progress * 2 * Math.PI - Math.PI / 2;
   const headX = center + radius * Math.cos(angle);
   const headY = center + radius * Math.sin(angle);
@@ -76,6 +101,8 @@ export function Timer({ timeLeft, totalDuration, phase, status, celebrating, cel
   const t = useI18n();
 
   // 根据主题和阶段选择颜色
+  // ─── Phase-dependent color sets ───
+  // Work: theme accent gradient; Break: cool tones; Overtime: red warning
   const workColors = { from: theme.accent, mid: theme.accentEnd, to: theme.accentEnd };
   const breakColors = { from: theme.breakAccent, mid: theme.breakAccentEnd, to: theme.breakAccentEnd };
   const overtimeColors = { from: '#ef4444', mid: '#f87171', to: '#fca5a5' };

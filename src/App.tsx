@@ -1,6 +1,22 @@
 /**
- * App — 西瓜时钟主应用
- * 管理计时器状态、记录、设置，串联所有组件
+ * App — Watermelon Clock main application component
+ *
+ * Orchestrates the entire app: timer state, records, settings, audio, i18n,
+ * and routes between Pomodoro mode and Project mode.
+ *
+ * Architecture:
+ * - useTimer: drives the simple pomodoro countdown (work → break cycle)
+ * - useProjectTimer: drives the multi-task project mode with its own state machine
+ * - Both modes share the same Timer component for rendering
+ * - Records (PomodoroRecord[]) are unified — project task completions also
+ *   create pomodoro records for consistent daily stats
+ * - Settings, records, and project state are persisted to localStorage
+ *
+ * Key design decisions:
+ * - `key={settings.language}` on the root div forces full re-render on language
+ *   switch, avoiding stale closure issues with i18n (v0.4.6 fix)
+ * - Background audio lifecycle is tied to timer running state via useEffect
+ * - Mode switch is disabled while any timer is active
  */
 import { useState, useCallback, useEffect, useMemo } from 'react';
 import { Timer } from './components/Timer';
@@ -120,6 +136,7 @@ function App() {
   const timer = useTimer({ settings, onComplete: handleTimerComplete, onSkipWork: handleSkipWork });
 
   // ─── Pomodoro abandon with confirm ───
+  // Shows a ConfirmModal before abandoning; records partial work (≥1min) as 'abandoned'
   const handleAbandonClick = useCallback(() => {
     setShowAbandonConfirm(true);
   }, []);
@@ -144,7 +161,9 @@ function App() {
     setShowAbandonConfirm(false);
   }, [settings.workMinutes, timer, resolveTaskName, setRecords]);
 
-  // ─── Project timer ───
+  // ─── Project timer callbacks ───
+  // When a project task completes, also create a PomodoroRecord for unified daily stats.
+  // Only records tasks ≥1min to avoid noise from instant skips.
   const handleProjectTaskComplete = useCallback((result: import('./types/project').ProjectTaskResult) => {
     const minutes = Math.round(result.actualSeconds / 60);
     if (minutes >= 1 && (result.status === 'completed' || result.status === 'abandoned')) {
@@ -188,10 +207,11 @@ function App() {
   // Determine if any timer is active (for disabling mode switch)
   const isAnyTimerActive = timer.status !== 'idle' || (project.state !== null && project.state.phase !== 'setup' && project.state.phase !== 'summary');
 
-  // Serialize mixer config for effect dependency
+  // ─── Background audio lifecycle ───
+  // Play ambience only during active work phases (pomodoro or project).
+  // Serialize mixer config to detect changes without deep comparison.
   const ambienceMixerKey = JSON.stringify(settings.ambienceMixer);
 
-  // 管理背景音生命周期
   const isProjectWorking = project.state?.phase === 'running' || project.state?.phase === 'overtime';
   useEffect(() => {
     if ((timer.status === 'running' && timer.phase === 'work') || isProjectWorking) {
@@ -210,7 +230,10 @@ function App() {
     ? settings.workMinutes * 60
     : settings.shortBreakMinutes * 60;
 
-  // 页面标题显示倒计时
+  // ─── Document title ───
+  // Shows countdown in browser tab: "12:34 🍉 西瓜时钟" during work,
+  // "12:34 ☕ 西瓜时钟" during break, "+01:23 ⏰" during overtime.
+  // Project mode uses 📋 emoji to distinguish from pomodoro mode.
   useEffect(() => {
     if (project.state && (project.state.phase === 'running' || project.state.phase === 'overtime' || project.state.phase === 'break' || project.state.phase === 'paused')) {
       const ps = project.state;

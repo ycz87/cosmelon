@@ -129,6 +129,10 @@ export function useProjectTimer(
   }, [state]);
 
   // ─── Timer tick ───
+  // 1s interval that drives the countdown for running/break/overtime phases.
+  // - running: decrements timeLeft, transitions to overtime when timeLeft hits 0
+  // - overtime: increments elapsedSeconds (counting up past the estimate)
+  // - break: decrements timeLeft, auto-starts next task or goes to summary when done
   useEffect(() => {
     if (!state) return;
     if (state.phase !== 'running' && state.phase !== 'break' && state.phase !== 'overtime') return;
@@ -181,6 +185,15 @@ export function useProjectTimer(
   }, [state?.phase]);
 
   // ─── Compute timer view ───
+  // Maps the internal ProjectState into a flat object that the Timer component
+  // can render directly. Returns null when the project is in setup/summary/exited
+  // (i.e., no active countdown to display).
+  //
+  // Key mapping rules:
+  //   - break phase → TimerPhase 'break', status 'running'
+  //   - paused phase → status 'paused', phase from pausedFrom
+  //   - running/overtime → TimerPhase 'work', status 'running'
+  //   - progressLabel shows "N/total" where N = completed count (break) or completed+1 (work)
   const timerView: ProjectTimerView | null = (() => {
     if (!state || state.phase === 'setup' || state.phase === 'summary' || state.phase === 'exited') return null;
 
@@ -244,6 +257,17 @@ export function useProjectTimer(
     setHasSavedProject(false);
   }, []);
 
+  /**
+   * Recover a saved project from localStorage.
+   * Calculates the time delta since the last tick to fast-forward the timer,
+   * then pauses so the user can review the state before resuming.
+   *
+   * Recovery scenarios:
+   * - running: subtract delta from timeLeft; if ≤0, enter overtime
+   * - break: subtract delta from timeLeft; if ≤0, advance to next task or summary
+   * - overtime: add delta to elapsedSeconds
+   * - paused: no time adjustment needed (timer wasn't ticking)
+   */
   const recoverProject = useCallback(() => {
     const saved = loadState();
     if (!saved) return;
@@ -328,6 +352,15 @@ export function useProjectTimer(
 
   // ─── Task actions ───
 
+  /**
+   * Record a task result and transition to the next state.
+   * After recording, either enters break (with currentTaskIndex advanced to next task)
+   * or goes to summary if this was the last task.
+   *
+   * Note: currentTaskIndex is advanced at break entry (not break exit).
+   * This means during break, currentTaskIndex already points to the NEXT task,
+   * which is important for break duration lookup and progressLabel display.
+   */
   const recordTaskResult = useCallback((prev: ProjectState, status: 'completed' | 'skipped'): ProjectState => {
     const task = prev.tasks[prev.currentTaskIndex];
     const result: ProjectTaskResult = {
@@ -366,6 +399,11 @@ export function useProjectTimer(
     };
   }, []);
 
+  /**
+   * Complete current task during work/overtime: records result and enters break.
+   * During break: skips remaining break time and starts the next task immediately.
+   * Blocked during setup/summary/exited and paused-from-break states.
+   */
   const completeCurrentTask = useCallback(() => {
     setState((prev) => {
       if (!prev) return prev;
