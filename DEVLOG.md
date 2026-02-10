@@ -2,6 +2,28 @@
 
 ---
 
+## v0.5.3 — 修复手机端专注结束黑屏（2026-02-10）
+
+### 需求背景
+Charles 反馈手机端每次专注时间结束后页面变黑屏，像内容没刷出来。P0 紧急。
+
+### 排查过程
+1. 检查 work→break 状态切换时的条件渲染 → 无问题，所有分支都有内容
+2. 检查 CelebrationOverlay → 无问题，absolute 定位 + pointer-events-none，2.5s 后自动消失
+3. 检查背景色计算 → 无问题，所有 theme 的 bgBreak 都有值
+4. **发现根因：** 根容器 `transition-all duration-[1500ms]` + `linear-gradient` 背景
+
+### 根因分析
+- `transition-all` 会过渡**所有** CSS 属性，包括 `min-height`（dvh 在移动端动态变化）、`flex` 等 layout 属性
+- `linear-gradient` 在部分移动端浏览器中无法被 CSS transition 平滑插值，过渡期间可能渲染为透明/黑色
+- 1.5s 的过渡时间放大了这个问题窗口
+
+### 修复方案
+- `transition-all` → `transition-colors`：只过渡颜色，不碰 layout
+- `linear-gradient` → 纯 `backgroundColor`：原渐变仅 100%→90% 透明度差异，视觉影响可忽略
+
+---
+
 ## v0.5.2 — PC 鼠标拖拽滚动（2026-02-10）
 
 ### 需求背景

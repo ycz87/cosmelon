@@ -349,8 +349,8 @@ function App() {
   return (
     <I18nProvider value={t}>
     <ThemeProvider value={theme}>
-      <div key={settings.language} className="min-h-dvh flex flex-col items-center transition-all duration-[1500ms]"
-        style={{ background: `linear-gradient(to bottom, ${bgColor}, ${bgColor}e6)` }}>
+      <div key={settings.language} className="min-h-dvh flex flex-col items-center transition-colors duration-[1500ms]"
+        style={{ backgroundColor: bgColor }}>
 
         {/* Header — 48px, logo left, segmented center, icons right */}
         <header
