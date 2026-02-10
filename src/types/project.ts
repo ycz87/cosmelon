@@ -31,6 +31,8 @@ export interface ProjectState {
   results: ProjectTaskResult[];
   currentTaskIndex: number;
   phase: ProjectPhase;
+  /** Phase before pausing — used to resume correctly */
+  pausedFrom?: 'running' | 'break' | 'overtime';
   /** Seconds left on current countdown (task or break) */
   timeLeft: number;
   /** Seconds elapsed on current task (for overtime tracking) */

@@ -129,7 +129,18 @@ export function useTimer({ settings, onComplete, onSkipWork }: UseTimerOptions):
     const nextPhase: TimerPhase = phase === 'work' ? 'break' : 'work';
     setPhase(nextPhase);
     setTimeLeft(getDuration(nextPhase, s));
-    setStatus('idle');
+
+    // Respect auto-start settings
+    const shouldAutoStart = phase === 'work'
+      ? s.autoStartBreak
+      : s.autoStartWork;
+
+    if (shouldAutoStart) {
+      setGeneration((g) => g + 1);
+      setStatus('running');
+    } else {
+      setStatus('idle');
+    }
   }, [phase, timeLeft]);
 
   const abandon = useCallback(() => {

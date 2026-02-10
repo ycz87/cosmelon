@@ -153,15 +153,13 @@ export function useProjectTimer(
         if (prev.phase === 'break') {
           const newTimeLeft = prev.timeLeft - 1;
           if (newTimeLeft <= 0) {
-            // Break over — advance to next task
-            const nextIndex = prev.currentTaskIndex + 1;
-            if (nextIndex >= prev.tasks.length) {
+            // Break over — start the next task (currentTaskIndex already advanced)
+            if (prev.currentTaskIndex >= prev.tasks.length) {
               return { ...prev, timeLeft: 0, phase: 'summary', lastTickAt: now };
             }
-            const nextTask = prev.tasks[nextIndex];
+            const nextTask = prev.tasks[prev.currentTaskIndex];
             return {
               ...prev,
-              currentTaskIndex: nextIndex,
               timeLeft: nextTask.estimatedMinutes * 60,
               elapsedSeconds: 0,
               phase: 'running',
@@ -197,18 +195,18 @@ export function useProjectTimer(
       phase = 'break';
       status = 'running';
     } else if (state.phase === 'paused') {
-      // Figure out if we were in break or work before pausing
-      const wasBreak = state.results.length > state.currentTaskIndex;
-      phase = wasBreak ? 'break' : 'work';
+      phase = state.pausedFrom === 'break' ? 'break' : 'work';
       status = 'paused';
     } else {
       phase = 'work';
       status = isOvertime ? 'running' : 'running';
     }
 
-    const totalDuration = isBreak
+    const totalDuration = (isBreak || (state.phase === 'paused' && state.pausedFrom === 'break'))
       ? currentTask.breakMinutes * 60
       : currentTask.estimatedMinutes * 60;
+
+    const showBreakProgress = isBreak || (state.phase === 'paused' && state.pausedFrom === 'break');
 
     return {
       timeLeft: isOvertime ? overtimeSeconds : state.timeLeft,
@@ -216,7 +214,7 @@ export function useProjectTimer(
       phase,
       status,
       taskName: currentTask?.name || '',
-      progressLabel: `${completedCount + (isBreak ? 1 : 0)}/${totalCount}`,
+      progressLabel: `${showBreakProgress ? completedCount : completedCount + 1}/${totalCount}`,
       progressFraction: totalCount > 0 ? completedCount / totalCount : 0,
       isOvertime,
       overtimeSeconds,
@@ -259,12 +257,11 @@ export function useProjectTimer(
       } else if (saved.phase === 'break') {
         saved.timeLeft = Math.max(0, saved.timeLeft - elapsed);
         if (saved.timeLeft <= 0) {
-          const nextIndex = saved.currentTaskIndex + 1;
-          if (nextIndex >= saved.tasks.length) {
+          // currentTaskIndex already points to next task
+          if (saved.currentTaskIndex >= saved.tasks.length) {
             saved.phase = 'summary';
           } else {
-            saved.currentTaskIndex = nextIndex;
-            saved.timeLeft = saved.tasks[nextIndex].estimatedMinutes * 60;
+            saved.timeLeft = saved.tasks[saved.currentTaskIndex].estimatedMinutes * 60;
             saved.elapsedSeconds = 0;
             saved.phase = 'running';
           }
@@ -311,7 +308,7 @@ export function useProjectTimer(
     setState((prev) => {
       if (!prev) return prev;
       if (prev.phase === 'running' || prev.phase === 'break' || prev.phase === 'overtime') {
-        return { ...prev, phase: 'paused', lastTickAt: new Date().toISOString() };
+        return { ...prev, pausedFrom: prev.phase, phase: 'paused', lastTickAt: new Date().toISOString() };
       }
       return prev;
     });
@@ -320,16 +317,8 @@ export function useProjectTimer(
   const resume = useCallback(() => {
     setState((prev) => {
       if (!prev || prev.phase !== 'paused') return prev;
-      const isBreak = prev.results.length > prev.currentTaskIndex;
-      let resumePhase: ProjectPhase;
-      if (isBreak) {
-        resumePhase = 'break';
-      } else if (prev.timeLeft <= 0) {
-        resumePhase = 'overtime';
-      } else {
-        resumePhase = 'running';
-      }
-      return { ...prev, phase: resumePhase, lastTickAt: new Date().toISOString() };
+      const resumePhase: ProjectPhase = prev.pausedFrom || 'running';
+      return { ...prev, phase: resumePhase, pausedFrom: undefined, lastTickAt: new Date().toISOString() };
     });
   }, []);
 
@@ -362,10 +351,11 @@ export function useProjectTimer(
       };
     }
 
-    // Enter break
+    // Enter break, advance currentTaskIndex to next task already
     return {
       ...prev,
       results: newResults,
+      currentTaskIndex: nextIndex,
       phase: 'break',
       timeLeft: task.breakMinutes * 60,
       lastTickAt: new Date().toISOString(),
@@ -375,8 +365,20 @@ export function useProjectTimer(
   const completeCurrentTask = useCallback(() => {
     setState((prev) => {
       if (!prev) return prev;
-      if (prev.phase === 'break' || prev.phase === 'setup' || prev.phase === 'summary' || prev.phase === 'exited') return prev;
-      if (prev.phase === 'paused' && prev.results.length > prev.currentTaskIndex) return prev;
+      if (prev.phase === 'setup' || prev.phase === 'summary' || prev.phase === 'exited') return prev;
+      // Allow completing during break — skip the break and start next task
+      if (prev.phase === 'break') {
+        const nextTask = prev.tasks[prev.currentTaskIndex];
+        if (!nextTask) return { ...prev, phase: 'summary', timeLeft: 0, lastTickAt: new Date().toISOString() };
+        return {
+          ...prev,
+          phase: 'running',
+          timeLeft: nextTask.estimatedMinutes * 60,
+          elapsedSeconds: 0,
+          lastTickAt: new Date().toISOString(),
+        };
+      }
+      if (prev.phase === 'paused' && prev.pausedFrom === 'break') return prev;
       return recordTaskResult(prev, 'completed');
     });
   }, [recordTaskResult]);
@@ -385,7 +387,7 @@ export function useProjectTimer(
     setState((prev) => {
       if (!prev) return prev;
       if (prev.phase === 'break' || prev.phase === 'setup' || prev.phase === 'summary' || prev.phase === 'exited') return prev;
-      if (prev.phase === 'paused' && prev.results.length > prev.currentTaskIndex) return prev;
+      if (prev.phase === 'paused' && prev.pausedFrom === 'break') return prev;
       return recordTaskResult(prev, 'skipped');
     });
   }, [recordTaskResult]);
@@ -445,10 +447,11 @@ export function useProjectTimer(
         // Last task — go to summary
         return { ...prev, phase: 'summary', timeLeft: 0, lastTickAt: new Date().toISOString() };
       }
-      // Enter break before next task
+      // Enter break before next task, advance index now
       const currentTask = prev.tasks[prev.currentTaskIndex];
       return {
         ...prev,
+        currentTaskIndex: nextIndex,
         phase: 'break',
         timeLeft: currentTask.breakMinutes * 60,
         lastTickAt: new Date().toISOString(),

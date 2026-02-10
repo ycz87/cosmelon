@@ -2,6 +2,27 @@
 
 ---
 
+## v0.4.4 — Bug 修复（2026-02-10）
+
+### Bug 1（P0）：项目模式退出后选"下一个"跳过任务
+- 重构 `currentTaskIndex` 推进时机：进入 break 时立即 +1，break 结束后不再 +1
+- 新增 `pausedFrom` 字段记录暂停前的 phase，确保 resume 正确恢复
+- 同步修复 recovery 逻辑
+
+### Bug 2（P1）：项目模式 break 阶段进度显示错误
+- break 阶段 progressLabel 不再 +1，显示已完成数（如 "1/3"）
+
+### Bug 3（P1）：break 阶段 ✓ 按钮可跳过休息
+- `completeCurrentTask` 在 break 阶段跳过休息，直接进入下一个任务
+
+### Bug 4（P1）：番茄钟 skip 后休息不自动开始
+- `skip` 现在检查 `autoStartBreak`/`autoStartWork`，为 true 时自动开始
+
+### Bug 5（P2）：项目模式 abandoned 任务不记录到历史
+- `handleProjectTaskComplete` 现在记录 abandoned 且 ≥1min 的任务，status 标记为 'abandoned'
+
+---
+
 ## v0.4.4 — 全主题对比度修复（2026-02-10）
 
 ### 主题颜色 token 调整（WCAG AA 标准）

@@ -147,19 +147,22 @@ function App() {
   // ─── Project timer ───
   const handleProjectTaskComplete = useCallback((result: import('./types/project').ProjectTaskResult) => {
     const minutes = Math.round(result.actualSeconds / 60);
-    if (minutes >= 1 && result.status === 'completed') {
+    if (minutes >= 1 && (result.status === 'completed' || result.status === 'abandoned')) {
       const stage = getGrowthStage(minutes);
       const emoji = GROWTH_EMOJI[stage];
+      const pomodoroStatus = result.status === 'completed' ? 'completed' : 'abandoned';
       const record: PomodoroRecord = {
         id: Date.now().toString(),
         task: result.name,
         durationMinutes: minutes,
         completedAt: result.completedAt,
         date: getTodayKey(),
-        status: 'completed',
+        status: pomodoroStatus,
       };
       setRecords((prev) => [record, ...prev]);
-      sendBrowserNotification(t.workComplete(emoji), `"${result.name}" · ${minutes}${t.minutes}`);
+      if (result.status === 'completed') {
+        sendBrowserNotification(t.workComplete(emoji), `"${result.name}" · ${minutes}${t.minutes}`);
+      }
     }
     playAlertRepeated(settings.alertSound, 1);
   }, [setRecords, settings.alertSound, t]);

@@ -2,6 +2,22 @@
 
 ---
 
+## v0.4.4 — Bug 修复（2026-02-10）
+
+### 需求背景
+Charles 要求在进入 v0.5 之前修复当前版本的 5 个 bug。
+
+### 改动文件
+- `src/types/project.ts` — ProjectState 新增 `pausedFrom` 字段
+- `src/hooks/useProjectTimer.ts` — Bug 1/2/3: 重构 currentTaskIndex 推进时机（进入 break 时立即 +1）、pause/resume 用 pausedFrom、break 阶段 ✓ 跳过休息、progressLabel 修复
+- `src/hooks/useTimer.ts` — Bug 4: skip 检查 autoStartBreak/autoStartWork
+- `src/App.tsx` — Bug 5: abandoned 任务（≥1min）记录到历史
+
+### 技术决策
+Bug 1 的修复方案选择了"进入 break 时立即推进 currentTaskIndex"，这样 `currentTaskIndex` 始终指向当前/即将执行的任务，语义更清晰。代价是需要同步修改 resume、recovery、timerView 等依赖 index 的逻辑，引入 `pausedFrom` 字段。
+
+---
+
 ## v0.4.4 — 全主题对比度修复（2026-02-10）
 
 ### 需求背景
