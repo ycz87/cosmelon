@@ -283,7 +283,7 @@ export const en: Messages = {
   encourageEmpty: [
     'Grow your watermelon, grow your focus 🍉',
     'Ready to plant your first melon? 🌱',
-    'Time to get things done 💪',
+    'Your watermelon field awaits 🍉',
   ],
   encourageFirst: [
     'Your watermelon is growing 🌱',
@@ -298,7 +298,7 @@ export const en: Messages = {
   encourageThird: [
     'Today\'s melon tastes extra sweet 🍉',
     '3 melons, what a harvest!',
-    'Getting into the zone!',
+    'Your melon patch is thriving 🌱',
   ],
   encourageMany: [
     '{n} melons harvested — you\'re crushing it!',
