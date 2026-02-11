@@ -2,6 +2,22 @@
 
 ---
 
+## v0.6.2 — 优化最后冲刺视觉效果（2026-02-11）
+
+### 优化：渐进式冲刺紧迫感
+- **60s–31s**：进度环轻微呼吸闪烁（1.5s 周期），数字加淡淡 glow（accent 色 textShadow）
+- **30s–11s**：呼吸加快（1s 周期），glow 更强
+- **10s–0s**：数字大幅脉冲（scale 1.0→1.15，0.5s 周期）+ opacity 闪烁（1.0→0.7），进度环快速闪烁 + brightness 变化
+- 不再直接变金色（之前像换主题），改为保持原色 + 渐进 glow/动画
+- 三个阶段平滑过渡，用户能感受到越来越紧迫
+
+### 技术改动
+- `Timer.tsx`：`isFinalSprint` 拆分为 `isSprintT1`/`isSprintT2`/`isSprintT3` 三级
+- `index.css`：新增 `animate-sprint-breathe-slow`/`animate-sprint-breathe-fast`/`animate-sprint-flash`/`animate-sprint-digits` 四个动画
+- 数字 glow 用 `textShadow` 实现，三级递增强度
+
+---
+
 ## v0.6.1 — 周趋势图 + 专注模式增强（2026-02-10）
 
 ### 新功能：周趋势图

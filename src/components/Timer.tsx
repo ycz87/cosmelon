@@ -139,9 +139,10 @@ export function Timer({ timeLeft, totalDuration, phase, status, celebrating, cel
     };
   }, []);
 
-  // ─── Final sprint detection ───
-  const isFinalSprint = isWork && status === 'running' && !isOvertime && timeLeft <= 60 && timeLeft > 0;
-  const isFinalCountdown = isWork && status === 'running' && !isOvertime && timeLeft <= 10 && timeLeft > 0;
+  // ─── Final sprint detection (progressive urgency) ───
+  const isSprintT1 = isWork && status === 'running' && !isOvertime && timeLeft <= 60 && timeLeft > 30; // gentle
+  const isSprintT2 = isWork && status === 'running' && !isOvertime && timeLeft <= 30 && timeLeft > 10; // urgent
+  const isSprintT3 = isWork && status === 'running' && !isOvertime && timeLeft <= 10 && timeLeft > 0;  // intense
 
   // Bug 2 fix: debounce ✓ and ✗ to prevent race conditions
   const actionLockRef = useRef(false);
@@ -187,12 +188,11 @@ export function Timer({ timeLeft, totalDuration, phase, status, celebrating, cel
   // 根据主题和阶段选择颜色
   // ─── Phase-dependent color sets ───
   // Work: theme accent gradient; Break: cool tones; Overtime: red warning
-  // Final sprint (last 60s): gold gradient
+  // Final sprint: keep theme colors (glow effect added via CSS classes)
   const workColors = { from: theme.accent, mid: theme.accentEnd, to: theme.accentEnd };
-  const sprintColors = { from: '#FFD700', mid: '#FFC107', to: '#FFB300' };
   const breakColors = { from: theme.breakAccent, mid: theme.breakAccentEnd, to: theme.breakAccentEnd };
   const overtimeColors = { from: '#ef4444', mid: '#f87171', to: '#fca5a5' };
-  const colors = isOvertime ? overtimeColors : isFinalSprint ? sprintColors : isWork ? workColors : breakColors;
+  const colors = isOvertime ? overtimeColors : isWork ? workColors : breakColors;
 
   const phaseLabel = isOvertime ? t.projectOvertime
     : phase === 'work' ? t.phaseWork
@@ -225,7 +225,7 @@ export function Timer({ timeLeft, totalDuration, phase, status, celebrating, cel
 
       {/* Circular timer */}
       <div className="relative w-[260px] h-[260px] sm:w-[320px] sm:h-[320px] flex items-center justify-center overflow-visible mt-4">
-        <svg className={`absolute inset-0 overflow-visible ${celebrating ? 'animate-ring-pulse' : ''} ${isOvertime ? 'animate-ring-pulse' : ''}`} viewBox={`0 0 ${size} ${size}`} overflow="visible" style={{ filter: `drop-shadow(0 0 12px ${colors.from}40)` }}>
+        <svg className={`absolute inset-0 overflow-visible ${celebrating ? 'animate-ring-pulse' : ''} ${isOvertime ? 'animate-ring-pulse' : ''} ${isSprintT1 ? 'animate-sprint-breathe-slow' : ''} ${isSprintT2 ? 'animate-sprint-breathe-fast' : ''} ${isSprintT3 ? 'animate-sprint-flash' : ''}`} viewBox={`0 0 ${size} ${size}`} overflow="visible" style={{ filter: `drop-shadow(0 0 12px ${colors.from}40)` }}>
           <defs>
             <linearGradient id="grad-progress" gradientUnits="userSpaceOnUse"
               x1={center} y1="0" x2={size} y2={size}>
@@ -303,8 +303,17 @@ export function Timer({ timeLeft, totalDuration, phase, status, celebrating, cel
             <span
               className={`text-6xl sm:text-7xl font-timer tracking-tight select-none transition-all ${
                 status === 'paused' ? 'animate-pulse' : ''
-              } ${isOvertime ? 'animate-pulse' : ''} ${isFinalCountdown ? 'animate-final-countdown' : ''} ${canQuickPick || canToggle ? 'cursor-pointer hover:opacity-70' : ''} ${digitBounce ? 'scale-95' : 'scale-100'}`}
-              style={{ fontWeight: 300, color: isOvertime ? '#ef4444' : isFinalSprint ? '#FFD700' : theme.text, fontVariantNumeric: 'tabular-nums', transition: 'transform 0.15s ease-out, opacity 0.2s, color 0.5s' }}
+              } ${isOvertime ? 'animate-pulse' : ''} ${isSprintT3 ? 'animate-sprint-digits' : ''} ${canQuickPick || canToggle ? 'cursor-pointer hover:opacity-70' : ''} ${digitBounce ? 'scale-95' : 'scale-100'}`}
+              style={{
+                fontWeight: 300,
+                color: isOvertime ? '#ef4444' : theme.text,
+                fontVariantNumeric: 'tabular-nums',
+                transition: 'transform 0.15s ease-out, opacity 0.2s, text-shadow 0.5s',
+                textShadow: isSprintT3 ? `0 0 20px ${theme.accent}, 0 0 40px ${theme.accent}80`
+                  : isSprintT2 ? `0 0 12px ${theme.accent}aa`
+                  : isSprintT1 ? `0 0 6px ${theme.accent}55`
+                  : 'none',
+              }}
               onClick={() => {
                 if (canToggle) {
                   toggleDisplayMode();
