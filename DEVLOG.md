@@ -2,6 +2,34 @@
 
 ---
 
+## v0.8.1 — 阈值调整 + 防挂机机制（2026-02-11）
+
+### 需求背景
+Charles 担心用户挂机刷收获物。两个改动：调整阈值让每个阶段更有辨识度，加防挂机机制。
+
+### 阈值调整
+新阈值 5-15/16-25/26-45/46-60/61-90，>90 封顶 ripe。金西瓜触发区间从 ≥90 改为 61-90，>90 不触发概率（防止挂机 90+ 分钟刷金西瓜）。
+
+### 防挂机：overtime 模式
+给 useTimer 加了 overtime phase。当 workMinutes > 25 且倒计时到 0 时，不自动完成，而是进入正计时模式。用户必须手动点 Done。同时 autoStartBreak 在 >25min 时自动禁用。
+
+### 防挂机：2x 超时惩罚
+handleSkipWork 里检查 `elapsedSeconds > workMinutes * 60 * 2`，超了就不调 resolveStageAndStore，不存瓜棚，不播庆祝。用 suppressCelebrationRef 在下一帧 dismiss 掉 useTimer 内部设的 celebrating。
+
+项目模式同理，handleProjectTaskComplete 里检查 `actualSeconds > estimatedMinutes * 60 * 2`。
+
+### 改动文件
+- `src/types.ts` — getGrowthStage 新阈值
+- `src/hooks/useTimer.ts` — 重写，新增 overtime phase + overtimeSeconds
+- `src/components/Timer.tsx` — isWork 包含 overtime
+- `src/App.tsx` — 2x 检查 + 庆祝抑制 + overtime 标题 + 健康提示 + abandon 修复
+- `src/i18n/types.ts` + `zh.ts` + `en.ts` — overtimeNoReward + healthReminder
+- `package.json` — 0.8.0 → 0.8.1
+- `docs/WAREHOUSE-DESIGN-v1.md` — 设计文档更新（小西提供）
+- 四个文档同步更新
+
+---
+
 ## v0.8.0 — 仓库与合成系统（2026-02-11）
 
 ### 需求背景

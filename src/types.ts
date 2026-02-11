@@ -183,12 +183,11 @@ export type GrowthStage = 'seed' | 'sprout' | 'bloom' | 'green' | 'ripe' | 'lege
 /** 根据专注时长返回生长阶段（不含 legendary 概率判定） */
 export function getGrowthStage(minutes: number): GrowthStage {
   if (minutes < 5) return 'seed'; // <5min 在调用侧判断是否给收获物
-  if (minutes < 15) return 'seed';
-  if (minutes < 25) return 'sprout';
-  if (minutes < 45) return 'bloom';
-  if (minutes < 60) return 'green';
-  if (minutes < 90) return 'ripe';
-  return 'ripe'; // ≥90min 默认 ripe，legendary 由概率判定
+  if (minutes <= 15) return 'seed';
+  if (minutes <= 25) return 'sprout';
+  if (minutes <= 45) return 'bloom';
+  if (minutes <= 60) return 'green';
+  return 'ripe'; // >60min 默认 ripe，legendary 由概率判定（仅 61-90）
 }
 
 /** 判定 ≥90min 是否触发金西瓜（10% 概率 + 保底） */

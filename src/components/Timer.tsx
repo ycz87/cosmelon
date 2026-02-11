@@ -71,7 +71,7 @@ function loadDisplayMode(): TimerDisplayMode {
 }
 
 export function Timer({ timeLeft, totalDuration, phase, status, celebrating, celebrationStage, celebrationIsRipe, workMinutes, onCelebrationComplete, onStart, onPause, onResume, onSkip, onAbandon, onChangeWorkMinutes, overtime }: TimerProps) {
-  const isWork = phase === 'work';
+  const isWork = phase === 'work' || phase === 'overtime';
   const isOvertime = !!overtime;
   const progress = isOvertime ? 1 : (totalDuration > 0 ? (totalDuration - timeLeft) / totalDuration : 0);
   const containerRef = useRef<HTMLDivElement>(null);

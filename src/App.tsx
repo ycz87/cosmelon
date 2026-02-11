@@ -18,7 +18,7 @@
  * - Background audio lifecycle is tied to timer running state via useEffect
  * - Mode switch is disabled while any timer is active
  */
-import { useState, useCallback, useEffect, useMemo } from 'react';
+import { useState, useCallback, useEffect, useMemo, useRef } from 'react';
 import { Timer } from './components/Timer';
 import { TaskInput } from './components/TaskInput';
 import { TodayStats } from './components/TodayStats';
@@ -67,6 +67,7 @@ function App() {
   const [mode, setMode] = useState<AppMode>('pomodoro');
   const [showGuide, setShowGuide] = useState(false);
   const [lastRolledStage, setLastRolledStage] = useState<GrowthStage | null>(null);
+  const suppressCelebrationRef = useRef(false);
 
   // PC drag-to-scroll (mouse drag = touch scroll)
   useDragScroll();
@@ -124,7 +125,8 @@ function App() {
       return 'seed';
     }
     let stage = getGrowthStage(minutes);
-    if (minutes >= 90) {
+    // 金西瓜只在 61-90 分钟触发，>90 分钟直接给 ripe
+    if (minutes >= 61 && minutes <= 90) {
       const gotLegendary = rollLegendary(warehouse.legendaryPity);
       updatePity(gotLegendary);
       if (gotLegendary) stage = 'legendary';
@@ -166,8 +168,10 @@ function App() {
       const elapsedMinutes = Math.round(elapsedSeconds / 60);
       if (elapsedMinutes < 1) return;
       const taskName = currentTask.trim() || t.defaultTaskName(records.filter((r) => r.date === getTodayKey()).length + 1);
-      const stage = resolveStageAndStore(elapsedMinutes);
-      const emoji = GROWTH_EMOJI[stage];
+
+      // 防挂机：实际时间超过设定 2 倍 → 不给收获物
+      const isOvertime2x = elapsedSeconds > settings.workMinutes * 60 * 2;
+
       const record: PomodoroRecord = {
         id: Date.now().toString(),
         task: taskName,
@@ -177,12 +181,23 @@ function App() {
         status: 'completed',
       };
       setRecords((prev) => [record, ...prev]);
-      sendBrowserNotification(t.skipComplete(emoji), `"${taskName}" · ${elapsedMinutes}${t.minutes}`);
+
+      if (isOvertime2x) {
+        // 超时 2 倍：记录但不给奖励，不存瓜棚，不播庆祝
+        setLastRolledStage(null);
+        suppressCelebrationRef.current = true;
+        sendBrowserNotification(t.overtimeNoReward, `"${taskName}" · ${elapsedMinutes}${t.minutes}`);
+      } else {
+        // 奖励按设定时间算
+        const stage = resolveStageAndStore(settings.workMinutes);
+        const emoji = GROWTH_EMOJI[stage];
+        sendBrowserNotification(t.skipComplete(emoji), `"${taskName}" · ${elapsedMinutes}${t.minutes}`);
+      }
       playAlertRepeated(settings.alertSound, 1);
     } catch (err) {
       console.error('[Timer] onSkipWork error:', err);
     }
-  }, [currentTask, records, setRecords, settings.alertSound, t, resolveStageAndStore]);
+  }, [currentTask, records, setRecords, settings.alertSound, settings.workMinutes, t, resolveStageAndStore]);
 
   const timer = useTimer({ settings, onComplete: handleTimerComplete, onSkipWork: handleSkipWork });
 
@@ -194,7 +209,9 @@ function App() {
 
   const handleAbandonConfirm = useCallback(() => {
     const totalSeconds = settings.workMinutes * 60;
-    const elapsedSeconds = totalSeconds - timer.timeLeft;
+    const elapsedSeconds = timer.phase === 'overtime'
+      ? totalSeconds + timer.overtimeSeconds
+      : totalSeconds - timer.timeLeft;
     const elapsedMinutes = Math.round(elapsedSeconds / 60);
     if (elapsedMinutes >= 1) {
       const taskName = resolveTaskName();
@@ -241,7 +258,11 @@ function App() {
         });
       } else {
         // Normal: create a new record + store to warehouse
-        const stage = result.status === 'completed' ? resolveStageAndStore(totalMinutes) : getGrowthStage(totalMinutes);
+        // 防挂机：overtime 超过预估 2 倍不给奖励
+        const isOvertime2x = result.actualSeconds > result.estimatedMinutes * 60 * 2;
+        const stage = (result.status === 'completed' && !isOvertime2x)
+          ? resolveStageAndStore(result.estimatedMinutes)
+          : getGrowthStage(result.estimatedMinutes);
         const emoji = GROWTH_EMOJI[stage];
         const record: PomodoroRecord = {
           id: Date.now().toString(),
@@ -253,7 +274,11 @@ function App() {
         };
         setRecords((prev) => [record, ...prev]);
         if (result.status === 'completed') {
-          sendBrowserNotification(t.workComplete(emoji), `"${result.name}" · ${totalMinutes}${t.minutes}`);
+          if (isOvertime2x) {
+            sendBrowserNotification(t.overtimeNoReward, `"${result.name}" · ${totalMinutes}${t.minutes}`);
+          } else {
+            sendBrowserNotification(t.workComplete(emoji), `"${result.name}" · ${totalMinutes}${t.minutes}`);
+          }
         }
       }
     }
@@ -304,7 +329,7 @@ function App() {
   const todayKey = getTodayKey();
   const todayRecords = records.filter((r) => r.date === todayKey);
 
-  const totalDuration = timer.phase === 'work'
+  const totalDuration = (timer.phase === 'work' || timer.phase === 'overtime')
     ? settings.workMinutes * 60
     : settings.shortBreakMinutes * 60;
 
@@ -331,11 +356,17 @@ function App() {
       return;
     }
     if (timer.status === 'running' || timer.status === 'paused') {
-      const minutes = Math.floor(timer.timeLeft / 60);
-      const seconds = timer.timeLeft % 60;
-      const timeStr = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-      const phaseEmoji = timer.phase === 'work' ? '🍉' : '☕';
-      document.title = `${timeStr} ${phaseEmoji} ${t.appName}`;
+      if (timer.phase === 'overtime') {
+        const m = Math.floor(timer.overtimeSeconds / 60);
+        const s = timer.overtimeSeconds % 60;
+        document.title = `+${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')} ⏰ ${t.appName}`;
+      } else {
+        const minutes = Math.floor(timer.timeLeft / 60);
+        const seconds = timer.timeLeft % 60;
+        const timeStr = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        const phaseEmoji = timer.phase === 'work' ? '🍉' : '☕';
+        document.title = `${timeStr} ${phaseEmoji} ${t.appName}`;
+      }
     } else if (timer.phase !== 'work') {
       document.title = `${t.phaseShortBreak} · ${t.appName}`;
     } else {
@@ -375,8 +406,15 @@ function App() {
   const isWork = timer.phase === 'work';
 
   // Celebration — use lastRolledStage if available (includes legendary), fallback to getGrowthStage
-  const celebrationGrowthStage: GrowthStage | null = timer.celebrating
-    ? (lastRolledStage ?? getGrowthStage(settings.workMinutes))
+  // null lastRolledStage = overtime 2x, suppress celebration
+  useEffect(() => {
+    if (timer.celebrating && suppressCelebrationRef.current) {
+      suppressCelebrationRef.current = false;
+      timer.dismissCelebration();
+    }
+  }, [timer.celebrating, timer.dismissCelebration]);
+  const celebrationGrowthStage: GrowthStage | null = timer.celebrating && lastRolledStage
+    ? lastRolledStage
     : null;
   const celebrationIsRipe = celebrationGrowthStage === 'ripe' || celebrationGrowthStage === 'legendary';
 
@@ -514,10 +552,16 @@ function App() {
                     onResume={timer.resume} onSkip={timer.skip}
                     onAbandon={handleAbandonClick}
                     onChangeWorkMinutes={handleChangeWorkMinutes}
+                    overtime={timer.overtimeSeconds > 0 ? { seconds: timer.overtimeSeconds } : undefined}
                   />
                   <div className="mt-6">
                     <TaskInput value={currentTask} onChange={setCurrentTask} disabled={timer.status !== 'idle'} />
                   </div>
+                  {settings.workMinutes > 25 && timer.status === 'idle' && (
+                    <div className="mt-2 text-center text-[11px]" style={{ color: theme.textFaint }}>
+                      {t.healthReminder}
+                    </div>
+                  )}
                 </div>
                 <div className="w-full max-w-xs sm:max-w-sm px-4 pt-4 pb-6">
                   <div className="rounded-2xl p-5 border" style={{ backgroundColor: theme.surface, borderColor: theme.border }}>

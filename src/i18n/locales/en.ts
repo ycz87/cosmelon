@@ -107,6 +107,10 @@ export const en: Messages = {
   stageNameLegendary: 'Golden Melon',
   legendaryUnlocked: 'Unlocked',
 
+  // Anti-AFK & Health
+  overtimeNoReward: 'Overtime too long — no reward this time ⏰',
+  healthReminder: 'Sessions over 25 min require manual finish — remember to rest 🧘',
+
   // Settings
   settings: 'Settings',
   timerRunningHint: '⏳ Timer is running — adjust after it stops',
@@ -216,7 +220,7 @@ export const en: Messages = {
   ],
   guideGrowth: '🌱 Watermelon Growth',
   guideGrowthDesc: 'The longer you focus, the bigger your watermelon grows:',
-  guideGrowthStages: ['<10 min · Sproutling', '10–14 min · Sprout', '15–19 min · Little Flower', '20–24 min · Unripe', '≥25 min · Ripe'],
+  guideGrowthStages: ['5–15 min · Sproutling', '16–25 min · Sprout', '26–45 min · Little Flower', '46–60 min · Unripe', '61–90 min · Ripe'],
   guideSettings: '⚙️ Settings',
   guideSettingsDesc: 'Customize focus/break durations, auto-start, alert sounds, ambience mixer, themes, and export your data from the gear icon.',
   guideStart: 'Get Started',

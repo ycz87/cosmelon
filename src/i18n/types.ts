@@ -55,6 +55,10 @@ export interface Messages {
   stageNameRipe: string;
   stageNameLegendary: string;
   legendaryUnlocked: string;
+
+  // Anti-AFK & Health (v0.8.1)
+  overtimeNoReward: string;
+  healthReminder: string;
   settings: string;
   timerRunningHint: string;
   workDuration: string;

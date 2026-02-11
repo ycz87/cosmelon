@@ -2,6 +2,30 @@
 
 ---
 
+## v0.8.1 — 阈值调整 + 防挂机机制（2026-02-11）
+
+### 专注阈值调整
+- 新阈值：seed 5-15min / sprout 16-25min / bloom 26-45min / green 46-60min / ripe 61-90min
+- >90min 封顶给 ripe（不触发金西瓜概率）
+- 金西瓜概率触发区间改为 61-90 分钟
+
+### 防挂机机制
+- >25 分钟专注进入 overtime 模式（计时器到 0 后开始正计时），需手动点 Done 结束
+- >25 分钟时 Auto-start Break 自动禁用
+- 实际时间超过设定 2 倍 → 不给收获物、不存瓜棚、不播庆祝动画
+- 奖励按设定时间（settings.workMinutes）计算，不按实际经过时间
+- 项目模式 overtime 超预估 2 倍同样不给奖励
+- 健康提示：>25 分钟时显示"需手动结束，记得适时休息 🧘"
+
+### 技术改动
+- `types.ts`：getGrowthStage() 新阈值，金西瓜触发区间 61-90
+- `useTimer.ts`：新增 overtime phase + overtimeSeconds 正计时
+- `Timer.tsx`：overtime 视为 work 相位（控制按钮 + 颜色）
+- `App.tsx`：2x 超时检查 + 庆祝抑制 + overtime 文档标题 + 健康提示
+- `i18n`：新增 overtimeNoReward + healthReminder 文案
+
+---
+
 ## v0.8.0 — 仓库与合成系统（2026-02-11）
 
 ### 专注时长阈值调整
