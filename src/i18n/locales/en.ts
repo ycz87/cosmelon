@@ -43,11 +43,11 @@ export const en: Messages = {
 
   // Per-stage celebration text (v0.7.1)
   celebrateSeed: [
-    'Every seed holds a watermelon field 🌱',
+    'Every sproutling holds a watermelon field 🌱',
     'A small start, a big possibility ✨',
-    'The seed is in your hands now',
+    'The sproutling is in your hands now',
     'Your first step of focus, taken 🌱',
-    'Plant the seed, wait for the bloom',
+    'A tiny sproutling, waiting to bloom',
   ],
   celebrateSprout: [
     'A sprout breaks through — your focus is taking root 🌿',
@@ -57,9 +57,9 @@ export const en: Messages = {
     'The sprout is here, good things are coming 🌿',
   ],
   celebrateBloom: [
-    'The flower blooms — can the fruit be far behind? 🌼',
+    'A little flower blooms — can the fruit be far behind? 🌼',
     'Not just a flower blooming, but your focus too',
-    'Blossom season, good things ahead 🌼',
+    'Little flowers in bloom, good things ahead 🌼',
     'Just a little more, and fruit will come',
     'Your focus is blooming 🌼',
   ],
@@ -99,9 +99,9 @@ export const en: Messages = {
   synthesisSynthesizeAll: 'Synthesize All',
   synthesisSuccess: (name) => `Success! Got ${name}`,
   warehouseEmpty: 'Your shed is empty — start focusing! 🍉',
-  stageNameSeed: 'Seed',
+  stageNameSeed: 'Sproutling',
   stageNameSprout: 'Sprout',
-  stageNameBloom: 'Flower',
+  stageNameBloom: 'Little Flower',
   stageNameGreen: 'Unripe Melon',
   stageNameRipe: 'Watermelon',
   stageNameLegendary: 'Golden Melon',
@@ -197,7 +197,7 @@ export const en: Messages = {
   themeWarm: 'Warm',
 
   // Growth stages
-  stageSeed: 'Seed',
+  stageSeed: 'Sproutling',
   stageSprout: 'Sprout',
   stageBloom: 'Bloom',
   stageGreen: 'Unripe',
@@ -216,7 +216,7 @@ export const en: Messages = {
   ],
   guideGrowth: '🌱 Watermelon Growth',
   guideGrowthDesc: 'The longer you focus, the bigger your watermelon grows:',
-  guideGrowthStages: ['<10 min · Seed', '10–14 min · Sprout', '15–19 min · Bloom', '20–24 min · Unripe', '≥25 min · Ripe'],
+  guideGrowthStages: ['<10 min · Sproutling', '10–14 min · Sprout', '15–19 min · Little Flower', '20–24 min · Unripe', '≥25 min · Ripe'],
   guideSettings: '⚙️ Settings',
   guideSettingsDesc: 'Customize focus/break durations, auto-start, alert sounds, ambience mixer, themes, and export your data from the gear icon.',
   guideStart: 'Get Started',

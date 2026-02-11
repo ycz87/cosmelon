@@ -203,7 +203,7 @@ export const GROWTH_EMOJI: Record<GrowthStage, string> = {
 };
 
 export const GROWTH_LABEL: Record<GrowthStage, string> = {
-  seed: '发芽', sprout: '幼苗', bloom: '开花', green: '青瓜', ripe: '成熟', legendary: '金西瓜',
+  seed: '小芽', sprout: '幼苗', bloom: '小花', green: '小瓜', ripe: '成熟', legendary: '金西瓜',
 };
 
 // ─── 仓库系统 ───
