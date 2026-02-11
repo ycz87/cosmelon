@@ -194,6 +194,13 @@ export function Timer({ timeLeft, totalDuration, phase, status, celebrating, cel
   const overtimeColors = { from: '#ef4444', mid: '#f87171', to: '#fca5a5' };
   const colors = isOvertime ? overtimeColors : isWork ? workColors : breakColors;
 
+  // ─── Ring base (track) color ───
+  // If theme provides explicit ringBase, use it; otherwise fall back to accent + ring opacity
+  const ringBaseFrom = theme.ringBase ?? colors.from;
+  const ringBaseEnd = theme.ringBaseEnd ?? colors.mid;
+  const ringBaseOpacityFrom = theme.ringBase ? '1' : theme.ring;
+  const ringBaseOpacityTo = theme.ringBase ? '0.6' : (parseFloat(theme.ring) * 0.4).toFixed(2);
+
   const phaseLabel = isOvertime ? t.projectOvertime
     : phase === 'work' ? t.phaseWork
     : t.phaseShortBreak;
@@ -214,7 +221,7 @@ export function Timer({ timeLeft, totalDuration, phase, status, celebrating, cel
         className="text-sm font-semibold tracking-widest transition-all duration-500 rounded-full"
         style={{
           color: isOvertime ? '#ef4444' : isWork ? theme.accent : theme.breakAccent,
-          backgroundColor: isOvertime ? 'rgba(239,68,68,0.12)' : isWork ? `${theme.accent}1f` : `${theme.breakAccent}1f`,
+          backgroundColor: isOvertime ? 'rgba(239,68,68,0.12)' : isWork ? (theme.focusLabel ?? `${theme.accent}1f`) : `${theme.breakAccent}1f`,
           padding: '6px 14px',
           fontSize: '14px',
           fontWeight: 600,
@@ -235,8 +242,8 @@ export function Timer({ timeLeft, totalDuration, phase, status, celebrating, cel
             </linearGradient>
             <linearGradient id="grad-base" gradientUnits="userSpaceOnUse"
               x1={center} y1="0" x2={size} y2={size}>
-              <stop offset="0%" stopColor={colors.from} stopOpacity="0.20" />
-              <stop offset="100%" stopColor={colors.mid} stopOpacity="0.08" />
+              <stop offset="0%" stopColor={isWork && !isOvertime ? ringBaseFrom : colors.from} stopOpacity={isWork && !isOvertime ? ringBaseOpacityFrom : '0.20'} />
+              <stop offset="100%" stopColor={isWork && !isOvertime ? ringBaseEnd : colors.mid} stopOpacity={isWork && !isOvertime ? ringBaseOpacityTo : '0.08'} />
             </linearGradient>
             <filter id="glow-head" x="-100%" y="-100%" width="300%" height="300%">
               <feGaussianBlur stdDeviation="8" result="blur" />

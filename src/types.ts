@@ -32,9 +32,12 @@ export interface ThemeColors {
   accentEnd: string;    // 渐变终点色
   breakAccent: string;  // 休息强调色
   breakAccentEnd: string;
-  ring: string;         // 进度环基底色 opacity
+  ring: string;         // 进度环基底色 opacity（fallback）
+  ringBase?: string;    // 进度环底圈显式颜色（覆盖 accent+ring opacity）
+  ringBaseEnd?: string; // 进度环底圈渐变终点色
   inputBg: string;      // 输入框背景
   border: string;       // 分割线/边框色
+  focusLabel?: string;  // Focus 标签胶囊背景色（可选）
 }
 
 export const THEMES: Record<ThemeId, { name: string; colors: ThemeColors }> = {
@@ -43,8 +46,10 @@ export const THEMES: Record<ThemeId, { name: string; colors: ThemeColors }> = {
     colors: {
       bg: '#111114', bgWork: '#141012', bgBreak: '#101218',
       surface: '#1c1c24', text: 'rgba(255,255,255,0.9)', textMuted: 'rgba(255,255,255,0.55)',
-      textFaint: 'rgba(255,255,255,0.3)', accent: '#f43f5e', accentEnd: '#e11d48',
+      textFaint: 'rgba(255,255,255,0.3)', accent: '#FF3B5C', accentEnd: '#FF6B8A',
       breakAccent: '#6366f1', breakAccentEnd: '#818cf8', ring: '0.35',
+      ringBase: '#2D5A27', ringBaseEnd: '#1a3d18',
+      focusLabel: 'rgba(76,175,80,0.15)',
       inputBg: 'rgba(255,255,255,0.04)',
       border: 'rgba(255,255,255,0.08)',
     },

@@ -281,29 +281,29 @@ export const en: Messages = {
 
   // Encouragement banner
   encourageEmpty: [
-    'New day, start your first focus 🍉',
-    'Ready to go? Let\'s focus!',
+    'Grow your watermelon, grow your focus 🍉',
+    'Ready to plant your first melon? 🌱',
     'Time to get things done 💪',
   ],
   encourageFirst: [
-    'Great start! First one done 🍉',
-    'First step taken, keep going!',
-    'Off to a good start ✨',
+    'Your watermelon is growing 🌱',
+    'First melon planted, keep going!',
+    'Focus and let it ripen 🍉',
   ],
   encourageSecond: [
-    'Keep it up! 2 done',
-    'Second one down, nice 👍',
-    'Good rhythm, keep going!',
+    'Keep it up! 2 melons harvested',
+    'Second melon down, nice 👍',
+    'Your melon patch is growing 🍉',
   ],
   encourageThird: [
-    'You\'re on fire today 💪',
-    '3 done, great productivity!',
+    'Today\'s melon tastes extra sweet 🍉',
+    '3 melons, what a harvest!',
     'Getting into the zone!',
   ],
   encourageMany: [
-    '{n} done — you\'re crushing it!',
-    '{n} sessions, what a day 🔥',
-    '{n} done, unstoppable!',
+    '{n} melons harvested — you\'re crushing it!',
+    '{n} melons, what a day 🔥',
+    '{n} melons, unstoppable harvest! 🍉',
   ],
   encourageBeatYesterday: (count, diff) => `${count} done, ${diff} more than yesterday 💪`,
   encourageTiedYesterday: (count) => `${count} done, same as yesterday`,
