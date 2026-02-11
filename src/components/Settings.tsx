@@ -24,7 +24,6 @@ interface SettingsProps {
   testMode?: {
     addItems: (stage: import('../types').GrowthStage, count: number) => void;
     resetWarehouse: () => void;
-    resetMigration: () => void;
   };
 }
 
@@ -347,13 +346,6 @@ export function Settings({ settings, onChange, disabled, isWorkRunning, onExport
                       style={{ backgroundColor: 'rgba(239,68,68,0.15)', color: '#ef4444' }}
                     >
                       清空瓜棚
-                    </button>
-                    <button
-                      onClick={testMode.resetMigration}
-                      className="px-2 py-1 rounded text-[11px] cursor-pointer"
-                      style={{ backgroundColor: 'rgba(239,68,68,0.1)', color: '#ef4444' }}
-                    >
-                      重置迁移标记
                     </button>
                   </div>
                 </div>

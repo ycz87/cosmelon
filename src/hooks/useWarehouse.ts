@@ -3,17 +3,13 @@
  *
  * 管理收获物存储、合成操作、保底计数器。
  * 数据持久化到 localStorage。
- *
- * v0.8.0 hotfix: 初始化时自动迁移历史专注记录到瓜棚（一次性）。
  */
-import { useCallback, useEffect, useRef } from 'react';
+import { useCallback } from 'react';
 import { useLocalStorage } from './useLocalStorage';
-import type { GrowthStage, Warehouse, SynthesisRecipe, PomodoroRecord } from '../types';
-import { DEFAULT_WAREHOUSE, SYNTHESIS_RECIPES, getGrowthStage } from '../types';
+import type { GrowthStage, Warehouse, SynthesisRecipe } from '../types';
+import { DEFAULT_WAREHOUSE, SYNTHESIS_RECIPES } from '../types';
 
 const WAREHOUSE_KEY = 'watermelon-warehouse';
-const MIGRATED_KEY = 'warehouse-migrated';
-const RECORDS_KEY = 'pomodoro-records';
 
 function migrateWarehouse(raw: unknown): Warehouse {
   if (!raw || typeof raw !== 'object') return DEFAULT_WAREHOUSE;
@@ -30,66 +26,8 @@ function migrateWarehouse(raw: unknown): Warehouse {
   return result;
 }
 
-/** 从历史记录回填瓜棚（一次性迁移） */
-function backfillFromRecords(): Partial<Warehouse> | null {
-  try {
-    if (localStorage.getItem(MIGRATED_KEY) === 'true') return null;
-
-    const raw = localStorage.getItem(RECORDS_KEY);
-    if (!raw) {
-      localStorage.setItem(MIGRATED_KEY, 'true');
-      return null;
-    }
-
-    const records: PomodoroRecord[] = JSON.parse(raw);
-    const items: Record<GrowthStage, number> = { seed: 0, sprout: 0, bloom: 0, green: 0, ripe: 0, legendary: 0 };
-    let total = 0;
-
-    for (const r of records) {
-      // 旧记录无 status 字段视为 completed
-      if (r.status === 'abandoned') continue;
-      if (r.durationMinutes < 5) continue;
-
-      // ≥90min 历史记录统一给 ripe（不触发金西瓜概率）
-      let stage = getGrowthStage(r.durationMinutes);
-      if (r.durationMinutes >= 90) stage = 'ripe';
-
-      items[stage]++;
-      total++;
-    }
-
-    localStorage.setItem(MIGRATED_KEY, 'true');
-
-    if (total === 0) return null;
-    return { items, totalCollected: total };
-  } catch {
-    localStorage.setItem(MIGRATED_KEY, 'true');
-    return null;
-  }
-}
-
 export function useWarehouse() {
   const [warehouse, setWarehouse] = useLocalStorage<Warehouse>(WAREHOUSE_KEY, DEFAULT_WAREHOUSE, migrateWarehouse);
-  const migrationDone = useRef(false);
-
-  // 一次性迁移历史记录
-  useEffect(() => {
-    if (migrationDone.current) return;
-    migrationDone.current = true;
-
-    const backfill = backfillFromRecords();
-    if (!backfill) return;
-
-    setWarehouse((prev) => {
-      // 只在瓜棚为空时回填（避免覆盖已有数据）
-      if (prev.totalCollected > 0) return prev;
-      return {
-        ...prev,
-        items: { ...prev.items, ...backfill.items },
-        totalCollected: backfill.totalCollected ?? 0,
-      };
-    });
-  }, [setWarehouse]);
 
   /** 添加收获物到瓜棚 */
   const addItem = useCallback((stage: GrowthStage) => {
@@ -159,11 +97,6 @@ export function useWarehouse() {
     setWarehouse({ ...DEFAULT_WAREHOUSE });
   }, [setWarehouse]);
 
-  /** 重置迁移标记（测试用） */
-  const resetMigration = useCallback(() => {
-    try { localStorage.removeItem(MIGRATED_KEY); } catch { /* noop */ }
-  }, []);
-
   return {
     warehouse,
     addItem,
@@ -173,7 +106,6 @@ export function useWarehouse() {
     synthesizeAll,
     getHighestStage,
     resetWarehouse,
-    resetMigration,
     recipes: SYNTHESIS_RECIPES,
   };
 }

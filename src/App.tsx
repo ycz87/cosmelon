@@ -72,7 +72,7 @@ function App() {
   useDragScroll();
 
   // Warehouse
-  const { warehouse, addItem, addItems, updatePity, synthesize, synthesizeAll, getHighestStage, resetWarehouse, resetMigration } = useWarehouse();
+  const { warehouse, addItem, addItems, updatePity, synthesize, synthesizeAll, getHighestStage, resetWarehouse } = useWarehouse();
 
   // Modal states
   const [showAbandonConfirm, setShowAbandonConfirm] = useState(false);
@@ -444,7 +444,7 @@ function App() {
               isWorkRunning={(timer.status === 'running' && timer.phase === 'work') || isProjectWorking === true}
               onExport={handleExport}
               onShowGuide={() => setShowGuide(true)}
-              testMode={{ addItems, resetWarehouse, resetMigration }}
+              testMode={{ addItems, resetWarehouse }}
             />
           </div>
         </header>
