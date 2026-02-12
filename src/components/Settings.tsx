@@ -187,7 +187,7 @@ export function Settings({ settings, onChange, disabled, isWorkRunning, onExport
         </button>
 
         {isOpen && (
-          <div className="absolute right-0 top-12 w-[calc(100vw-1.5rem)] sm:w-80 p-4 sm:p-5 rounded-2xl border shadow-2xl z-50 animate-fade-up max-h-[75vh] overflow-y-auto"
+          <div className="absolute right-0 top-12 w-[calc(100vw-1.5rem)] sm:w-80 p-4 sm:p-5 rounded-2xl border shadow-2xl z-50 animate-fade-up max-h-[75vh] overflow-y-auto settings-scrollbar"
             style={{ backgroundColor: theme.surface, borderColor: theme.border }}>
             <div className="flex flex-col">
               {disabled && (

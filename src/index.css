@@ -446,3 +446,22 @@ body {
   background: var(--range-accent);
 }
 
+
+/* ─── Custom Scrollbar ─── */
+.settings-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+.settings-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.settings-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(255, 59, 92, 0.4);
+  border-radius: 999px;
+}
+.settings-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 59, 92, 0.7);
+}
+.settings-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 59, 92, 0.4) transparent;
+}

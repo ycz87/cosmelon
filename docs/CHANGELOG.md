@@ -2,6 +2,17 @@
 
 ---
 
+## v0.8.4 — 设置面板滚动条美化（2026-02-12）
+
+### Settings Scrollbar 优化
+- 针对设置面板滚动区域新增 `.settings-scrollbar` 自定义样式
+- 滚动条宽度设为 7px（细而清晰）
+- 轨道使用半透明深色背景，风格更贴合 Dark 主题
+- Thumb 使用西瓜红 accent（`rgba(255,59,92,0.5)`），hover 提升亮度
+- Firefox 兼容：`scrollbar-width: thin` + `scrollbar-color`
+
+---
+
 ## v0.8.3 — Alert Volume 滑块质感升级（2026-02-12）
 
 ### Slider 视觉优化（P1）
