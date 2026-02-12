@@ -2,6 +2,17 @@
 
 ---
 
+## v0.9.0 — 快捷选择器 Toast 提示（2026-02-12）
+
+### 需求背景
+Charles 反馈：主页点击时钟弹出快捷时间选择器，选择超过 25min 时没有提示不能自动进入休息模式。设置面板里有提示但快捷选择器里没有。
+
+### 改动
+- `src/components/Toast.tsx`（新增）— 通用 Toast 组件，淡入淡出动画，useTheme() 适配 5 套主题
+- `src/components/Timer.tsx` — 快捷选择器 onClick 增加 >25min 判断触发 healthReminder toast；inline toast div 替换为 Toast 组件
+
+---
+
 ## v0.8.8 — 小瓜和大西瓜图标优化（2026-02-12）
 
 ### 需求背景

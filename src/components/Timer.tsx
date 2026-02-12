@@ -27,6 +27,7 @@ import { formatTime } from '../utils/time';
 import { useTheme } from '../hooks/useTheme';
 import { useI18n } from '../i18n';
 import { CelebrationOverlay } from './CelebrationOverlay';
+import { Toast } from './Toast';
 
 /** Timer display mode: countdown (default) or count-up */
 type TimerDisplayMode = 'countdown' | 'countup';
@@ -341,7 +342,15 @@ export function Timer({ timeLeft, totalDuration, phase, status, celebrating, cel
             style={{ backgroundColor: `${theme.surface}f0`, borderColor: theme.border }}>
             {QUICK_DURATIONS.map((m) => (
               <button key={m}
-                onClick={() => { onChangeWorkMinutes(m); setShowQuickPicker(false); }}
+                onClick={() => {
+                  onChangeWorkMinutes(m);
+                  setShowQuickPicker(false);
+                  if (m > 25) {
+                    setToast(t.healthReminder);
+                    if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
+                    toastTimerRef.current = setTimeout(() => setToast(null), 3500);
+                  }
+                }}
                 className="px-2.5 py-1 rounded-lg text-xs transition-all cursor-pointer"
                 style={{
                   backgroundColor: workMinutes === m ? `${theme.accent}30` : theme.inputBg,
@@ -447,15 +456,8 @@ export function Timer({ timeLeft, totalDuration, phase, status, celebrating, cel
         )}
       </div>
 
-      {/* Toast for short-tap hint */}
-      {toast && (
-        <div
-          className="absolute -bottom-2 text-xs font-medium px-3 py-1.5 rounded-full animate-fade-up"
-          style={{ backgroundColor: `${theme.surface}ee`, color: theme.textMuted, border: `1px solid ${theme.border}` }}
-        >
-          {toast}
-        </div>
-      )}
+      {/* Toast for short-tap hint & health reminder */}
+      <Toast message={toast} durationMs={3500} />
     </div>
   );
 }
