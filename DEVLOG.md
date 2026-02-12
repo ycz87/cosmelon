@@ -2,6 +2,26 @@
 
 ---
 
+## v0.8.2 — autoStartBreak UI 联动 + 提示文案位置（2026-02-12）
+
+### 需求背景
+Charles 反馈 >25min 时 autoStartBreak 开关没有自动关闭，提示文案在页面底部太不显眼。
+
+### 改动
+- Settings.tsx update() 里检测 workMinutes > 25 时自动 set autoStartBreak = false
+- Toggle 组件加 disabled prop（opacity-40 + cursor-not-allowed + aria-disabled）
+- autoStartBreak 开关在 workMinutes > 25 时 disabled
+- 健康提示从 App.tsx 底部移到 Settings 面板 Focus NumberStepper 下方
+- workMinutes 改回 ≤25 时开关恢复可用但不自动开启
+
+### 改动文件
+- `src/components/Settings.tsx` — Toggle disabled + update 联动 + 提示文案
+- `src/App.tsx` — 移除底部健康提示
+- `package.json` — 0.8.1 → 0.8.2
+- 四个文档同步
+
+---
+
 ## v0.8.1 — 阈值调整 + 防挂机机制（2026-02-11）
 
 ### 需求背景

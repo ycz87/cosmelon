@@ -43,19 +43,20 @@ function SectionHeader({ title }: { title: string }) {
 }
 
 /** 开关组件 — iOS green when active */
-function Toggle({ label, checked, onChange }: {
-  label: string; checked: boolean; onChange: (v: boolean) => void;
+function Toggle({ label, checked, onChange, disabled }: {
+  label: string; checked: boolean; onChange: (v: boolean) => void; disabled?: boolean;
 }) {
   const t = useTheme();
   return (
-    <div className="flex items-center justify-between gap-3">
+    <div className={`flex items-center justify-between gap-3 ${disabled ? 'opacity-40' : ''}`}>
       <div className="text-sm" style={{ color: t.textMuted }}>{label}</div>
       <button
-        onClick={() => onChange(!checked)}
-        className="relative w-10 h-5.5 rounded-full transition-colors duration-200 cursor-pointer"
+        onClick={() => !disabled && onChange(!checked)}
+        className={`relative w-10 h-5.5 rounded-full transition-colors duration-200 ${disabled ? 'cursor-not-allowed' : 'cursor-pointer'}`}
         style={{ backgroundColor: checked ? TOGGLE_GREEN : t.inputBg }}
         role="switch"
         aria-checked={checked}
+        aria-disabled={disabled}
       >
         <span
           className="absolute top-0.5 left-0.5 w-4.5 h-4.5 rounded-full bg-white shadow transition-transform duration-200"
@@ -141,6 +142,10 @@ export function Settings({ settings, onChange, disabled, isWorkRunning, onExport
 
   const update = (patch: Partial<PomodoroSettings>) => {
     const next = { ...settings, ...patch };
+    // >25min 时自动关闭 autoStartBreak
+    if ('workMinutes' in patch && (patch.workMinutes ?? 0) > 25) {
+      next.autoStartBreak = false;
+    }
     onChange(next);
     if ('alertVolume' in patch) setMasterAlertVolume(next.alertVolume);
     if ('ambienceVolume' in patch) setMasterAmbienceVolume(next.ambienceVolume);
@@ -189,10 +194,15 @@ export function Settings({ settings, onChange, disabled, isWorkRunning, onExport
               <div className="flex flex-col gap-4 mt-3">
                 <NumberStepper label={i18n.workDuration} value={settings.workMinutes}
                   onChange={(v) => update({ workMinutes: v })} min={1} max={120} disabled={disabled} unit={i18n.minutes} />
+                {settings.workMinutes > 25 && (
+                  <div className="text-[11px] -mt-2" style={{ color: theme.textMuted }}>
+                    {i18n.healthReminder}
+                  </div>
+                )}
                 <NumberStepper label={i18n.shortBreak} value={settings.shortBreakMinutes}
                   onChange={(v) => update({ shortBreakMinutes: v })} min={1} max={30} disabled={disabled} unit={i18n.minutes} />
                 <Toggle label={i18n.autoStartBreak} checked={settings.autoStartBreak}
-                  onChange={(v) => update({ autoStartBreak: v })} />
+                  onChange={(v) => update({ autoStartBreak: v })} disabled={settings.workMinutes > 25} />
                 <Toggle label={i18n.autoStartWork} checked={settings.autoStartWork}
                   onChange={(v) => update({ autoStartWork: v })} />
               </div>

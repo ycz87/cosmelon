@@ -2,6 +2,19 @@
 
 ---
 
+## v0.8.2 — autoStartBreak UI 联动 + 提示文案位置调整（2026-02-12）
+
+### autoStartBreak 开关联动
+- workMinutes > 25 时自动关闭 autoStartBreak 并灰掉开关（不可点击）
+- workMinutes 改回 ≤25 时开关恢复可用（不自动开启）
+- Toggle 组件新增 disabled 支持
+
+### 提示文案位置调整
+- 健康提示从页面底部移到设置面板 Focus 时长下方
+- 仅 workMinutes > 25 时显示
+
+---
+
 ## v0.8.1 — 阈值调整 + 防挂机机制（2026-02-11）
 
 ### 专注阈值调整
