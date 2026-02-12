@@ -562,11 +562,6 @@ function App() {
                   <div className="mt-6">
                     <TaskInput value={currentTask} onChange={setCurrentTask} disabled={timer.status !== 'idle'} />
                   </div>
-                  {settings.workMinutes > 25 && timer.status === 'idle' && (
-                    <div className="mt-2 text-center text-[11px]" style={{ color: theme.textFaint }}>
-                      {t.healthReminder}
-                    </div>
-                  )}
                 </div>
                 <div className="w-full max-w-xs sm:max-w-sm px-4 pt-4 pb-6">
                   <div className="rounded-2xl p-5 border" style={{ backgroundColor: theme.surface, borderColor: theme.border }}>

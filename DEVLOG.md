@@ -1039,3 +1039,8 @@ interface ProjectTimerView {
 - `.gitignore` 更新：排除 `src-tauri/target/`、`gen/`、`Cargo.lock`
 - `package.json` 新增 `tauri` 脚本
 
+
+### commit: pending — 提示展示策略优化（v0.8.9）
+- 移除主页面常驻健康提示，减少主界面干扰
+- 提示改为设置面板 Focus 时长下方条件显示
+- 仅在 `workMinutes > 25` 时显示 tip（与防挂机策略一致）

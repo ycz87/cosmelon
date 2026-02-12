@@ -200,7 +200,16 @@ export function Settings({ settings, onChange, disabled, isWorkRunning, onExport
                 <NumberStepper label={i18n.workDuration} value={settings.workMinutes}
                   onChange={(v) => update({ workMinutes: v })} min={1} max={120} disabled={disabled} unit={i18n.minutes} />
                 {settings.workMinutes > 25 && (
-                  <div className="text-[11px] -mt-2" style={{ color: theme.textMuted }}>
+                  <div
+                    className="-mt-1 rounded-xl border px-3 py-2 text-[11px] leading-relaxed"
+                    style={{
+                      color: theme.textMuted,
+                      borderColor: `${theme.accent}40`,
+                      backgroundColor: `${theme.accent}14`,
+                    }}
+                    role="note"
+                    aria-live="polite"
+                  >
                     {i18n.healthReminder}
                   </div>
                 )}
