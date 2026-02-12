@@ -50,7 +50,7 @@ export function AlertPickerModal({ selected, onSelect, onClose }: Props) {
         </div>
 
         {/* Sound grid */}
-        <div className="flex-1 overflow-y-auto px-5 py-3">
+        <div className="flex-1 overflow-y-auto px-5 py-3 settings-scrollbar">
           <div className="grid grid-cols-2 gap-2">
             {ALL_ALERT_IDS.map((id) => {
               const isActive = selected === id;

@@ -121,7 +121,7 @@ export function AmbienceMixerModal({ config, onChange, onClose, keepOnClose }: P
         </div>
 
         {/* Sound list */}
-        <div className="flex-1 overflow-y-auto px-5 py-3">
+        <div className="flex-1 overflow-y-auto px-5 py-3 settings-scrollbar">
           {categories.map((cat) => {
             const sounds = ALL_AMBIENCE_SOUNDS.filter((s) => s.category === cat);
             return (
