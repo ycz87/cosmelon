@@ -2,6 +2,28 @@
 
 ---
 
+## v0.8.7 — 音量滑块尺寸缩小（2026-02-12）
+
+### 需求背景
+Charles 反馈音量滑块看起来太大，影响美观，希望更精致不突兀。
+
+### 改动
+- `src/index.css`
+  - `.range-slider` 轨道高度 8px → 5px
+  - `::-webkit-slider-thumb` / `::-moz-range-thumb` 尺寸 22px → 16px
+  - thumb 描边 2px → 1.5px
+  - 外发光 4px → 3px，hover 6px → 4px，active 7px → 5px
+  - 阴影整体减弱，比例协调
+  - Firefox `::-moz-range-track` / `::-moz-range-progress` 高度同步 5px
+- 所有主题下样式一致，滑块仍可正常拖动
+
+### 改动文件
+- `src/index.css`
+- `package.json`（0.8.6 → 0.8.7）
+- 四个文档同步
+
+---
+
 ## v0.8.3 — Slider 样式再优化（2026-02-12）
 
 ### 需求背景
