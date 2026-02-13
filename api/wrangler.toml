@@ -5,4 +5,4 @@ compatibility_date = "2026-02-13"
 [[d1_databases]]
 binding = "DB"
 database_name = "watermelon-clock-db"
-database_id = ""  # Will be filled after d1 create
+database_id = "f96102d0-3dc7-4028-8ff1-151d3164e9a2"
