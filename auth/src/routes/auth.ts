@@ -231,3 +231,93 @@ authRoutes.get('/me', authMiddleware, async (c) => {
     },
   })
 })
+
+// ─── 10. PUT /profile — 修改昵称 ───
+
+authRoutes.put('/profile', authMiddleware, async (c) => {
+  const userId = c.get('userId')
+  const body = await c.req.json<{ displayName?: string }>()
+  const displayName = body.displayName?.trim()
+  if (!displayName || displayName.length === 0 || displayName.length > 50) {
+    return c.json({ error: 'Display name must be 1-50 characters' }, 400)
+  }
+
+  await c.env.DB.prepare(
+    'UPDATE users SET display_name = ?, updated_at = datetime(\'now\') WHERE id = ?',
+  ).bind(displayName, userId).run()
+
+  const user = await c.env.DB.prepare(
+    'SELECT id, email, display_name, avatar_url FROM users WHERE id = ?',
+  ).bind(userId).first<{ id: string; email: string; display_name: string | null; avatar_url: string | null }>()
+
+  return c.json({
+    user: {
+      id: user!.id,
+      email: user!.email,
+      displayName: user!.display_name,
+      avatarUrl: user!.avatar_url,
+    },
+  })
+})
+
+// ─── 11. POST /avatar — 上传头像 ───
+
+const ALLOWED_TYPES: Record<string, string> = {
+  'image/jpeg': 'jpg',
+  'image/png': 'png',
+  'image/webp': 'webp',
+}
+const MAX_AVATAR_SIZE = 2 * 1024 * 1024 // 2MB
+
+authRoutes.post('/avatar', authMiddleware, async (c) => {
+  const userId = c.get('userId')
+
+  const formData = await c.req.formData()
+  const file = formData.get('avatar')
+  if (!file || !(file instanceof File)) {
+    return c.json({ error: 'No avatar file provided' }, 400)
+  }
+
+  if (!ALLOWED_TYPES[file.type]) {
+    return c.json({ error: 'Only jpg, png, webp allowed' }, 400)
+  }
+
+  if (file.size > MAX_AVATAR_SIZE) {
+    return c.json({ error: 'File too large, max 2MB' }, 400)
+  }
+
+  const key = `avatars/${userId}`
+  const arrayBuffer = await file.arrayBuffer()
+
+  await c.env.AVATARS.put(key, arrayBuffer, {
+    httpMetadata: { contentType: file.type },
+  })
+
+  // Build avatar URL using the public endpoint
+  const origin = new URL(c.req.url).origin
+  const avatarUrl = `${origin}/auth/avatar/${userId}`
+
+  await c.env.DB.prepare(
+    'UPDATE users SET avatar_url = ?, updated_at = datetime(\'now\') WHERE id = ?',
+  ).bind(avatarUrl, userId).run()
+
+  return c.json({ avatarUrl })
+})
+
+// ─── 12. GET /avatar/:userId — 公开头像端点 ───
+
+authRoutes.get('/avatar/:userId', async (c) => {
+  const userId = c.req.param('userId')
+  const key = `avatars/${userId}`
+
+  const object = await c.env.AVATARS.get(key)
+  if (!object) {
+    return c.json({ error: 'Avatar not found' }, 404)
+  }
+
+  const headers = new Headers()
+  headers.set('Content-Type', object.httpMetadata?.contentType || 'image/jpeg')
+  headers.set('Cache-Control', 'public, max-age=86400')
+
+  return new Response(object.body, { headers })
+})

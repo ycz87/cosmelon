@@ -29,6 +29,7 @@ interface SettingsProps {
     isLoading: boolean;
     login: (token: string) => Promise<void>;
     logout: () => Promise<void>;
+    updateProfile: (data: { displayName?: string; avatarUrl?: string }) => void;
   };
   testMode?: {
     addItems: (stage: import('../types').GrowthStage, count: number) => void;
@@ -208,6 +209,7 @@ export function Settings({ settings, onChange, disabled, isWorkRunning, onExport
                     isLoading={auth.isLoading}
                     onLoginClick={() => { setShowLoginPanel(true); setIsOpen(false); }}
                     onLogout={auth.logout}
+                    onUpdateProfile={auth.updateProfile}
                   />
                   <div className="border-t mt-4 pt-4" style={{ borderColor: theme.border }} />
                 </>

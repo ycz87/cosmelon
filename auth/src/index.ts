@@ -4,6 +4,7 @@ import { authRoutes } from './routes/auth'
 export type Env = {
   DB: D1Database
   SESSION_KV: KVNamespace
+  AVATARS: R2Bucket
   JWT_SECRET: string
   RESEND_API_KEY: string
   GOOGLE_CLIENT_ID: string

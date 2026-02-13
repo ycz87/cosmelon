@@ -130,11 +130,16 @@ export function useAuth() {
     clearAuth()
   }, [clearAuth])
 
+  const updateProfile = useCallback((data: { displayName?: string; avatarUrl?: string }) => {
+    setUser(prev => prev ? { ...prev, ...data } : null)
+  }, [])
+
   return {
     user,
     isLoading,
     isAuthenticated: !!user,
     login,
     logout,
+    updateProfile,
   }
 }

@@ -2,6 +2,44 @@
 
 ---
 
+## v0.13.0 — 个人资料编辑：头像上传 + 昵称修改（2026-02-13）
+
+### 背景
+用户登录后需要能自定义头像和昵称，提升个性化体验。
+
+### 改动
+- **R2 存储**：创建 `cosmelon-avatars` R2 bucket，auth Workers 新增 AVATARS 绑定
+- **auth 新增 3 个端点**：
+  - `PUT /profile`：authMiddleware 保护，更新 display_name
+  - `POST /avatar`：authMiddleware 保护，接收 multipart/form-data，裁剪后存 R2，更新 avatar_url
+  - `GET /avatar/:userId`：公开端点，从 R2 读取头像返回，Cache-Control 24h
+- **前端 UserProfile 改造**：
+  - 头像点击触发隐藏 file input，选择后 Canvas API 裁剪为 256x256 正方形上传
+  - 上传中显示 loading spinner 覆盖在头像上，hover 显示相机图标
+  - 昵称 hover 显示 ✏️ 编辑图标，点击变为 input 框，回车/失焦保存
+  - 保存中显示"保存中..."文案
+- **useAuth 新增 updateProfile**：编辑成功后即时更新本地 user 状态
+- **i18n**：新增 profileEditName / profileSaving / profileUploadAvatar（中英文）
+
+### 技术决策
+- R2 key 不带扩展名（`avatars/{userId}`），content-type 存在 R2 httpMetadata，简化覆盖逻辑
+- 前端上传后 URL 附加 `?t=timestamp` cache-buster，强制浏览器刷新头像
+- Canvas 裁剪取中心正方形区域，缩放到 256x256，jpg 质量 0.9
+
+### 改动文件
+- `auth/wrangler.toml` — 新增 R2 绑定
+- `auth/src/index.ts` — Env 类型新增 AVATARS
+- `auth/src/routes/auth.ts` — 新增 3 个端点
+- `src/components/UserProfile.tsx` — 重写，支持头像上传和昵称编辑
+- `src/hooks/useAuth.ts` — 新增 updateProfile
+- `src/components/Settings.tsx` — auth prop 新增 updateProfile，传递给 UserProfile
+- `src/i18n/types.ts` — 新增 3 个 key
+- `src/i18n/locales/zh.ts` / `en.ts` — 新增翻译
+- `package.json` — 0.12.0 → 0.13.0
+- 四个文档同步
+
+---
+
 ## v0.12.0 — Auth 服务拆分 + 自定义域名（2026-02-13）
 
 ### 背景

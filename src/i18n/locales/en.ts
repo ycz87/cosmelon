@@ -400,4 +400,9 @@ export const en: Messages = {
   authMicrosoft: 'Continue with Microsoft',
   authLoginToSync: 'Sign in to sync data',
   authLogout: 'Sign Out',
+
+  // Profile editing
+  profileEditName: 'Edit name',
+  profileSaving: 'Saving...',
+  profileUploadAvatar: 'Change avatar',
 };

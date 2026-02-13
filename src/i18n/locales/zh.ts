@@ -400,4 +400,9 @@ export const zh: Messages = {
   authMicrosoft: '使用 Microsoft 登录',
   authLoginToSync: '登录以同步数据',
   authLogout: '退出',
+
+  // Profile editing
+  profileEditName: '修改昵称',
+  profileSaving: '保存中...',
+  profileUploadAvatar: '更换头像',
 };

@@ -1,3 +1,21 @@
+## v0.13.0 — 个人资料编辑：头像上传 + 昵称修改（2026-02-13）
+
+### 新增
+- 头像上传：点击头像选择图片，Canvas API 裁剪为 256x256 正方形，上传到 R2
+- 昵称编辑：点击昵称显示编辑图标，点击后变为 input 框，回车或失焦保存
+- R2 存储：创建 cosmelon-avatars bucket，头像通过公开端点 GET /auth/avatar/:userId 访问
+- 3 个新 API 端点：PUT /auth/profile、POST /auth/avatar、GET /auth/avatar/:userId
+- useAuth 新增 updateProfile 方法，编辑成功后即时更新本地状态
+- i18n 新增 profileEditName / profileSaving / profileUploadAvatar
+
+### 技术细节
+- 头像存储使用 R2，key 为 `avatars/{userId}`，content-type 存在 httpMetadata
+- 上传限制：最大 2MB，仅 jpg/png/webp
+- 头像公开端点设置 Cache-Control: public, max-age=86400
+- 前端上传后 URL 附加 cache-buster 参数强制刷新
+
+---
+
 ## v0.12.0 — Auth 服务拆分 + 自定义域名（2026-02-13）
 
 ### 架构变更

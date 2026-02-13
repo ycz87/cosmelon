@@ -270,4 +270,9 @@ export interface Messages {
   authMicrosoft: string;
   authLoginToSync: string;
   authLogout: string;
+
+  // Profile editing (v0.13.0)
+  profileEditName: string;
+  profileSaving: string;
+  profileUploadAvatar: string;
 }
