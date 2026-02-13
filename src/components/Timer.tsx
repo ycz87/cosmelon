@@ -102,6 +102,9 @@ export function Timer({ timeLeft, totalDuration, phase, status, celebrating, cel
   const longPressStartRef = useRef(0);
   const toastTimerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
+  // ─── Health reminder toast (independent from long-press toast) ───
+  const [healthToast, setHealthToast] = useState(false);
+
   const startLongPress = useCallback((target: 'skip' | 'abandon', action: () => void) => {
     longPressStartRef.current = Date.now();
     setLongPressTarget(target);
@@ -347,11 +350,7 @@ export function Timer({ timeLeft, totalDuration, phase, status, celebrating, cel
                 onClick={() => {
                   onChangeWorkMinutes(m);
                   setShowQuickPicker(false);
-                  if (m > 25) {
-                    setToast(t.healthReminder);
-                    if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
-                    toastTimerRef.current = setTimeout(() => setToast(null), 3500);
-                  }
+                  if (m > 25) setHealthToast(true);
                 }}
                 className="px-2.5 py-1 rounded-lg text-xs transition-all cursor-pointer"
                 style={{
@@ -366,8 +365,12 @@ export function Timer({ timeLeft, totalDuration, phase, status, celebrating, cel
         )}
       </div>
 
-      {/* Health reminder toast — below timer circle */}
-      <Toast message={toast} durationMs={3500} />
+      {/* Health reminder toast — outside progress ring, before controls */}
+      {healthToast && (
+        <div className="flex justify-center mt-3">
+          <Toast message={t.healthReminder} onDone={() => setHealthToast(false)} />
+        </div>
+      )}
 
       {/* Controls */}
       <div className="flex items-center gap-3 sm:gap-4 h-16 mt-6">
@@ -461,6 +464,15 @@ export function Timer({ timeLeft, totalDuration, phase, status, celebrating, cel
         )}
       </div>
 
+      {/* Toast for short-tap hint (long-press buttons) */}
+      {toast && (
+        <div
+          className="absolute -bottom-2 text-xs font-medium px-3 py-1.5 rounded-full animate-fade-up"
+          style={{ backgroundColor: `${theme.surface}ee`, color: theme.textMuted, border: `1px solid ${theme.border}` }}
+        >
+          {toast}
+        </div>
+      )}
     </div>
   );
 }

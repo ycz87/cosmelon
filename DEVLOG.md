@@ -2,36 +2,26 @@
 
 ---
 
-## v0.9.2 — Toast 位置修复（2026-02-12）
-
-### 问题
-v0.9.1 的 Toast 放在进度环容器内部（260x260 固定尺寸 flex 居中），导致 Toast 和时钟数字重叠不可见。
-
-### 修复
-- 将 `<Toast>` 从进度环容器内移到容器外（进度环 `</div>` 和控制按钮之间）
-- 父容器 `flex flex-col items-center` 自动居中 Toast
-
----
-
-## v0.9.1 — Toast 位置调整（2026-02-12）
+## v0.9.0 — 健康提醒 Toast（2026-02-13）
 
 ### 需求背景
-Charles 反馈 Toast 位置不够醒目，希望放在时钟数字正下方更清晰。
+快捷时间选择器选择 >25 分钟时，需要一个 Toast 提醒用户该时长需手动结束，注意休息。
 
 ### 改动
-- `src/components/Toast.tsx` — 去掉 `absolute -bottom-2` 定位，改为文档流元素 `mt-2`
-- `src/components/Timer.tsx` — 将 `<Toast>` 从组件底部移到时钟数字 `<span>` 之后、快捷选择器之前
+- 新建 `src/components/Toast.tsx`：fade-in / fade-out 动画，3500ms 自动消失，适配 5 套主题，aria-live 无障碍
+- 修改 `src/components/Timer.tsx`：
+  - 新增独立 `healthToast` state（不与长按提示 `toast` 共用）
+  - 快捷选择器 onClick 增加 >25min 判断触发 healthToast
+  - Toast 放在进度环容器外部（进度环 div 和控制按钮之间），避免 260x260 固定容器内重叠
+  - 恢复长按提示的原始 inline 渲染
+- 文案使用 i18n `healthReminder` key（中/英双语）
+- ≤25min 不弹 Toast
 
----
-
-## v0.9.0 — 快捷选择器 Toast 提示（2026-02-12）
-
-### 需求背景
-Charles 反馈：主页点击时钟弹出快捷时间选择器，选择超过 25min 时没有提示不能自动进入休息模式。设置面板里有提示但快捷选择器里没有。
-
-### 改动
-- `src/components/Toast.tsx`（新增）— 通用 Toast 组件，淡入淡出动画，useTheme() 适配 5 套主题
-- `src/components/Timer.tsx` — 快捷选择器 onClick 增加 >25min 判断触发 healthReminder toast；inline toast div 替换为 Toast 组件
+### 改动文件
+- `src/components/Toast.tsx`（新建）
+- `src/components/Timer.tsx`
+- `package.json`（0.8.9 → 0.9.0）
+- 四个文档同步
 
 ---
 

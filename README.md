@@ -126,6 +126,7 @@
 ### 其他
 - 设置面板 Alert Volume 滑块精致化：5px 纤细轨道、16px 小巧滑块、accent 发光交互反馈
 - 健康提示改为仅在设置面板 Focus 时长下方条件显示（workMinutes > 25）
+- 快捷选择器选 >25min 时弹出 Toast 健康提醒（3.5s 自动消失，fade 动画）
 - 设置菜单底部显示当前版本号（从 package.json 自动读取）
 - 设置页四组分组标题（计时/提醒/外观/通用），清晰有序
 - 8pt 间距网格系统，视觉层级分明
@@ -219,4 +220,4 @@ MIT
 
 ---
 
-**Current version: v0.9.2**
+**Current version: v0.9.0**

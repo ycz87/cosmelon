@@ -1,63 +1,51 @@
-import { useEffect, useRef, useState } from 'react';
+/**
+ * Toast — 轻量级提示组件
+ *
+ * fade-in / fade-out 动画，3500ms 自动消失。
+ * 适配 5 套主题（Dark/Light/Forest/Ocean/Warm）。
+ *
+ * v0.9.0: 健康提醒 toast，选择 >25min 时显示。
+ */
+import { useEffect, useState } from 'react';
 import { useTheme } from '../hooks/useTheme';
 
 interface ToastProps {
-  message: string | null;
-  durationMs?: number;
-  className?: string;
+  message: string;
+  /** 自动消失时间（ms），默认 3500 */
+  duration?: number;
+  /** 消失后回调 */
+  onDone: () => void;
 }
 
-export function Toast({ message, durationMs = 3500, className = '' }: ToastProps) {
+export function Toast({ message, duration = 3500, onDone }: ToastProps) {
   const theme = useTheme();
-  const [visible, setVisible] = useState(false);
-  const [renderedMessage, setRenderedMessage] = useState<string | null>(null);
-  const hideTimerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
-  const unmountTimerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  const [phase, setPhase] = useState<'in' | 'out'>('in');
 
   useEffect(() => {
-    if (hideTimerRef.current) clearTimeout(hideTimerRef.current);
-    if (unmountTimerRef.current) clearTimeout(unmountTimerRef.current);
-
-    if (!message) {
-      setVisible(false);
-      setRenderedMessage(null);
-      return;
-    }
-
-    setRenderedMessage(message);
-    setVisible(true);
-
-    const fadeOutMs = 300;
-    const visibleDurationMs = Math.max(durationMs - fadeOutMs, 1200);
-
-    hideTimerRef.current = setTimeout(() => {
-      setVisible(false);
-    }, visibleDurationMs);
-
-    unmountTimerRef.current = setTimeout(() => {
-      setRenderedMessage(null);
-    }, visibleDurationMs + fadeOutMs);
-
-    return () => {
-      if (hideTimerRef.current) clearTimeout(hideTimerRef.current);
-      if (unmountTimerRef.current) clearTimeout(unmountTimerRef.current);
-    };
-  }, [message, durationMs]);
-
-  if (!renderedMessage) return null;
+    const fadeOutAt = duration - 400;
+    const t1 = setTimeout(() => setPhase('out'), fadeOutAt);
+    const t2 = setTimeout(onDone, duration);
+    return () => { clearTimeout(t1); clearTimeout(t2); };
+  }, [duration, onDone]);
 
   return (
     <div
-      className={`text-xs font-medium px-3 py-1.5 rounded-full z-20 transition-all duration-300 mt-2 ${className}`}
+      role="status"
+      aria-live="polite"
+      className="text-sm font-medium px-4 py-2 rounded-xl pointer-events-none select-none"
       style={{
         backgroundColor: `${theme.surface}ee`,
         color: theme.textMuted,
         border: `1px solid ${theme.border}`,
-        opacity: visible ? 1 : 0,
-        transform: visible ? 'translateY(0)' : 'translateY(8px)',
+        boxShadow: `0 2px 12px ${theme.accent}18`,
+        opacity: phase === 'in' ? 1 : 0,
+        transform: phase === 'in' ? 'translateY(0)' : 'translateY(-4px)',
+        transition: 'opacity 0.35s ease, transform 0.35s ease',
+        maxWidth: '90vw',
+        textAlign: 'center' as const,
       }}
     >
-      {renderedMessage}
+      {message}
     </div>
   );
 }
