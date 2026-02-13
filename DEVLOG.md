@@ -2,6 +2,30 @@
 
 ---
 
+## Cloudflare Pages 迁移准备（2026-02-13）
+
+### 背景
+Charles 确认将西瓜时钟从 Vercel 迁移到 Cloudflare Pages。本次为代码层面的准备工作，不涉及实际部署。
+
+### 改动
+- 新增 `wrangler.toml`：Cloudflare Pages 配置，SPA 模式（`not_found_handling = "single-page-application"`）
+- 检查确认项：
+  - `vite.config.ts`：`base` 默认 `/`，构建输出 `dist`，无 Vercel 特定配置 ✅
+  - `package.json`：无 Vercel 特定 scripts 或依赖 ✅
+  - 无 `vercel.json` 文件 ✅
+  - PWA `scope` 和 `start_url` 均为 `/`，无硬编码域名 ✅
+  - `npm run build` 成功，dist 目录结构正常 ✅
+
+### 新增文件
+- `wrangler.toml`
+
+### 待办（迁移完成后）
+- Cloudflare Pages 项目创建 + 域名绑定（需要 Charles 的 Cloudflare 账号）
+- 验证通过后删除 Vercel 相关配置（如有）
+- 统一更新版本号
+
+---
+
 ## v0.9.2 — Toast 健康提醒文案优化（2026-02-13）
 
 ### 需求背景

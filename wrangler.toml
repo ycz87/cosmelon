@@ -1,0 +1,5 @@
+name = "watermelon-clock"
+compatibility_date = "2026-02-13"
+
+[assets]
+not_found_handling = "single-page-application"
