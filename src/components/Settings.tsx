@@ -132,7 +132,7 @@ function VolumeSlider({ label, value, onChange }: {
   );
 }
 
-const REPEAT_OPTIONS = [1, 2, 3, 5, 0];
+const REPEAT_OPTIONS = [1, 3, 5, 0];
 const LOCALE_LABELS: Record<Locale, string> = { zh: '中文', en: 'EN' };
 // Divider color is now theme-aware via theme.border
 

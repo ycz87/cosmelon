@@ -194,8 +194,8 @@ export const zh: Messages = {
   seconds: '秒',
 
   // Theme names
-  themeDark: '经典暗色',
-  themeLight: '纯净亮色',
+  themeDark: '西瓜色',
+  themeLight: '亮红色',
   themeForest: '森林绿',
   themeOcean: '海洋蓝',
   themeWarm: '暖橙色',
