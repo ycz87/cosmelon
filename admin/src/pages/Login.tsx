@@ -2,7 +2,7 @@ import { useState, useRef } from 'react'
 import { Turnstile, type TurnstileInstance } from '@marsidev/react-turnstile'
 import { sendCode, verifyCode } from '../auth'
 
-const TURNSTILE_SITE_KEY = '1x00000000000000000000AA' // Cloudflare test key — replace with real key after creating widget
+const TURNSTILE_SITE_KEY = '0x4AAAAAACbwD0uXjJAIG84Y'
 
 export function Login({ onLogin }: { onLogin: () => void }) {
   const [email, setEmail] = useState('')

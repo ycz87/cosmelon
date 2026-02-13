@@ -9,7 +9,7 @@ import { useI18n } from '../i18n'
 import { CodeInput } from './CodeInput'
 
 const AUTH_BASE = 'https://auth.cosmelon.app'
-const TURNSTILE_SITE_KEY = '1x00000000000000000000AA' // Cloudflare test key — replace with real key after creating widget
+const TURNSTILE_SITE_KEY = '0x4AAAAAACbwD0uXjJAIG84Y'
 
 interface LoginPanelProps {
   open: boolean
