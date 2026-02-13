@@ -36,3 +36,15 @@ auth/.dev.vars
 admin/node_modules
 admin/dist
 .wrangler
+
+# Android (Capacitor) build artifacts
+android/app/build/
+android/.gradle/
+android/build/
+android/capacitor-cordova-android-plugins/build/
+android/capacitor-android/build/  
+android/capacitor-status-bar/build/
+*.apk
+
+# Capacitor resources (generated)
+resources/
