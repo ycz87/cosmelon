@@ -351,6 +351,7 @@ export function Timer({ timeLeft, totalDuration, phase, status, celebrating, cel
                   onChangeWorkMinutes(m);
                   setShowQuickPicker(false);
                   if (m > 25) setHealthToast(true);
+                  else setHealthToast(false);
                 }}
                 className="px-2.5 py-1 rounded-lg text-xs transition-all cursor-pointer"
                 style={{
@@ -365,9 +366,9 @@ export function Timer({ timeLeft, totalDuration, phase, status, celebrating, cel
         )}
       </div>
 
-      {/* Health reminder toast — outside progress ring, before controls */}
+      {/* Health reminder toast — floating, does not occupy layout space */}
       {healthToast && (
-        <div className="flex justify-center mt-3">
+        <div className="absolute left-1/2 -translate-x-1/2" style={{ top: '100%', marginTop: '4px', zIndex: 20 }}>
           <Toast message={t.healthReminder} onDone={() => setHealthToast(false)} />
         </div>
       )}

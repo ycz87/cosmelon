@@ -2,6 +2,23 @@
 
 ---
 
+## v0.9.1 — Toast 体验修复（2026-02-13）
+
+### 需求背景
+Charles 测试 v0.9.0 Toast 反馈两个问题：1) Toast 出现时把开始按钮往下推（占用布局空间）；2) 选 >25min 弹 Toast 后快速切回 ≤25min，Toast 不会立即消失。
+
+### 改动
+- `Timer.tsx`：Toast 容器从 `flex mt-3` 改为 `absolute` 定位（`top:100%` + `left:50%` + `-translate-x-1/2`），浮动在进度环下方，不占文档流空间
+- `Timer.tsx`：快捷选择器 onClick 中，选 ≤25min 时加 `setHealthToast(false)`，立即隐藏正在显示的 Toast
+- 不影响 Toast 组件本身逻辑（fade-in/out 动画、3.5s 自动消失）
+
+### 改动文件
+- `src/components/Timer.tsx`
+- `package.json`（0.9.0 → 0.9.1）
+- 四个文档同步
+
+---
+
 ## v0.9.0 — 健康提醒 Toast（2026-02-13）
 
 ### 需求背景
