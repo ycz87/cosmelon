@@ -2,6 +2,33 @@
 
 ---
 
+## v0.16.0 — 多语言扩展 + 语言选择弹窗（2026-02-13）
+
+### 背景
+从中英双语扩展到 8 种语言，覆盖主要国际市场。
+
+### 改动
+
+#### 新增 6 种语言
+- `src/i18n/locales/ja.ts` — 日语 🇯🇵
+- `src/i18n/locales/ko.ts` — 韩语 🇰🇷
+- `src/i18n/locales/es.ts` — 西班牙语 🇪🇸
+- `src/i18n/locales/fr.ts` — 法语 🇫🇷
+- `src/i18n/locales/de.ts` — 德语 🇩🇪
+- `src/i18n/locales/pt.ts` — 巴西葡萄牙语 🇧🇷
+
+每个语言文件完整实现 Messages 接口的所有 key（200+ 个），包括函数类型、readonly 数组、Record 类型。
+
+#### i18n 系统更新
+- `src/i18n/index.ts`：Locale 类型扩展为 8 种，detectLocale 支持所有新语言，默认回退改为英文
+- 浏览器语言自动检测覆盖 zh/en/ja/ko/es/fr/de/pt
+
+#### 语言选择弹窗
+- 新建 `src/components/LanguagePickerModal.tsx`：弹窗列出 8 种语言（国旗 + 原名），当前选中高亮 + checkmark
+- 修改 `src/components/Settings.tsx`：语言切换从两个按钮改为点击打开弹窗，显示当前语言国旗 + 名称
+
+---
+
 ## Cloudflare Turnstile 防机器人验证（2026-02-13）
 
 在 email send-code 端点集成 Cloudflare Turnstile 人机验证，防止滥用邮件发送。后端新增 `verifyTurnstile` 服务和 `TURNSTILE_SECRET` 环境变量；前端（西瓜时钟 + Admin）在登录面板邮箱输入下方添加 Turnstile widget，发送验证码时携带 token。当前使用 Cloudflare 测试 key，部署前需替换为真实 key。OAuth 登录不受影响。

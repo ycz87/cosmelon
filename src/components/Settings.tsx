@@ -13,6 +13,7 @@ import { useI18n } from '../i18n';
 import type { Locale } from '../i18n';
 import { AmbienceMixerModal } from './AmbienceMixerModal';
 import { AlertPickerModal } from './AlertPickerModal';
+import { LanguagePickerModal } from './LanguagePickerModal';
 import { UserProfile } from './UserProfile';
 import { LoginPanel } from './LoginPanel';
 import type { User } from '../hooks/useAuth';
@@ -133,13 +134,23 @@ function VolumeSlider({ label, value, onChange }: {
 }
 
 const REPEAT_OPTIONS = [1, 3, 5, 0];
-const LOCALE_LABELS: Record<Locale, string> = { zh: '中文', en: 'EN' };
+const LANGUAGE_DISPLAY: Record<Locale, { flag: string; name: string }> = {
+  zh: { flag: '🇨🇳', name: '中文' },
+  en: { flag: '🇺🇸', name: 'English' },
+  ja: { flag: '🇯🇵', name: '日本語' },
+  ko: { flag: '🇰🇷', name: '한국어' },
+  es: { flag: '🇪🇸', name: 'Español' },
+  fr: { flag: '🇫🇷', name: 'Français' },
+  de: { flag: '🇩🇪', name: 'Deutsch' },
+  pt: { flag: '🇧🇷', name: 'Português' },
+};
 // Divider color is now theme-aware via theme.border
 
 export function Settings({ settings, onChange, disabled, isWorkRunning, onExport, onShowGuide, auth, testMode }: SettingsProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [showAmbienceModal, setShowAmbienceModal] = useState(false);
   const [showAlertModal, setShowAlertModal] = useState(false);
+  const [showLanguageModal, setShowLanguageModal] = useState(false);
   const [showLoginPanel, setShowLoginPanel] = useState(false);
   const panelRef = useRef<HTMLDivElement>(null);
   const theme = useTheme();
@@ -326,15 +337,13 @@ export function Settings({ settings, onChange, disabled, isWorkRunning, onExport
                   {/* 语言切换 */}
                   <div className="flex items-center justify-between gap-3">
                     <div className="text-sm" style={{ color: theme.textMuted }}>{i18n.language}</div>
-                    <div className="flex gap-1.5">
-                      {(Object.keys(LOCALE_LABELS) as Locale[]).map((loc) => (
-                        <button key={loc} onClick={() => update({ language: loc })}
-                          className={optBtn(settings.language === loc)}
-                          style={optStyle(settings.language === loc)}>
-                          {LOCALE_LABELS[loc]}
-                        </button>
-                      ))}
-                    </div>
+                    <button
+                      onClick={() => setShowLanguageModal(true)}
+                      className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs transition-all cursor-pointer"
+                      style={{ backgroundColor: `${theme.accent}20`, color: theme.accent }}>
+                      <span>{LANGUAGE_DISPLAY[settings.language]?.flag}</span>
+                      <span>{LANGUAGE_DISPLAY[settings.language]?.name}</span>
+                    </button>
                   </div>
                 </div>
               </div>
@@ -426,6 +435,14 @@ export function Settings({ settings, onChange, disabled, isWorkRunning, onExport
           selected={settings.alertSound}
           onSelect={(id) => update({ alertSound: id })}
           onClose={() => setShowAlertModal(false)}
+        />,
+        document.body,
+      )}
+      {showLanguageModal && createPortal(
+        <LanguagePickerModal
+          selected={settings.language}
+          onSelect={(locale) => update({ language: locale })}
+          onClose={() => setShowLanguageModal(false)}
         />,
         document.body,
       )}
