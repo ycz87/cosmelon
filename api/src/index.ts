@@ -1,5 +1,8 @@
 import { Hono } from 'hono'
 import { healthRoutes } from './routes/health'
+import { settingsRoutes } from './routes/settings'
+import { recordsRoutes } from './routes/records'
+import { warehouseRoutes } from './routes/warehouse'
 
 export type Env = {
   DB: D1Database
@@ -35,6 +38,9 @@ app.options('*', (c) => c.body(null, 204))
 
 // Routes
 app.route('/health', healthRoutes)
+app.route('/settings', settingsRoutes)
+app.route('/records', recordsRoutes)
+app.route('/warehouse', warehouseRoutes)
 
 // 404
 app.notFound((c) => c.json({ error: 'Not Found' }, 404))

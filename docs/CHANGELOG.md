@@ -1,3 +1,19 @@
+## v0.14.0 — 云端数据同步（2026-02-13）
+
+### 新增
+- 云端同步 API：settings（GET/PUT）、records（GET/POST/POST batch）、warehouse（GET/PUT）
+- 前端 useSync hook：fire-and-forget 异步同步，本地优先，失败静默忽略
+- 登录后自动拉取云端数据覆盖本地；首次登录自动迁移本地数据到云端
+- 设置变更、专注完成、仓库操作实时同步到云端
+- 未登录用户不受影响，继续使用 localStorage
+
+### 技术细节
+- API 端点全部需要 JWT 认证（共享 JWT_SECRET 本地验证）
+- 专注记录支持分页查询（from/to/limit/offset）和批量导入
+- 仓库数据通过 inventory 表存储，legendaryPity/totalCollected 作为特殊行
+
+---
+
 ## v0.13.0 — 个人资料编辑：头像上传 + 昵称修改（2026-02-13）
 
 ### 新增

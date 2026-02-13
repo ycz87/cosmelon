@@ -4,7 +4,7 @@
  * 管理收获物存储、合成操作、保底计数器。
  * 数据持久化到 localStorage。
  */
-import { useCallback } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import { useLocalStorage } from './useLocalStorage';
 import type { GrowthStage, Warehouse, SynthesisRecipe } from '../types';
 import { DEFAULT_WAREHOUSE, SYNTHESIS_RECIPES } from '../types';
@@ -26,8 +26,20 @@ function migrateWarehouse(raw: unknown): Warehouse {
   return result;
 }
 
-export function useWarehouse() {
+export function useWarehouse(onSync?: (warehouse: Warehouse) => void) {
   const [warehouse, setWarehouse] = useLocalStorage<Warehouse>(WAREHOUSE_KEY, DEFAULT_WAREHOUSE, migrateWarehouse);
+
+  // Sync warehouse to cloud on changes (skip initial mount)
+  const onSyncRef = useRef(onSync);
+  onSyncRef.current = onSync;
+  const mountedRef = useRef(false);
+  useEffect(() => {
+    if (!mountedRef.current) {
+      mountedRef.current = true;
+      return;
+    }
+    onSyncRef.current?.(warehouse);
+  }, [warehouse]);
 
   /** 添加收获物到瓜棚 */
   const addItem = useCallback((stage: GrowthStage) => {
@@ -99,6 +111,7 @@ export function useWarehouse() {
 
   return {
     warehouse,
+    setWarehouse,
     addItem,
     addItems,
     updatePity,

@@ -2,6 +2,28 @@
 
 ---
 
+## v0.14.0 — 云端数据同步（2026-02-13）
+
+### 背景
+两周冲刺 Day 5-7，用户系统已完成，实现数据云端同步让用户跨设备使用。
+
+### 改动
+- 新增 `api/src/routes/settings.ts`：GET/PUT /api/settings
+- 新增 `api/src/routes/records.ts`：GET/POST/POST batch /api/records
+- 新增 `api/src/routes/warehouse.ts`：GET/PUT /api/warehouse
+- 更新 `api/src/index.ts`：挂载三个新路由
+- 新增 `src/hooks/useSync.ts`：云端同步 hook（fire-and-forget）
+- 更新 `src/App.tsx`：集成 useSync，登录后 pull/migrate，设置变更实时 push
+- 更新 `src/hooks/useWarehouse.ts`：接收 onSync 回调，变更时触发同步
+- API Workers 已重新部署，health 返回 v0.14.0
+
+### 同步策略
+- 本地优先：先写 localStorage，异步推云端
+- 登录后拉取：云端有数据则覆盖本地，无数据则迁移本地到云端
+- 未登录用户完全不受影响
+
+---
+
 ## v0.13.0 — 个人资料编辑：头像上传 + 昵称修改（2026-02-13）
 
 ### 背景

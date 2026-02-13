@@ -40,6 +40,7 @@ import type { TimerPhase } from './hooks/useTimer';
 import { useProjectTimer } from './hooks/useProjectTimer';
 import { useWarehouse } from './hooks/useWarehouse';
 import { useAuth } from './hooks/useAuth';
+import { useSync } from './hooks/useSync';
 import { ThemeProvider } from './hooks/useTheme';
 import { useLocalStorage } from './hooks/useLocalStorage';
 import { useDragScroll } from './hooks/useDragScroll';
@@ -76,8 +77,11 @@ function App() {
   // Auth
   const auth = useAuth();
 
-  // Warehouse
-  const { warehouse, addItem, addItems, updatePity, synthesize, synthesizeAll, getHighestStage, resetWarehouse } = useWarehouse();
+  // Cloud sync (fire-and-forget, local-first)
+  const { syncSettings, syncRecord, syncWarehouse, pullAll, migrateLocalData } = useSync(auth.isAuthenticated);
+
+  // Warehouse (with cloud sync callback)
+  const { warehouse, setWarehouse, addItem, addItems, updatePity, synthesize, synthesizeAll, getHighestStage, resetWarehouse } = useWarehouse(syncWarehouse);
 
   // Modal states
   const [showAbandonConfirm, setShowAbandonConfirm] = useState(false);
@@ -108,6 +112,34 @@ function App() {
     setMasterAlertVolume(settings.alertVolume);
     setMasterAmbienceVolume(settings.ambienceVolume);
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // ─── Cloud sync: pull data on login ───
+  const hasSyncedRef = useRef(false);
+  useEffect(() => {
+    if (!auth.isAuthenticated || auth.isLoading || hasSyncedRef.current) return;
+    hasSyncedRef.current = true;
+    pullAll().then((result) => {
+      if (result.hasData) {
+        // Cloud has data — overwrite local
+        if (result.settings) setSettings(result.settings);
+        if (result.records.length > 0) setRecords(result.records);
+        if (result.warehouse) setWarehouse(result.warehouse);
+      } else {
+        // Cloud empty — migrate local data up
+        migrateLocalData(settings, records, warehouse);
+      }
+    });
+  }, [auth.isAuthenticated, auth.isLoading]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // ─── Cloud sync: push settings on change (skip initial) ───
+  const settingsMountedRef = useRef(false);
+  useEffect(() => {
+    if (!settingsMountedRef.current) {
+      settingsMountedRef.current = true;
+      return;
+    }
+    syncSettings(settings);
+  }, [settings, syncSettings]);
 
   // ─── Stop looping alert on any user interaction ───
   // When alertRepeatCount is 0 (continuous loop), clicking or pressing any key stops the alert.
@@ -155,6 +187,7 @@ function App() {
           status: 'completed',
         };
         setRecords((prev) => [record, ...prev]);
+        syncRecord(record);
         sendBrowserNotification(t.workComplete(emoji), `"${taskName}" · ${settings.workMinutes}${t.minutes}`);
         playAlertRepeated(settings.alertSound, settings.alertRepeatCount);
       } else {
@@ -165,7 +198,7 @@ function App() {
       // Prevent timer completion errors from crashing the app
       console.error('[Timer] onComplete error:', err);
     }
-  }, [currentTask, records, setRecords, settings.alertSound, settings.alertRepeatCount, settings.workMinutes, t, resolveStageAndStore]);
+  }, [currentTask, records, setRecords, settings.alertSound, settings.alertRepeatCount, settings.workMinutes, t, resolveStageAndStore, syncRecord]);
 
   const handleSkipWork = useCallback((elapsedSeconds: number) => {
     try {
@@ -185,6 +218,7 @@ function App() {
         status: 'completed',
       };
       setRecords((prev) => [record, ...prev]);
+      syncRecord(record);
 
       if (isOvertime2x) {
         // 超时 2 倍：记录但不给奖励，不存瓜棚，不播庆祝
@@ -201,7 +235,7 @@ function App() {
     } catch (err) {
       console.error('[Timer] onSkipWork error:', err);
     }
-  }, [currentTask, records, setRecords, settings.alertSound, settings.workMinutes, t, resolveStageAndStore]);
+  }, [currentTask, records, setRecords, settings.alertSound, settings.workMinutes, t, resolveStageAndStore, syncRecord]);
 
   const timer = useTimer({ settings, onComplete: handleTimerComplete, onSkipWork: handleSkipWork });
 
@@ -228,10 +262,11 @@ function App() {
         status: 'abandoned',
       };
       setRecords((prev) => [record, ...prev]);
+      syncRecord(record);
     }
     timer.abandon();
     setShowAbandonConfirm(false);
-  }, [settings.workMinutes, timer, resolveTaskName, setRecords]);
+  }, [settings.workMinutes, timer, resolveTaskName, setRecords, syncRecord]);
 
   // ─── Project timer callbacks ───
   // When a project task completes, also create a PomodoroRecord for unified daily stats.
@@ -277,6 +312,7 @@ function App() {
           status: pomodoroStatus,
         };
         setRecords((prev) => [record, ...prev]);
+        syncRecord(record);
         if (result.status === 'completed') {
           if (isOvertime2x) {
             sendBrowserNotification(t.overtimeNoReward, `"${result.name}" · ${totalMinutes}${t.minutes}`);
@@ -287,7 +323,7 @@ function App() {
       }
     }
     playAlertRepeated(settings.alertSound, 1);
-  }, [setRecords, settings.alertSound, t, resolveStageAndStore]);
+  }, [setRecords, settings.alertSound, t, resolveStageAndStore, syncRecord]);
 
   const handleProjectComplete = useCallback((record: ProjectRecord) => {
     setProjectRecords((prev) => [record, ...prev]);
