@@ -26,24 +26,21 @@ cosmelon/docs/badges/
 
 ---
 
-## 二、品牌色板
+## 二、设计风格参考
 
-跟 logo 保持一致：
-- 西瓜绿 #4CAF50（主色）
-- 果肉红 #F06B6B（强调色）
-- 深绿 #2E7D32（点缀）
-- 西瓜籽黑 #1B5E20
-- 白色瓜皮 #FFFFFF
-- 暖黄 #FFD700（金色/稀有）
-
-整体色调以绿+红+白为主，保持清新可爱。
+以西瓜时钟 logo 为基准：
+- 简约圆润的造型，没有多余细节
+- 伪 3D 质感，柔和阴影，微微光泽
+- kawaii 可爱表情（圆点眼睛+微笑弧线）
+- 色彩明快清新，饱和度适中，不沉闷不刺眼
+- 颜色不限于 logo 的绿红白，可以根据每个徽章的主题自由搭配，但整体风格要跟 logo 一致
 
 ---
 
 ## 三、通用提示词（每个徽章前面都加这段）
 
 ```
-A single cute badge icon on a clean white background. Pseudo-3D style with soft rounded shapes, gentle shadows, and a slight glossy feel. Kawaii aesthetic — simple, minimal, adorable. Color palette: watermelon green (#4CAF50), red (#F06B6B), white, with touches of dark green (#2E7D32). No text, no letters, no numbers. One simple focal element, clean composition, easy to recognize at small sizes.
+A single cute badge icon on a clean white background. Pseudo-3D style with soft rounded shapes, gentle shadows, and a slight glossy feel. Kawaii aesthetic — simple, minimal, adorable. The design style should match a watermelon-clock app logo: clean, rounded, cheerful, with fresh vibrant colors. Colors are not limited — use whatever palette fits the badge theme, but keep the overall feel consistent with the cute kawaii watermelon brand. No text, no letters, no numbers. One simple focal element, clean composition, easy to recognize at small sizes.
 ```
 
 ---
@@ -140,7 +137,7 @@ A single cute badge icon on a clean white background. Pseudo-3D style with soft 
 1. 每次只生成一个徽章
 2. 如果太复杂 → 加 "Very simple, minimal details, clean design."
 3. 如果不够可爱 → 加 "Extra kawaii, baby-like proportions, round soft shapes."
-4. 如果颜色偏了 → 加 "Use watermelon green #4CAF50 and red #F06B6B as main colors."
+4. 如果颜色不协调 → 加 "Fresh, cheerful color palette that matches a cute kawaii app brand."
 5. 如果出现文字 → 加 "Absolutely no text or letters anywhere."
 6. 如果 3D 感不够 → 加 "Soft clay-like 3D render, gentle ambient occlusion."
 
@@ -151,6 +148,6 @@ A single cute badge icon on a clean white background. Pseudo-3D style with soft 
 - [ ] 简约可爱，不过于复杂
 - [ ] 没有文字/字母/数字
 - [ ] 能看出西瓜元素
-- [ ] 色彩跟品牌一致（绿+红+白为主）
+- [ ] 色彩明快清新，风格跟品牌一致
 - [ ] 缩小到 48px 仍能辨认主体
 - [ ] 文件名正确，放在 `docs/badges/`
