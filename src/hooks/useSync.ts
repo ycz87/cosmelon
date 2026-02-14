@@ -8,6 +8,7 @@
 import { useState, useCallback, useRef } from 'react'
 import { API_BASE } from './useAuth'
 import type { PomodoroRecord, PomodoroSettings, Warehouse } from '../types'
+import type { AchievementData } from '../achievements/types'
 
 const TOKEN_KEY = 'wc_access_token'
 
@@ -21,6 +22,7 @@ interface PullResult {
   settings: PomodoroSettings | null
   records: PomodoroRecord[]
   warehouse: Warehouse | null
+  achievements: AchievementData | null
 }
 
 function getToken(): string | null {
@@ -78,9 +80,18 @@ export function useSync(isAuthenticated: boolean) {
     }).catch(() => {})
   }, [isAuthenticated])
 
+  /** Push achievements to cloud (fire-and-forget) */
+  const syncAchievements = useCallback((achievements: AchievementData) => {
+    if (!isAuthenticated) return
+    authFetch('/achievements', {
+      method: 'PUT',
+      body: JSON.stringify({ achievements }),
+    }).catch(() => {})
+  }, [isAuthenticated])
+
   /** Pull all data from cloud. Returns what was found. */
   const pullAll = useCallback(async (): Promise<PullResult> => {
-    const empty: PullResult = { hasData: false, settings: null, records: [], warehouse: null }
+    const empty: PullResult = { hasData: false, settings: null, records: [], warehouse: null, achievements: null }
     if (!isAuthenticated) return empty
     if (syncingRef.current) return empty
 
@@ -88,15 +99,17 @@ export function useSync(isAuthenticated: boolean) {
     setSyncState(s => ({ ...s, isSyncing: true }))
 
     try {
-      const [settingsRes, recordsRes, warehouseRes] = await Promise.all([
+      const [settingsRes, recordsRes, warehouseRes, achievementsRes] = await Promise.all([
         authFetch('/settings'),
         authFetch('/records?limit=500'),
         authFetch('/warehouse'),
+        authFetch('/achievements'),
       ])
 
       let settings: PomodoroSettings | null = null
       let records: PomodoroRecord[] = []
       let warehouse: Warehouse | null = null
+      let achievements: AchievementData | null = null
       let hasData = false
 
       if (settingsRes?.ok) {
@@ -123,8 +136,16 @@ export function useSync(isAuthenticated: boolean) {
         }
       }
 
+      if (achievementsRes?.ok) {
+        const data = await achievementsRes.json() as { achievements: AchievementData | null }
+        if (data.achievements) {
+          achievements = data.achievements
+          hasData = true
+        }
+      }
+
       setSyncState({ isSyncing: false, lastSyncAt: new Date().toISOString() })
-      return { hasData, settings, records, warehouse }
+      return { hasData, settings, records, warehouse, achievements }
     } catch {
       setSyncState(s => ({ ...s, isSyncing: false }))
       return empty
@@ -138,6 +159,7 @@ export function useSync(isAuthenticated: boolean) {
     settings: PomodoroSettings,
     records: PomodoroRecord[],
     warehouse: Warehouse,
+    achievements?: AchievementData,
   ) => {
     if (!isAuthenticated) return
 
@@ -161,6 +183,14 @@ export function useSync(isAuthenticated: boolean) {
         method: 'PUT',
         body: JSON.stringify({ warehouse }),
       })
+
+      // Push achievements
+      if (achievements) {
+        await authFetch('/achievements', {
+          method: 'PUT',
+          body: JSON.stringify({ achievements }),
+        })
+      }
     } catch {
       // Silent fail — local data is still intact
     }
@@ -171,6 +201,7 @@ export function useSync(isAuthenticated: boolean) {
     syncSettings,
     syncRecord,
     syncWarehouse,
+    syncAchievements,
     pullAll,
     migrateLocalData,
   }

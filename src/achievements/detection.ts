@@ -4,6 +4,7 @@
  */
 import type { AchievementData } from './types';
 import type { PomodoroRecord, Warehouse } from '../types';
+import type { AmbienceMixerConfig } from '../audio';
 import { formatDateKey } from '../utils/stats';
 
 interface DetectionContext {
@@ -17,6 +18,8 @@ interface DetectionContext {
   now: Date;
   /** Total project records count */
   totalProjects: number;
+  /** Current ambience mixer config (for X3 sound explorer) */
+  ambienceMixer?: AmbienceMixerConfig;
 }
 
 /** Get ISO week key YYYY-WW */
@@ -37,7 +40,7 @@ export function detectAchievements(ctx: DetectionContext): {
   updatedData: AchievementData;
   newlyUnlocked: string[];
 } {
-  const { records, sessionMinutes, sessionCompleted, now, totalProjects } = ctx;
+  const { records, sessionMinutes, sessionCompleted, now, totalProjects, ambienceMixer } = ctx;
   const data: AchievementData = JSON.parse(JSON.stringify(ctx.data));
   const progress = data.progress;
   const todayKey = formatDateKey(now);
@@ -99,6 +102,36 @@ export function detectAchievements(ctx: DetectionContext): {
 
     // Perfectionist tracking (X4)
     progress.consecutiveCompleted++;
+
+    // Sound explorer tracking (X3)
+    if (ambienceMixer) {
+      const enabledIds = Object.entries(ambienceMixer)
+        .filter(([, cfg]) => cfg.enabled)
+        .map(([id]) => id)
+        .sort();
+      const hash = enabledIds.join(',');
+      if (hash) { // empty hash (no sounds) doesn't count
+        const idx = progress.soundComboDays.indexOf(todayKey);
+        if (idx >= 0) {
+          progress.soundComboHashes[idx] = hash;
+        } else {
+          progress.soundComboDays.push(todayKey);
+          progress.soundComboHashes.push(hash);
+        }
+        // Keep only last 7 days
+        if (progress.soundComboDays.length > 7) {
+          progress.soundComboDays = progress.soundComboDays.slice(-7);
+          progress.soundComboHashes = progress.soundComboHashes.slice(-7);
+        }
+      }
+    }
+
+    // All-rounder tracking (X5) — add 'focus' module
+    if (progress.dailyModules.date !== todayKey) {
+      progress.dailyModules = { date: todayKey, modules: ['focus'] };
+    } else if (!progress.dailyModules.modules.includes('focus')) {
+      progress.dailyModules.modules = [...progress.dailyModules.modules, 'focus'];
+    }
 
     // Project count
     progress.totalProjects = totalProjects;
@@ -178,13 +211,34 @@ export function detectAchievements(ctx: DetectionContext): {
   }
 
   // X3: Sound Explorer (7 consecutive days with different sound combos)
-  // This is tracked externally via updateSoundCombo()
+  if (!isUnlocked('X3') && progress.soundComboDays.length >= 7) {
+    const days = progress.soundComboDays.slice(-7);
+    const hashes = progress.soundComboHashes.slice(-7);
+    // Check consecutive dates
+    let consecutive = true;
+    for (let i = 1; i < days.length; i++) {
+      const prev = new Date(days[i - 1] + 'T00:00:00');
+      const curr = new Date(days[i] + 'T00:00:00');
+      if (curr.getTime() - prev.getTime() !== 86400000) {
+        consecutive = false;
+        break;
+      }
+    }
+    // Check all hashes are unique
+    const uniqueHashes = new Set(hashes);
+    if (consecutive && uniqueHashes.size === 7) unlock('X3');
+  }
 
   // X4: Perfectionist (5 consecutive completed sessions)
   if (!isUnlocked('X4') && progress.consecutiveCompleted >= 5) unlock('X4');
 
-  // X5: All-Rounder — needs warehouse + farm interaction, skip for now
-  // (would need external tracking)
+  // X5: All-Rounder — focus + warehouse + farm in same day
+  if (!isUnlocked('X5')) {
+    const m = progress.dailyModules;
+    if (m.date === todayKey && m.modules.includes('focus') && m.modules.includes('warehouse') && m.modules.includes('farm')) {
+      unlock('X5');
+    }
+  }
 
   // X6: Midnight Gardener (2:00-4:00 AM)
   if (!isUnlocked('X6') && sessionCompleted && sessionMinutes > 0) {
@@ -248,6 +302,22 @@ export function detectWarehouseAchievements(ctx: WarehouseDetectionContext): {
       newlyUnlocked.push(id);
     }
   };
+
+  // ── All-rounder tracking (X5) — add 'warehouse' module ──
+  const todayKey = formatDateKey(now);
+  if (progress.dailyModules.date !== todayKey) {
+    progress.dailyModules = { date: todayKey, modules: ['warehouse'] };
+  } else if (!progress.dailyModules.modules.includes('warehouse')) {
+    progress.dailyModules.modules = [...progress.dailyModules.modules, 'warehouse'];
+  }
+
+  // Check X5 after updating modules
+  if (!isUnlocked('X5')) {
+    const m = progress.dailyModules;
+    if (m.modules.includes('focus') && m.modules.includes('warehouse') && m.modules.includes('farm')) {
+      unlock('X5');
+    }
+  }
 
   // ── Update progress based on trigger ──
   if (trigger === 'addItem' && addedStage) {
@@ -330,6 +400,22 @@ export function detectFarmAchievements(data: AchievementData): {
       newlyUnlocked.push(id);
     }
   };
+
+  // ── All-rounder tracking (X5) — add 'farm' module ──
+  const todayKey = formatDateKey(now);
+  if (progress.dailyModules.date !== todayKey) {
+    progress.dailyModules = { date: todayKey, modules: ['farm'] };
+  } else if (!progress.dailyModules.modules.includes('farm')) {
+    progress.dailyModules.modules = [...progress.dailyModules.modules, 'farm'];
+  }
+
+  // Check X5 after updating modules
+  if (!isUnlocked('X5')) {
+    const m = progress.dailyModules;
+    if (m.modules.includes('focus') && m.modules.includes('warehouse') && m.modules.includes('farm')) {
+      unlock('X5');
+    }
+  }
 
   // G1: First Planting — totalPlants >= 1
   if (!isUnlocked('G1') && progress.totalPlants >= 1) unlock('G1');

@@ -2,6 +2,35 @@
 
 ---
 
+## v0.18.0 — 成就系统完整版：隐藏系列完善 + 云端同步（2026-02-14）
+
+### 背景
+Step 4（最后一步）：完善隐藏系列 X3/X5 检测 + 成就数据云端同步。
+
+### 改动
+
+#### X3 音效探索家
+- `DetectionContext` 新增 `ambienceMixer?: AmbienceMixerConfig` 字段
+- 专注完成时计算当前音效组合 hash（enabled sound ids 排序后 join）
+- 更新 `soundComboDays` / `soundComboHashes`，保留最近 7 天
+- 检测：7 天连续 + 7 个不同 hash → 解锁
+
+#### X5 全能玩家
+- `AchievementProgress` 新增 `dailyModules: { date: string; modules: string[] }`
+- `detectAchievements` 中添加 'focus'，`detectWarehouseAchievements` 中添加 'warehouse'，`detectFarmAchievements` 中添加 'farm'
+- 每天第一次操作时重置（date 不匹配时）
+- 三个模块都有 → 解锁
+
+#### 云端同步
+- `useSync` 新增 `syncAchievements(data)` — PUT /api/achievements
+- `pullAll()` 新增 GET /api/achievements，PullResult 新增 achievements 字段
+- `migrateLocalData()` 新增可选 achievements 参数
+- `useAchievements` 新增 `onSync` 回调（每次数据变化时触发）+ `mergeFromCloud` 方法
+- App.tsx 中 pullAll 返回 achievements 时调用 mergeFromCloud（取解锁并集，时间取较早的）
+- 后端 API 尚未实现，fire-and-forget 静默失败
+
+---
+
 ## v0.17.2 — 农场系列成就检测预埋（2026-02-14）
 
 ### 背景

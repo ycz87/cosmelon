@@ -1,5 +1,5 @@
 /**
- * Achievement system types — v0.17.2
+ * Achievement system types — v0.18.0
  */
 
 export type AchievementSeries = 'streak' | 'focus' | 'house' | 'farm' | 'hidden';
@@ -47,6 +47,8 @@ export interface AchievementProgress {
   collectedStagesCount: number; // number of unique normal stages collected (for H2 progress)
   collectedStages: string[];    // GrowthStage types ever collected (for H2)
   collectedTools: string[];     // tool types ever collected (for H10)
+  // All-rounder tracking (X5)
+  dailyModules: { date: string; modules: string[] };
   // Farm tracking (farm series)
   totalPlants: number;          // cumulative plants planted
   totalFarmHarvests: number;    // cumulative farm harvests
@@ -86,6 +88,7 @@ export const DEFAULT_PROGRESS: AchievementProgress = {
   collectedStagesCount: 0,
   collectedStages: [],
   collectedTools: [],
+  dailyModules: { date: '', modules: [] },
   totalPlants: 0,
   totalFarmHarvests: 0,
   alienVisits: 0,

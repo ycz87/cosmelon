@@ -83,13 +83,13 @@ function App() {
   const auth = useAuth();
 
   // Cloud sync (fire-and-forget, local-first)
-  const { syncSettings, syncRecord, syncWarehouse, pullAll, migrateLocalData } = useSync(auth.isAuthenticated);
+  const { syncSettings, syncRecord, syncWarehouse, syncAchievements, pullAll, migrateLocalData } = useSync(auth.isAuthenticated);
 
   // Warehouse (with cloud sync callback)
   const { warehouse, setWarehouse, addItem, addItems, updatePity, synthesize, synthesizeAll, getHighestStage, resetWarehouse } = useWarehouse(syncWarehouse);
 
-  // Achievements
-  const achievements = useAchievements(records, projectRecords.length);
+  // Achievements (with cloud sync callback)
+  const achievements = useAchievements(records, projectRecords.length, syncAchievements);
 
   // Wrapped synthesize with achievement detection
   const handleSynthesize = useCallback((recipe: import('./types').SynthesisRecipe, count: number = 1): boolean => {
@@ -156,9 +156,10 @@ function App() {
         if (result.settings) setSettings(result.settings);
         if (result.records.length > 0) setRecords(result.records);
         if (result.warehouse) setWarehouse(result.warehouse);
+        if (result.achievements) achievements.mergeFromCloud(result.achievements);
       } else {
         // Cloud empty — migrate local data up
-        migrateLocalData(settings, records, warehouse);
+        migrateLocalData(settings, records, warehouse, achievements.data);
       }
     });
   }, [auth.isAuthenticated, auth.isLoading]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -234,7 +235,7 @@ function App() {
         sendBrowserNotification(t.workComplete(emoji), `"${taskName}" · ${settings.workMinutes}${t.minutes}`);
         playAlertRepeated(settings.alertSound, settings.alertRepeatCount);
         // Check achievements after work completion
-        const newAchievements = achievements.checkAfterSession(settings.workMinutes, true);
+        const newAchievements = achievements.checkAfterSession(settings.workMinutes, true, settings.ambienceMixer);
         if (newAchievements.length > 0) {
           // Delay showing achievement celebration until after the main celebration
           setTimeout(() => setAchievementCelebrationIds(newAchievements), 3000);
@@ -283,7 +284,7 @@ function App() {
       playAlertRepeated(settings.alertSound, 1);
       // Check achievements after skip-complete
       if (!isOvertime2x) {
-        const newAchievements = achievements.checkAfterSession(settings.workMinutes, true);
+        const newAchievements = achievements.checkAfterSession(settings.workMinutes, true, settings.ambienceMixer);
         if (newAchievements.length > 0) {
           setTimeout(() => setAchievementCelebrationIds(newAchievements), 3000);
         }
@@ -386,6 +387,7 @@ function App() {
       const newAchievements = achievements.checkAfterSession(
         Math.round(result.actualSeconds / 60),
         true,
+        settings.ambienceMixer,
       );
       if (newAchievements.length > 0) {
         setTimeout(() => setAchievementCelebrationIds(newAchievements), 3000);

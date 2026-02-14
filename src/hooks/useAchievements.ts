@@ -7,10 +7,15 @@ import type { AchievementData } from '../achievements/types';
 import { DEFAULT_ACHIEVEMENT_DATA } from '../achievements/types';
 import { detectAchievements, detectOnDailyOpen, detectWarehouseAchievements, detectFarmAchievements } from '../achievements/detection';
 import type { PomodoroRecord, Warehouse } from '../types';
+import type { AmbienceMixerConfig } from '../audio';
 
 const STORAGE_KEY = 'achievements';
 
-export function useAchievements(records: PomodoroRecord[], totalProjects: number) {
+export function useAchievements(
+  records: PomodoroRecord[],
+  totalProjects: number,
+  onSync?: (data: AchievementData) => void,
+) {
   const [data, setData] = useLocalStorage<AchievementData>(STORAGE_KEY, DEFAULT_ACHIEVEMENT_DATA);
   const pendingUnlocksRef = useRef<string[]>([]);
   const dailyCheckedRef = useRef(false);
@@ -37,7 +42,11 @@ export function useAchievements(records: PomodoroRecord[], totalProjects: number
    * Call after a focus session completes.
    * Returns array of newly unlocked achievement IDs.
    */
-  const checkAfterSession = useCallback((sessionMinutes: number, sessionCompleted: boolean): string[] => {
+  const checkAfterSession = useCallback((
+    sessionMinutes: number,
+    sessionCompleted: boolean,
+    ambienceMixer?: AmbienceMixerConfig,
+  ): string[] => {
     const { updatedData, newlyUnlocked } = detectAchievements({
       data,
       records,
@@ -45,13 +54,15 @@ export function useAchievements(records: PomodoroRecord[], totalProjects: number
       sessionCompleted,
       now: new Date(),
       totalProjects,
+      ambienceMixer,
     });
     setData(updatedData);
+    onSync?.(updatedData);
     if (newlyUnlocked.length > 0) {
       pendingUnlocksRef.current = [...pendingUnlocksRef.current, ...newlyUnlocked];
     }
     return newlyUnlocked;
-  }, [data, records, totalProjects, setData]);
+  }, [data, records, totalProjects, setData, onSync]);
 
   /** Mark achievements as seen (user viewed them) */
   const markSeen = useCallback((ids: string[]) => {
@@ -78,11 +89,12 @@ export function useAchievements(records: PomodoroRecord[], totalProjects: number
       synthesisCount: opts?.synthesisCount,
     });
     setData(updatedData);
+    onSync?.(updatedData);
     if (newlyUnlocked.length > 0) {
       pendingUnlocksRef.current = [...pendingUnlocksRef.current, ...newlyUnlocked];
     }
     return newlyUnlocked;
-  }, [data, setData]);
+  }, [data, setData, onSync]);
 
   /**
    * Call after farm operations (plant, harvest, alien visit, thief defense, daily check).
@@ -92,11 +104,12 @@ export function useAchievements(records: PomodoroRecord[], totalProjects: number
   const checkFarm = useCallback((): string[] => {
     const { updatedData, newlyUnlocked } = detectFarmAchievements(data);
     setData(updatedData);
+    onSync?.(updatedData);
     if (newlyUnlocked.length > 0) {
       pendingUnlocksRef.current = [...pendingUnlocksRef.current, ...newlyUnlocked];
     }
     return newlyUnlocked;
-  }, [data, setData]);
+  }, [data, setData, onSync]);
 
   /** Get count of unseen unlocked achievements */
   const unseenCount = Object.keys(data.unlocked).filter(id => !data.seen.includes(id)).length;
@@ -108,6 +121,23 @@ export function useAchievements(records: PomodoroRecord[], totalProjects: number
     return pending;
   }, []);
 
+  /** Merge cloud data into local (union of unlocked, earlier timestamps win) */
+  const mergeFromCloud = useCallback((cloud: AchievementData) => {
+    setData(prev => {
+      const merged = { ...prev };
+      const mergedUnlocked = { ...prev.unlocked };
+      for (const [id, ts] of Object.entries(cloud.unlocked)) {
+        if (!mergedUnlocked[id] || ts < mergedUnlocked[id]) {
+          mergedUnlocked[id] = ts;
+        }
+      }
+      merged.unlocked = mergedUnlocked;
+      // Merge seen list
+      merged.seen = [...new Set([...prev.seen, ...cloud.seen])];
+      return merged;
+    });
+  }, [setData]);
+
   return {
     data,
     checkAfterSession,
@@ -116,5 +146,6 @@ export function useAchievements(records: PomodoroRecord[], totalProjects: number
     markSeen,
     unseenCount,
     consumePendingUnlocks,
+    mergeFromCloud,
   };
 }

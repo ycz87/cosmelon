@@ -1,3 +1,24 @@
+## v0.18.0 — 成就系统完整版：隐藏系列完善 + 云端同步（2026-02-14）
+
+### 新增
+- 🎵 X3 音效探索家：连续 7 天每天使用不同的背景音组合即可解锁
+- 🎮 X5 全能玩家：同一天在专注、瓜棚、农场都有操作即可解锁
+- ☁️ 成就云端同步：登录后自动推送/拉取成就数据
+- 多设备成就合并：取解锁并集，时间取较早的
+- 首次登录迁移包含成就数据
+
+### 技术细节
+- `DetectionContext` 新增 `ambienceMixer` 字段，专注完成时传入当前音效配置
+- `AchievementProgress` 新增 `dailyModules` 字段追踪每日模块操作
+- `detectWarehouseAchievements` / `detectFarmAchievements` 中追踪 X5 模块
+- `useSync` 新增 `syncAchievements` 方法（PUT /api/achievements）
+- `pullAll` 新增拉取 achievements 数据（GET /api/achievements）
+- `migrateLocalData` 新增 achievements 参数
+- `useAchievements` 新增 `onSync` 回调 + `mergeFromCloud` 方法
+- 后端 API 端点尚未实现，sync 调用静默失败（fire-and-forget），后端上线后自动生效
+
+---
+
 ## v0.17.2 — 农场系列成就检测预埋（2026-02-14）
 
 ### 新增
