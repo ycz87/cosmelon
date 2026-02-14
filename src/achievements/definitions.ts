@@ -31,18 +31,18 @@ export const FOCUS_ACHIEVEMENTS: AchievementDef[] = [
   { id: 'F10', series: 'focus', nameZh: '项目达人', nameEn: 'Project Pro', descZh: '十个项目，你已经是项目管理高手', descEn: 'Ten projects — you\'re a project management pro', conditionZh: '完成 10 个项目', conditionEn: 'Complete 10 projects', emoji: '📋', target: 10, progressKey: 'totalProjects' },
 ];
 
-// 🏠 瓜棚系列 (House) — display only
+// 🏠 瓜棚系列 (House)
 export const HOUSE_ACHIEVEMENTS: AchievementDef[] = [
-  { id: 'H1', series: 'house', nameZh: '初次收获', nameEn: 'First Harvest', descZh: '', descEn: '', emoji: '🧺' },
-  { id: 'H2', series: 'house', nameZh: '满园春色', nameEn: 'Full Garden', descZh: '', descEn: '', emoji: '🌸' },
-  { id: 'H3', series: 'house', nameZh: '金瓜降临', nameEn: 'Golden Arrival', descZh: '', descEn: '', emoji: '✨' },
-  { id: 'H4', series: 'house', nameZh: '金瓜收藏家', nameEn: 'Golden Collector', descZh: '', descEn: '', emoji: '💎' },
-  { id: 'H5', series: 'house', nameZh: '仓库大亨', nameEn: 'Warehouse Tycoon', descZh: '', descEn: '', emoji: '🏭' },
-  { id: 'H6', series: 'house', nameZh: '合成初体验', nameEn: 'First Synthesis', descZh: '', descEn: '', emoji: '⚗️' },
-  { id: 'H7', series: 'house', nameZh: '合成大师', nameEn: 'Synthesis Master', descZh: '', descEn: '', emoji: '🧪' },
-  { id: 'H8', series: 'house', nameZh: '第一刀', nameEn: 'First Slice', descZh: '', descEn: '', emoji: '🔪' },
-  { id: 'H9', series: 'house', nameZh: '切瓜百刀', nameEn: 'Hundred Slices', descZh: '', descEn: '', emoji: '⚔️' },
-  { id: 'H10', series: 'house', nameZh: '道具全收集', nameEn: 'Tool Collector', descZh: '', descEn: '', emoji: '🎒' },
+  { id: 'H1', series: 'house', nameZh: '初次收获', nameEn: 'First Harvest', descZh: '你的第一颗种子发芽了！', descEn: 'Your first seed has sprouted!', conditionZh: '获得第 1 个收获物', conditionEn: 'Collect your first item', emoji: '🧺', target: 1, progressKey: 'totalCollected' },
+  { id: 'H2', series: 'house', nameZh: '满园春色', nameEn: 'Full Garden', descZh: '小芽、幼苗、小花、小瓜、大西瓜——你全都有了', descEn: 'Seed, sprout, bloom, green, ripe — you have them all', conditionZh: '集齐 5 种普通收获物', conditionEn: 'Collect all 5 normal growth stages', emoji: '🌸', target: 5, progressKey: 'collectedStagesCount' },
+  { id: 'H3', series: 'house', nameZh: '金瓜降临', nameEn: 'Golden Arrival', descZh: '传说中的金西瓜！你是被选中的人 ✨', descEn: 'The legendary golden melon! You are the chosen one ✨', conditionZh: '获得第 1 个金西瓜', conditionEn: 'Obtain your first golden melon', emoji: '✨', target: 1, progressKey: 'goldenMelons' },
+  { id: 'H4', series: 'house', nameZh: '金瓜收藏家', nameEn: 'Golden Collector', descZh: '五颗金西瓜，你的运气和实力都在线', descEn: 'Five golden melons — luck and skill combined', conditionZh: '获得 5 个金西瓜', conditionEn: 'Obtain 5 golden melons', emoji: '💎', target: 5, progressKey: 'goldenMelons' },
+  { id: 'H5', series: 'house', nameZh: '仓库大亨', nameEn: 'Warehouse Tycoon', descZh: '你的瓜棚快装不下了！', descEn: 'Your warehouse is almost full!', conditionZh: '仓库总收获物 ≥100', conditionEn: 'Total collected items ≥100', emoji: '🏭', target: 100, progressKey: 'totalCollected' },
+  { id: 'H6', series: 'house', nameZh: '合成初体验', nameEn: 'First Synthesis', descZh: '把小的变成大的，这就是合成的魔力', descEn: 'Turn small into big — that\'s the magic of synthesis', conditionZh: '第 1 次合成', conditionEn: 'Perform your first synthesis', emoji: '⚗️', target: 1, progressKey: 'totalSynthesis' },
+  { id: 'H7', series: 'house', nameZh: '合成大师', nameEn: 'Synthesis Master', descZh: '五十次合成，你已经是瓜棚里的炼金术士', descEn: 'Fifty syntheses — you\'re the alchemist of the shed', conditionZh: '累计合成 ≥50 次', conditionEn: 'Total syntheses ≥50', emoji: '🧪', target: 50, progressKey: 'totalSynthesis' },
+  { id: 'H8', series: 'house', nameZh: '第一刀', nameEn: 'First Slice', descZh: '咔嚓！你的第一刀切得真漂亮 🔪', descEn: 'Chop! Your first slice was perfect 🔪', conditionZh: '第 1 次切瓜', conditionEn: 'Slice your first melon', emoji: '🔪', target: 1, progressKey: 'totalSlices' },
+  { id: 'H9', series: 'house', nameZh: '切瓜百刀', nameEn: 'Hundred Slices', descZh: '一百刀下去，你已经是切瓜界的大师傅', descEn: 'A hundred slices — you\'re a master slicer', conditionZh: '累计切瓜 ≥100 次', conditionEn: 'Total slices ≥100', emoji: '⚔️', target: 100, progressKey: 'totalSlices' },
+  { id: 'H10', series: 'house', nameZh: '道具全收集', nameEn: 'Tool Collector', descZh: '每一种道具你都拥有过，真正的收藏家 🧰', descEn: 'You\'ve owned every tool — a true collector 🧰', conditionZh: '获得过所有类型的道具', conditionEn: 'Collect all tool types', emoji: '🎒' },
 ];
 
 // 🌱 农场系列 (Farm) — display only

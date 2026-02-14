@@ -2,6 +2,35 @@
 
 ---
 
+## v0.17.1 — 瓜棚系列成就检测（2026-02-14）
+
+### 背景
+Step 1 完成了成就页面 UI + 坚持/专注/隐藏系列检测。Step 2 实现瓜棚系列 10 个成就的检测逻辑。
+
+### 改动
+
+#### 类型扩展
+- `AchievementProgress` 新增 6 个字段：totalSynthesis, goldenMelons, totalSlices, totalCollected, collectedStagesCount, collectedStages, collectedTools
+- `DEFAULT_PROGRESS` 同步更新
+- `SERIES_CONFIG.house` 移除 `comingSoon: true`
+
+#### 检测逻辑
+- `detection.ts` 新增 `detectWarehouseAchievements()` 函数
+- H1-H5: 基于收获物数量/种类/金西瓜数
+- H6-H7: 基于合成次数
+- H8-H9: 基于切瓜次数（预埋）
+- H10: 基于道具收集（预埋）
+
+#### 集成
+- `useAchievements.ts` 新增 `checkWarehouse()` 方法
+- `App.tsx` 在 `resolveStageAndStore` 后触发瓜棚成就检测
+- `App.tsx` 包装 synthesize/synthesizeAll 添加成就检测
+
+#### 成就定义
+- `definitions.ts` 瓜棚系列 10 个成就补全 descZh/descEn/conditionZh/conditionEn/target/progressKey
+
+---
+
 ## v0.17.0 — 成就徽章系统（2026-02-14）
 
 ### 背景

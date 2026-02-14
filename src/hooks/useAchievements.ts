@@ -5,8 +5,8 @@ import { useCallback, useRef, useEffect } from 'react';
 import { useLocalStorage } from './useLocalStorage';
 import type { AchievementData } from '../achievements/types';
 import { DEFAULT_ACHIEVEMENT_DATA } from '../achievements/types';
-import { detectAchievements, detectOnDailyOpen } from '../achievements/detection';
-import type { PomodoroRecord } from '../types';
+import { detectAchievements, detectOnDailyOpen, detectWarehouseAchievements } from '../achievements/detection';
+import type { PomodoroRecord, Warehouse } from '../types';
 
 const STORAGE_KEY = 'achievements';
 
@@ -61,6 +61,29 @@ export function useAchievements(records: PomodoroRecord[], totalProjects: number
     }));
   }, [setData]);
 
+  /**
+   * Call after warehouse operations (addItem, synthesize).
+   * Returns array of newly unlocked achievement IDs.
+   */
+  const checkWarehouse = useCallback((
+    warehouse: Warehouse,
+    trigger: 'addItem' | 'synthesize' | 'slice' | 'collectTool' | 'init',
+    opts?: { addedStage?: string; synthesisCount?: number },
+  ): string[] => {
+    const { updatedData, newlyUnlocked } = detectWarehouseAchievements({
+      data,
+      warehouse,
+      trigger,
+      addedStage: opts?.addedStage,
+      synthesisCount: opts?.synthesisCount,
+    });
+    setData(updatedData);
+    if (newlyUnlocked.length > 0) {
+      pendingUnlocksRef.current = [...pendingUnlocksRef.current, ...newlyUnlocked];
+    }
+    return newlyUnlocked;
+  }, [data, setData]);
+
   /** Get count of unseen unlocked achievements */
   const unseenCount = Object.keys(data.unlocked).filter(id => !data.seen.includes(id)).length;
 
@@ -74,6 +97,7 @@ export function useAchievements(records: PomodoroRecord[], totalProjects: number
   return {
     data,
     checkAfterSession,
+    checkWarehouse,
     markSeen,
     unseenCount,
     consumePendingUnlocks,

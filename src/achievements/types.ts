@@ -1,5 +1,5 @@
 /**
- * Achievement system types — v0.17.0
+ * Achievement system types — v0.17.1
  */
 
 export type AchievementSeries = 'streak' | 'focus' | 'house' | 'farm' | 'hidden';
@@ -39,6 +39,14 @@ export interface AchievementProgress {
   // Sound explorer tracking (X3)
   soundComboDays: string[];   // last 7 dates with unique combos
   soundComboHashes: string[]; // hash of combo used each day
+  // Warehouse tracking (house series)
+  totalSynthesis: number;       // cumulative synthesis count
+  goldenMelons: number;         // cumulative legendary melons obtained
+  totalSlices: number;          // cumulative slice count
+  totalCollected: number;       // mirror of warehouse.totalCollected for progress display
+  collectedStagesCount: number; // number of unique normal stages collected (for H2 progress)
+  collectedStages: string[];    // GrowthStage types ever collected (for H2)
+  collectedTools: string[];     // tool types ever collected (for H10)
 }
 
 export interface AchievementData {
@@ -63,6 +71,13 @@ export const DEFAULT_PROGRESS: AchievementProgress = {
   consecutiveCompleted: 0,
   soundComboDays: [],
   soundComboHashes: [],
+  totalSynthesis: 0,
+  goldenMelons: 0,
+  totalSlices: 0,
+  totalCollected: 0,
+  collectedStagesCount: 0,
+  collectedStages: [],
+  collectedTools: [],
 };
 
 export const DEFAULT_ACHIEVEMENT_DATA: AchievementData = {
@@ -81,7 +96,7 @@ export const SERIES_CONFIG: Record<AchievementSeries, {
 }> = {
   streak: { emoji: '⭐️', color: '#FF8C42', count: 10 },
   focus:  { emoji: '⏱️', color: '#FF3B5C', count: 10 },
-  house:  { emoji: '🏠', color: '#4CAF50', count: 10, comingSoon: true },
+  house:  { emoji: '🏠', color: '#4CAF50', count: 10 },
   farm:   { emoji: '🌱', color: '#8D6E63', count: 8, comingSoon: true },
   hidden: { emoji: '🌟', color: '#FFD700', colorEnd: '#9C27B0', count: 6 },
 };

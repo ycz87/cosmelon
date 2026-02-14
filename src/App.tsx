@@ -91,6 +91,30 @@ function App() {
   // Achievements
   const achievements = useAchievements(records, projectRecords.length);
 
+  // Wrapped synthesize with achievement detection
+  const handleSynthesize = useCallback((recipe: import('./types').SynthesisRecipe, count: number = 1): boolean => {
+    const result = synthesize(recipe, count);
+    if (result) {
+      const actual = Math.min(count, Math.floor(warehouse.items[recipe.from] / recipe.cost));
+      const newAchievements = achievements.checkWarehouse(warehouse, 'synthesize', { synthesisCount: actual > 0 ? actual : 1 });
+      if (newAchievements.length > 0) {
+        setTimeout(() => setAchievementCelebrationIds(prev => [...prev, ...newAchievements]), 500);
+      }
+    }
+    return result;
+  }, [synthesize, warehouse, achievements]);
+
+  const handleSynthesizeAll = useCallback((recipe: import('./types').SynthesisRecipe): number => {
+    const count = synthesizeAll(recipe);
+    if (count > 0) {
+      const newAchievements = achievements.checkWarehouse(warehouse, 'synthesize', { synthesisCount: count });
+      if (newAchievements.length > 0) {
+        setTimeout(() => setAchievementCelebrationIds(prev => [...prev, ...newAchievements]), 500);
+      }
+    }
+    return count;
+  }, [synthesizeAll, warehouse, achievements]);
+
   // Modal states
   const [showAbandonConfirm, setShowAbandonConfirm] = useState(false);
   const [showProjectExit, setShowProjectExit] = useState(false);
@@ -177,8 +201,19 @@ function App() {
     }
     addItem(stage);
     setLastRolledStage(stage);
+    // Check warehouse achievements after adding item
+    // Use warehouse with updated totalCollected (addItem increments it)
+    const updatedWarehouse = {
+      ...warehouse,
+      items: { ...warehouse.items, [stage]: warehouse.items[stage] + 1 },
+      totalCollected: warehouse.totalCollected + 1,
+    };
+    const newAchievements = achievements.checkWarehouse(updatedWarehouse, 'addItem', { addedStage: stage });
+    if (newAchievements.length > 0) {
+      setTimeout(() => setAchievementCelebrationIds(prev => [...prev, ...newAchievements]), 3500);
+    }
     return stage;
-  }, [warehouse.legendaryPity, updatePity, addItem]);
+  }, [warehouse, updatePity, addItem, achievements]);
 
   const handleTimerComplete = useCallback((phase: TimerPhase) => {
     try {
@@ -722,8 +757,8 @@ function App() {
         {showWarehouse && (
           <WarehousePage
             warehouse={warehouse}
-            onSynthesize={synthesize}
-            onSynthesizeAll={synthesizeAll}
+            onSynthesize={handleSynthesize}
+            onSynthesizeAll={handleSynthesizeAll}
             highestStage={getHighestStage()}
             onClose={() => setShowWarehouse(false)}
           />

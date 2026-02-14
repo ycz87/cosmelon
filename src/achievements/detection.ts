@@ -1,10 +1,9 @@
 /**
- * Achievement detection — checks unlock conditions for streak & focus series
- * Also handles hidden series detection.
+ * Achievement detection — checks unlock conditions for streak, focus, house & hidden series.
  * Returns array of newly unlocked achievement IDs.
  */
 import type { AchievementData } from './types';
-import type { PomodoroRecord } from '../types';
+import type { PomodoroRecord, Warehouse } from '../types';
 import { formatDateKey } from '../utils/stats';
 
 interface DetectionContext {
@@ -211,4 +210,101 @@ export function detectOnDailyOpen(data: AchievementData, records: PomodoroRecord
     now: new Date(),
     totalProjects,
   });
+}
+
+/** Normal stages (excluding legendary) for H2 check */
+const NORMAL_STAGES = ['seed', 'sprout', 'bloom', 'green', 'ripe'] as const;
+
+interface WarehouseDetectionContext {
+  data: AchievementData;
+  warehouse: Warehouse;
+  /** Which event triggered this check */
+  trigger: 'addItem' | 'synthesize' | 'slice' | 'collectTool' | 'init';
+  /** The stage just added (for addItem trigger) */
+  addedStage?: string;
+  /** Number of synthesis operations just performed */
+  synthesisCount?: number;
+}
+
+/**
+ * Detect warehouse (house series) achievements.
+ * Call after addItem, synthesize, slice, or tool collection.
+ * Updates progress fields and checks H1-H10.
+ */
+export function detectWarehouseAchievements(ctx: WarehouseDetectionContext): {
+  updatedData: AchievementData;
+  newlyUnlocked: string[];
+} {
+  const { warehouse, trigger, addedStage, synthesisCount } = ctx;
+  const data: AchievementData = JSON.parse(JSON.stringify(ctx.data));
+  const progress = data.progress;
+  const now = new Date();
+  const newlyUnlocked: string[] = [];
+
+  const isUnlocked = (id: string) => id in data.unlocked;
+  const unlock = (id: string) => {
+    if (!isUnlocked(id)) {
+      data.unlocked[id] = now.toISOString();
+      newlyUnlocked.push(id);
+    }
+  };
+
+  // ── Update progress based on trigger ──
+  if (trigger === 'addItem' && addedStage) {
+    // Track collected stages (for H2)
+    if (!progress.collectedStages.includes(addedStage)) {
+      progress.collectedStages = [...progress.collectedStages, addedStage];
+    }
+    // Track golden melons (for H3/H4)
+    if (addedStage === 'legendary') {
+      progress.goldenMelons++;
+    }
+  }
+
+  if (trigger === 'synthesize' && synthesisCount) {
+    progress.totalSynthesis += synthesisCount;
+  }
+
+  // Sync display fields from warehouse
+  progress.totalCollected = warehouse.totalCollected;
+  progress.collectedStagesCount = progress.collectedStages.filter(
+    s => NORMAL_STAGES.includes(s as typeof NORMAL_STAGES[number]),
+  ).length;
+
+  // ── Check House Series ──
+  // H1: first harvest (totalCollected >= 1)
+  if (!isUnlocked('H1') && warehouse.totalCollected >= 1) unlock('H1');
+
+  // H2: collected all 5 normal stages
+  if (!isUnlocked('H2')) {
+    const hasAll = NORMAL_STAGES.every(s => progress.collectedStages.includes(s));
+    if (hasAll) unlock('H2');
+  }
+
+  // H3: first golden melon
+  if (!isUnlocked('H3') && progress.goldenMelons >= 1) unlock('H3');
+
+  // H4: 5 golden melons
+  if (!isUnlocked('H4') && progress.goldenMelons >= 5) unlock('H4');
+
+  // H5: total collected >= 100
+  if (!isUnlocked('H5') && warehouse.totalCollected >= 100) unlock('H5');
+
+  // H6: first synthesis
+  if (!isUnlocked('H6') && progress.totalSynthesis >= 1) unlock('H6');
+
+  // H7: 50 syntheses
+  if (!isUnlocked('H7') && progress.totalSynthesis >= 50) unlock('H7');
+
+  // H8: first slice
+  if (!isUnlocked('H8') && progress.totalSlices >= 1) unlock('H8');
+
+  // H9: 100 slices
+  if (!isUnlocked('H9') && progress.totalSlices >= 100) unlock('H9');
+
+  // H10: all tool types collected (placeholder — no tool system yet)
+  // Will auto-trigger when collectedTools contains all types
+  // if (!isUnlocked('H10') && progress.collectedTools.length >= ALL_TOOL_TYPES.length) unlock('H10');
+
+  return { updatedData: data, newlyUnlocked };
 }

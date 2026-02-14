@@ -1,3 +1,21 @@
+## v0.17.1 — 瓜棚系列成就检测（2026-02-14）
+
+### 新增
+- 🏠 瓜棚系列 10 个成就检测逻辑全部实现（H1-H10）
+- 收获物添加后自动检测：初次收获、满园春色、金瓜降临、金瓜收藏家、仓库大亨
+- 合成操作后自动检测：合成初体验、合成大师
+- 切瓜/道具检测逻辑预埋（H8/H9/H10），等功能上线后自动生效
+- AchievementProgress 新增 warehouse 追踪字段（totalSynthesis, goldenMelons, totalSlices, collectedStages, collectedTools）
+- 瓜棚系列成就补全中英文描述、解锁条件、进度条配置
+- 瓜棚系列移除"即将开放"标记，徽章可正常交互
+
+### 技术细节
+- `detectWarehouseAchievements()` — 独立的瓜棚成就检测函数
+- App.tsx 中 `resolveStageAndStore` 和合成操作后触发瓜棚成就检测
+- useAchievements 新增 `checkWarehouse` 方法
+
+---
+
 ## v0.17.0 — 成就徽章系统（2026-02-14）
 
 ### 新增
