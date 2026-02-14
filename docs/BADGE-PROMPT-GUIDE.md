@@ -29,18 +29,19 @@ cosmelon/docs/badges/
 ## 二、设计风格参考
 
 以西瓜时钟 logo 为基准：
-- 简约圆润的造型，没有多余细节
-- 伪 3D 质感，柔和阴影，微微光泽
+- 珐琅徽章风格（enamel pin badge）— 有金属边框、填色区域分明、像真实可佩戴的徽章
+- 造型简约圆润，没有多余细节
 - kawaii 可爱表情（圆点眼睛+微笑弧线）
 - 色彩明快清新，饱和度适中，不沉闷不刺眼
 - 颜色不限于 logo 的绿红白，可以根据每个徽章的主题自由搭配，但整体风格要跟 logo 一致
+- 所有物体的颜色要符合现实常识（如：西瓜籽是棕色/黑色，不是绿色）
 
 ---
 
 ## 三、通用提示词（每个徽章前面都加这段）
 
 ```
-A single cute badge icon on a clean white background. Pseudo-3D style with soft rounded shapes, gentle shadows, and a slight glossy feel. Kawaii aesthetic — simple, minimal, adorable. The design style should match a watermelon-clock app logo: clean, rounded, cheerful, with fresh vibrant colors. Colors are not limited — use whatever palette fits the badge theme, but keep the overall feel consistent with the cute kawaii watermelon brand. No text, no letters, no numbers. One simple focal element, clean composition, easy to recognize at small sizes.
+A single cute enamel pin badge icon on a clean white background. The style resembles a real collectible enamel pin — with a thin metallic rim, smooth filled color areas, and a slight glossy sheen. Kawaii aesthetic — simple, minimal, adorable, rounded shapes. The design style should match a watermelon-clock app logo: clean, cheerful, with fresh vibrant colors. Colors are not limited — use whatever palette fits the badge theme, but keep the overall feel consistent with the cute kawaii watermelon brand. All object colors must be realistic (e.g. watermelon seeds are brown/black, not green; watermelon flesh is red/pink, rind is green). No text, no letters, no numbers. One simple focal element, clean composition, easy to recognize at small sizes.
 ```
 
 ---
@@ -139,7 +140,7 @@ A single cute badge icon on a clean white background. Pseudo-3D style with soft 
 3. 如果不够可爱 → 加 "Extra kawaii, baby-like proportions, round soft shapes."
 4. 如果颜色不协调 → 加 "Fresh, cheerful color palette that matches a cute kawaii app brand."
 5. 如果出现文字 → 加 "Absolutely no text or letters anywhere."
-6. 如果 3D 感不够 → 加 "Soft clay-like 3D render, gentle ambient occlusion."
+6. 如果不像徽章 → 加 "Enamel pin badge style with metallic rim border and smooth filled color areas."
 
 ## 七、生成后检查清单
 
