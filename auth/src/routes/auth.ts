@@ -82,6 +82,14 @@ authRoutes.post('/email/send-code', async (c) => {
     return c.json({ error: 'Turnstile verification failed' }, 403)
   }
 
+  // Global IP rate limit: max 5 requests per 60s
+  const ipRateKey = `rate:ip:${ip || 'unknown'}`
+  const ipAttempts = parseInt(await c.env.SESSION_KV.get(ipRateKey) || '0', 10)
+  if (ipAttempts >= 5) {
+    return c.json({ error: 'Too many requests from this IP' }, 429)
+  }
+  await c.env.SESSION_KV.put(ipRateKey, String(ipAttempts + 1), { expirationTtl: 60 })
+
   const email = body.email?.trim().toLowerCase()
   if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
     return c.json({ error: 'Invalid email' }, 400)

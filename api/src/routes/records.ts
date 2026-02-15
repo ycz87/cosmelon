@@ -75,32 +75,67 @@ recordsRoutes.post('/', async (c) => {
 // POST /records/batch — batch insert records (for local data migration)
 recordsRoutes.post('/batch', async (c) => {
   const userId = c.get('userId')
-  const body = await c.req.json()
-  const records: Array<{ id: string; task: string; durationMinutes: number; completedAt: string; status?: string }> = body.records || []
+  const body = await c.req.json<{ records?: Array<Record<string, unknown>> }>()
+  const records = Array.isArray(body.records) ? body.records : []
 
   if (records.length === 0) {
-    return c.json({ ok: true, inserted: 0 })
+    return c.json({ ok: true, inserted: 0, skipped: 0 })
   }
 
   // D1 batch: max 100 statements per batch
   const batchSize = 100
   let inserted = 0
+  let skipped = 0
 
   for (let i = 0; i < records.length; i += batchSize) {
     const chunk = records.slice(i, i + batchSize)
-    const stmts = chunk.map((r) => {
-      const endedAt = r.completedAt
-      const startedAt = new Date(new Date(endedAt).getTime() - r.durationMinutes * 60 * 1000).toISOString()
+    const stmts = []
+
+    for (const record of chunk) {
+      const id = record.id
+      const task = record.task
+      const durationMinutes = record.durationMinutes
+      const completedAt = record.completedAt
+      const status = record.status
+
+      if (!id || typeof id !== 'string') {
+        skipped += 1
+        continue
+      }
+      if (!task || typeof task !== 'string' || task.length > 200) {
+        skipped += 1
+        continue
+      }
+      if (typeof durationMinutes !== 'number' || durationMinutes < 0 || durationMinutes > 1440) {
+        skipped += 1
+        continue
+      }
+      if (typeof completedAt !== 'string' || !completedAt || isNaN(Date.parse(completedAt))) {
+        skipped += 1
+        continue
+      }
+      if (status && status !== 'completed' && status !== 'abandoned') {
+        skipped += 1
+        continue
+      }
+
+      const endedAt = completedAt
+      const startedAt = new Date(new Date(endedAt).getTime() - durationMinutes * 60 * 1000).toISOString()
       const now = new Date().toISOString()
-      return c.env.DB.prepare(
-        `INSERT INTO focus_records (id, user_id, task_name, duration_minutes, status, started_at, ended_at, created_at)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-         ON CONFLICT(id) DO NOTHING`
-      ).bind(r.id, userId, r.task, r.durationMinutes, r.status || 'completed', startedAt, endedAt, now)
-    })
-    await c.env.DB.batch(stmts)
-    inserted += chunk.length
+      stmts.push(
+        c.env.DB.prepare(
+          `INSERT INTO focus_records (id, user_id, task_name, duration_minutes, status, started_at, ended_at, created_at)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+           ON CONFLICT(id) DO NOTHING`
+        ).bind(id, userId, task, durationMinutes, status || 'completed', startedAt, endedAt, now)
+      )
+    }
+
+    if (stmts.length > 0) {
+      await c.env.DB.batch(stmts)
+      inserted += stmts.length
+    }
   }
 
-  return c.json({ ok: true, inserted })
+  return c.json({ ok: true, inserted, skipped })
 })

@@ -37,16 +37,21 @@ export function InstallPrompt() {
       setTimeout(() => setVisible(true), 3000);
     };
 
-    window.addEventListener('beforeinstallprompt', handler);
-
-    // Detect when app gets installed
-    window.addEventListener('appinstalled', () => {
+    const appInstalledHandler = () => {
       setIsInstalled(true);
       setVisible(false);
       setDeferredPrompt(null);
-    });
+    };
 
-    return () => window.removeEventListener('beforeinstallprompt', handler);
+    window.addEventListener('beforeinstallprompt', handler);
+
+    // Detect when app gets installed
+    window.addEventListener('appinstalled', appInstalledHandler);
+
+    return () => {
+      window.removeEventListener('beforeinstallprompt', handler);
+      window.removeEventListener('appinstalled', appInstalledHandler);
+    };
   }, []);
 
   const handleInstall = useCallback(async () => {

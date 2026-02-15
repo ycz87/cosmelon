@@ -13,6 +13,7 @@ export abstract class AmbienceSound {
   protected gainNode: GainNode | null = null;
   protected _running = false;
   protected loopTimer: ReturnType<typeof setInterval> | null = null;
+  protected extraTimers: ReturnType<typeof setTimeout>[] = [];
 
   get running(): boolean { return this._running; }
 
@@ -29,6 +30,8 @@ export abstract class AmbienceSound {
   stop(): void {
     this._running = false;
     if (this.loopTimer) { clearInterval(this.loopTimer); this.loopTimer = null; }
+    for (const timer of this.extraTimers) clearTimeout(timer);
+    this.extraTimers = [];
     for (const s of this.sources) { try { s.stop(); } catch { /* already stopped */ } }
     for (const n of this.nodes) { try { n.disconnect(); } catch { /* ok */ } }
     this.sources = [];
@@ -235,7 +238,7 @@ export class ThunderstormSound extends AmbienceSound {
       cSrc.start(now);
       cSrc.stop(now + crackDur + 0.06);
       // Follow with rumble
-      setTimeout(() => thunderRumble(), (0.1 + Math.random() * 0.5) * 1000);
+      this.extraTimers.push(setTimeout(() => thunderRumble(), (0.1 + Math.random() * 0.5) * 1000));
     };
 
     this.loopTimer = setInterval(() => {
@@ -484,7 +487,7 @@ export class CricketsSound extends AmbienceSound {
       const timer = setInterval(() => {
         if (Math.random() < 0.7) doChirpBurst(); // occasional silence for realism
       }, chirpRate);
-      setTimeout(() => doChirpBurst(), startDelay);
+      this.extraTimers.push(setTimeout(() => doChirpBurst(), startDelay));
       timers.push(timer);
     }
 

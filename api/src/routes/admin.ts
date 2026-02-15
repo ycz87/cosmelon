@@ -20,9 +20,8 @@ adminRoutes.get('/users', async (c) => {
   const params: (string | number)[] = []
 
   if (search) {
-    const where = ' WHERE email LIKE ? OR display_name LIKE ?'
-    // Escape LIKE special characters to prevent pattern injection
-    const escaped = search.replace(/[%_\\]/g, '\\$&')
+    const where = " WHERE email LIKE ? ESCAPE '\\' OR display_name LIKE ? ESCAPE '\\'"
+    const escaped = search.replace(/%/g, '\\%').replace(/_/g, '\\_')
     const pattern = `%${escaped}%`
     countSql += where
     listSql += where

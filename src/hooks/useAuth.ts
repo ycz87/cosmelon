@@ -61,6 +61,7 @@ export function useAuth() {
       }, refreshIn)
     } catch {
       // Invalid token format
+      clearAuth()
     }
   }, [clearAuth])
 
@@ -79,6 +80,8 @@ export function useAuth() {
 
   // Initialize: check token + fetch user
   useEffect(() => {
+    let cancelled = false
+
     const init = async () => {
       // Check URL fragment for OAuth callback
       const hash = window.location.hash
@@ -93,20 +96,30 @@ export function useAuth() {
 
       const token = localStorage.getItem(TOKEN_KEY)
       if (!token) {
-        setIsLoading(false)
+        if (!cancelled) setIsLoading(false)
         return
       }
 
       const me = await fetchMe(token)
+      if (cancelled) return
       if (me) {
-        setUser(me)
+        if (!cancelled) setUser(me)
         scheduleRefresh(token)
       } else {
         localStorage.removeItem(TOKEN_KEY)
       }
-      setIsLoading(false)
+      if (!cancelled) setIsLoading(false)
     }
+
     init()
+
+    return () => {
+      cancelled = true
+      if (refreshTimerRef.current) {
+        clearTimeout(refreshTimerRef.current)
+        refreshTimerRef.current = null
+      }
+    }
   }, [fetchMe, scheduleRefresh])
 
   const login = useCallback(async (accessToken: string) => {
