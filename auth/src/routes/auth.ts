@@ -15,7 +15,7 @@ import { verifyTurnstile } from '../services/turnstile'
 
 type AuthEnv = { Bindings: Env; Variables: { userId: string; email: string } }
 
-const FRONTEND_URL = 'https://watermelon-clock.pages.dev'
+const FRONTEND_URL = 'https://clock.cosmelon.app'
 const REFRESH_TOKEN_TTL = 30 * 24 * 60 * 60 // 30 days in seconds
 
 export const authRoutes = new Hono<AuthEnv>()

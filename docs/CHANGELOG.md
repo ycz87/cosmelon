@@ -1,3 +1,10 @@
+## v0.19.2 — 修复 auth 服务 FRONTEND_URL（2026-02-15）
+
+### 修复
+- auth 服务 OAuth 回调 FRONTEND_URL 从 `watermelon-clock.pages.dev` 更新为 `clock.cosmelon.app`，修复 OAuth 登录后跳转到旧域名的问题
+
+---
+
 ## v0.19.1 — UI 微调：番茄模式命名 + 移除 phase capsule（2026-02-14）
 
 ### 改进

@@ -2,6 +2,22 @@
 
 ---
 
+## v0.19.2 — 修复 auth 服务 FRONTEND_URL（2026-02-15）
+
+### 背景
+OAuth 登录（Google/Microsoft）回调后，auth 服务将用户重定向到 FRONTEND_URL。该值仍指向旧的 Cloudflare Pages 域名 `watermelon-clock.pages.dev`，需要更新为自定义域名 `clock.cosmelon.app`。
+
+### 改动
+- `auth/src/routes/auth.ts`：`FRONTEND_URL` 从 `https://watermelon-clock.pages.dev` 改为 `https://clock.cosmelon.app`
+- auth worker 重新部署
+
+### 改动文件
+- `auth/src/routes/auth.ts`
+- `package.json`（0.19.1 → 0.19.2）
+- 四个文档同步
+
+---
+
 ## v0.19.1 — UI 微调：番茄模式命名 + 移除 phase capsule（2026-02-14）
 
 ### 背景

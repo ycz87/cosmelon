@@ -3,7 +3,7 @@
 ## 项目信息
 
 - **产品名称：** 西瓜时钟（Watermelon Clock）
-- **线上地址：** https://watermelon-clock.pages.dev/
+- **线上地址：** https://clock.cosmelon.app/
 - **旧地址：** https://pomodoro-puce-seven-98.vercel.app/
 - **GitHub：** https://github.com/ycz87/pomodoro
 - **技术栈：** React 19 + Vite 7 + Tailwind CSS 4 + TypeScript
