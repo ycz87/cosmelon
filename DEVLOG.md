@@ -2,6 +2,23 @@
 
 ---
 
+## v0.20.2 — 庆祝效果增强（2026-02-16）
+
+### 背景
+Charles 反馈庆祝效果太短太小，看不清就消失了。需要增强视觉冲击力和持续时间。
+
+### 改动
+STAGE_CONFIG 全面调整：
+- **时长加倍：** seed 3.5→5s, sprout 4→6s, bloom 4.5→7s, green 5→8.5s, ripe 6→10s, legendary 8→14s
+- **图标放大：** seed 80→100, sprout 88→110, bloom 96→130, green 108→150, ripe 120→160, legendary 130→180
+- **粒子翻倍：** seed 18→36, sprout 28→56, bloom 40→80, green 55→110, ripe 80→160, legendary 100→200
+- **光晕增强：** 每阶段 glowLayers +2, glowIntensity 提升（seed 0.7, sprout 0.8, bloom 0.9, green/ripe/legendary 1.0）
+
+### 文件变更
+- 修改 `src/components/CelebrationOverlay.tsx` — STAGE_CONFIG 数值调整
+
+---
+
 ## v0.20.1 — 徽章显示修复（2026-02-16）
 
 ### 背景
