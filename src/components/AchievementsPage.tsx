@@ -52,11 +52,9 @@ function BadgeIcon({ def, unlocked, series, size = 64 }: {
 
     return (
       <div
-        className="rounded-full flex items-center justify-center shrink-0 overflow-hidden"
+        className="flex items-center justify-center shrink-0"
         style={{
           width: size, height: size,
-          backgroundColor: 'rgba(128,128,128,0.2)',
-          border: '2px solid rgba(128,128,128,0.3)',
         }}
       >
         {canShowImage ? (
@@ -68,7 +66,15 @@ function BadgeIcon({ def, unlocked, series, size = 64 }: {
             onError={() => setImageError(true)}
           />
         ) : (
-          <span style={{ fontSize: size * 0.35 }}>🔒</span>
+          <span
+            className="rounded-full flex items-center justify-center w-full h-full"
+            style={{
+              backgroundColor: 'rgba(128,128,128,0.2)',
+              border: '2px solid rgba(128,128,128,0.3)',
+            }}
+          >
+            <span style={{ fontSize: size * 0.35 }}>🔒</span>
+          </span>
         )}
       </div>
     );
@@ -77,7 +83,7 @@ function BadgeIcon({ def, unlocked, series, size = 64 }: {
   if (canShowImage) {
     return (
       <div
-        className="rounded-full flex items-center justify-center shrink-0 overflow-hidden"
+        className="flex items-center justify-center shrink-0"
         style={{
           width: size, height: size,
           boxShadow: `0 0 ${size * 0.3}px ${config.color}40`,
