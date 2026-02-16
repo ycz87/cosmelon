@@ -40,22 +40,45 @@ export const RARE_ITEMS: ItemId[] = Object.values(ITEM_DEFS)
   .filter(d => d.rarity === 'rare').map(d => d.id);
 export const ALL_ITEM_IDS: ItemId[] = Object.keys(ITEM_DEFS) as ItemId[];
 
+// ─── 种子品质 ───
+export type SeedQuality = 'normal' | 'epic' | 'legendary';
+
+export interface SeedCounts {
+  normal: number;
+  epic: number;
+  legendary: number;
+}
+
+export const DEFAULT_SEED_COUNTS: SeedCounts = { normal: 0, epic: 0, legendary: 0 };
+
 export interface SlicingResult {
   seeds: number;
+  seedQuality: SeedQuality;   // 本次掉落的种子品质
   items: ItemId[];
   isPerfect: boolean;
   melonType: 'ripe' | 'legendary';
+  comboBonus: number;          // combo 额外种子数
 }
 
-/** 瓜棚扩展存储（种子+道具） */
+// ─── 保底计数器 ───
+export interface PityCounter {
+  epicPity: number;       // 连续未出 epic 种子的切瓜次数
+  legendaryPity: number;  // 连续未出 legendary 种子的切瓜次数
+}
+
+export const DEFAULT_PITY: PityCounter = { epicPity: 0, legendaryPity: 0 };
+
+/** 瓜棚扩展存储（种子+道具+保底） */
 export interface ShedStorage {
-  seeds: number;
+  seeds: SeedCounts;
   items: Record<ItemId, number>;
   totalSliced: number;
+  pity: PityCounter;
 }
 
 export const DEFAULT_SHED_STORAGE: ShedStorage = {
-  seeds: 0,
+  seeds: { ...DEFAULT_SEED_COUNTS },
   items: Object.fromEntries(ALL_ITEM_IDS.map(id => [id, 0])) as Record<ItemId, number>,
   totalSliced: 0,
+  pity: { ...DEFAULT_PITY },
 };

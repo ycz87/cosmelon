@@ -435,6 +435,7 @@ export const zh: Messages = {
   slicePerfectBonus: '+1 完美奖励',
   sliceRare: '稀有',
   sliceCollect: '收下',
+  sliceContinue: '🔪 继续切下一个',
   sliceButton: '🔪 切瓜',
   itemName: (id) => ({
     'starlight-fertilizer': '⚡ 星光肥料',
@@ -466,6 +467,9 @@ export const zh: Messages = {
   shedNoItems: '还没有道具，切瓜试试运气吧',
   shedSliceSection: '🔪 切瓜',
   shedTotalSliced: '总切瓜数',
+  seedQualityLabel: (q) => ({ normal: '普通', epic: '史诗', legendary: '传说' }[q] ?? q),
+  comboExpert: '🔪 切瓜达人！',
+  comboGod: '⚡ 瓜神降临！',
 
   tabFocus: '专注',
   tabWarehouse: '瓜棚',

@@ -2,6 +2,30 @@
 
 ---
 
+## v0.21.1 — 连切 Combo + 保底机制（2026-02-16）
+
+### 背景
+Phase 1 切瓜系统验收通过后，Phase 2 增强体验：连切 Combo 奖励和种子保底机制。
+
+### 改动
+1. **种子品质系统** — `SeedQuality: 'normal' | 'epic' | 'legendary'`，种子存储从 `number` 改为 `SeedCounts { normal, epic, legendary }`，兼容旧数据迁移
+2. **保底机制** — `PityCounter { epicPity, legendaryPity }` 追踪连续未出高品质种子次数，30 瓜必出 epic，80 瓜必出 legendary
+3. **Combo 系统** — App.tsx 维护 `comboCount` 状态，3 连+1 种子，5 连必出 legendary 种子
+4. **SlicingScene 增强** — Combo 计数器 UI、里程碑特效（"切瓜达人"/"瓜神降临"）、"继续切下一个"按钮
+5. **瓜棚种子区** — 按品质分行显示（普通🌰/史诗💎/传说🌟），带颜色标识
+6. **i18n** — 8 种语言新增 combo/品质/继续切瓜文案
+
+### 文件变更
+- 修改 `src/types/slicing.ts` — 新增 SeedQuality, SeedCounts, PityCounter, SlicingResult.comboBonus
+- 修改 `src/slicing/engine.ts` — 保底逻辑 + combo 奖励 + updatePity 导出
+- 修改 `src/hooks/useShedStorage.ts` — 适配新存储结构 + 迁移函数
+- 修改 `src/components/SlicingScene.tsx` — combo UI + 继续切瓜
+- 修改 `src/components/WarehousePage.tsx` — 种子按品质显示
+- 修改 `src/App.tsx` — combo 状态管理 + pity 更新
+- 修改 `src/i18n/` 全部 locale 文件
+
+---
+
 ## v0.21.0 — 切瓜系统 MVP（2026-02-16）
 
 ### 背景

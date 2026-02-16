@@ -435,6 +435,7 @@ export const en: Messages = {
   slicePerfectBonus: '+1 Perfect Bonus',
   sliceRare: 'Rare',
   sliceCollect: 'Collect',
+  sliceContinue: '🔪 Slice Next',
   sliceButton: '🔪 Slice',
   itemName: (id) => ({
     'starlight-fertilizer': '⚡ Starlight Fertilizer',
@@ -466,6 +467,9 @@ export const en: Messages = {
   shedNoItems: 'No items yet — try slicing some melons!',
   shedSliceSection: '🔪 Slice',
   shedTotalSliced: 'Total Sliced',
+  seedQualityLabel: (q) => ({ normal: 'Normal', epic: 'Epic', legendary: 'Legendary' }[q] ?? q),
+  comboExpert: '🔪 Slice Expert!',
+  comboGod: '⚡ Melon God!',
 
   tabFocus: 'Focus',
   tabWarehouse: 'Shed',

@@ -38,6 +38,7 @@ import { WarehousePage } from './components/WarehousePage';
 import { AchievementsPage } from './components/AchievementsPage';
 import { AchievementCelebration } from './components/AchievementCelebration';
 import { SlicingScene } from './components/SlicingScene';
+import { updatePity as updatePityCalc } from './slicing/engine';
 import { FarmPage } from './components/FarmPage';
 import { useTimer } from './hooks/useTimer';
 import type { TimerPhase } from './hooks/useTimer';
@@ -92,10 +93,11 @@ function App() {
   const { warehouse, setWarehouse, addItem, addItems, updatePity, consumeMelon, synthesize, synthesizeAll, getHighestStage, resetWarehouse } = useWarehouse(syncWarehouse);
 
   // Shed storage (seeds + items from slicing)
-  const { shed, addSeeds, addItem: addShedItem, incrementSliced } = useShedStorage();
+  const { shed, addSeeds, addItem: addShedItem, incrementSliced, updatePityCounter } = useShedStorage();
 
   // Slicing scene state
   const [slicingMelon, setSlicingMelon] = useState<'ripe' | 'legendary' | null>(null);
+  const [comboCount, setComboCount] = useState(0);
 
   // Achievements (with cloud sync callback)
   const achievements = useAchievements(records, projectRecords.length, syncAchievements);
@@ -127,24 +129,37 @@ function App() {
   // Slicing handlers
   const handleStartSlice = useCallback((type: 'ripe' | 'legendary') => {
     if (consumeMelon(type)) {
+      setComboCount(prev => prev + 1);
       setSlicingMelon(type);
     }
   }, [consumeMelon]);
 
   const handleSliceComplete = useCallback((result: import('./types/slicing').SlicingResult) => {
-    addSeeds(result.seeds);
+    addSeeds(result.seeds, result.seedQuality);
     result.items.forEach(itemId => addShedItem(itemId));
     incrementSliced();
+    updatePityCounter(updatePityCalc(shed.pity, result.seedQuality));
     setSlicingMelon(null);
-  }, [addSeeds, addShedItem, incrementSliced]);
+  }, [addSeeds, addShedItem, incrementSliced, updatePityCounter, shed.pity]);
+
+  const handleSliceContinue = useCallback(() => {
+    // 继续切下一个：找到可切的瓜
+    const type: 'ripe' | 'legendary' = warehouse.items.legendary > 0 ? 'legendary' : 'ripe';
+    if (warehouse.items[type] > 0) {
+      handleStartSlice(type);
+    }
+  }, [warehouse.items, handleStartSlice]);
 
   const handleSliceCancel = useCallback(() => {
-    // Return the melon since user cancelled
     if (slicingMelon) {
       addItem(slicingMelon === 'legendary' ? 'legendary' : 'ripe');
     }
     setSlicingMelon(null);
+    setComboCount(0); // 取消重置 combo
   }, [slicingMelon, addItem]);
+
+  // 检查是否还有瓜可以继续切
+  const canContinueSlicing = warehouse.items.ripe > 0 || warehouse.items.legendary > 0;
 
   // Modal states
   const [showAbandonConfirm, setShowAbandonConfirm] = useState(false);
@@ -789,7 +804,11 @@ function App() {
         {slicingMelon && (
           <SlicingScene
             melonType={slicingMelon}
+            comboCount={comboCount}
+            canContinue={canContinueSlicing}
+            pity={shed.pity}
             onComplete={handleSliceComplete}
+            onContinue={handleSliceContinue}
             onCancel={handleSliceCancel}
           />
         )}

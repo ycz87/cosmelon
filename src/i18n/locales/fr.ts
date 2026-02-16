@@ -435,6 +435,7 @@ export const fr: Messages = {
   slicePerfectBonus: '+1 Bonus parfait',
   sliceRare: 'Rare',
   sliceCollect: 'Récupérer',
+  sliceContinue: '🔪 Couper la suivante',
   sliceButton: '🔪 Couper',
   itemName: (id) => ({
     'starlight-fertilizer': '⚡ Engrais stellaire',
@@ -466,6 +467,9 @@ export const fr: Messages = {
   shedNoItems: 'Pas encore d\'objets — coupez des pastèques !',
   shedSliceSection: '🔪 Couper',
   shedTotalSliced: 'Total coupé',
+  seedQualityLabel: (q) => ({ normal: 'Normal', epic: 'Épique', legendary: 'Légendaire' }[q] ?? q),
+  comboExpert: '🔪 Expert en coupe !',
+  comboGod: '⚡ Dieu pastèque !',
 
   tabFocus: 'Focus',
   tabWarehouse: 'Hangar',

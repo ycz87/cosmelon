@@ -1,12 +1,12 @@
 /**
- * useShedStorage — 种子/道具存储 hook
+ * useShedStorage — 种子/道具/保底存储 hook
  *
- * 管理切瓜产出的种子和道具，持久化到 localStorage。
+ * 管理切瓜产出的种子（三品质）、道具和保底计数器，持久化到 localStorage。
  */
 import { useCallback } from 'react';
 import { useLocalStorage } from './useLocalStorage';
-import type { ItemId, ShedStorage } from '../types/slicing';
-import { DEFAULT_SHED_STORAGE, ALL_ITEM_IDS } from '../types/slicing';
+import type { ItemId, ShedStorage, SeedQuality, PityCounter } from '../types/slicing';
+import { DEFAULT_SHED_STORAGE, ALL_ITEM_IDS, DEFAULT_PITY, DEFAULT_SEED_COUNTS } from '../types/slicing';
 
 const SHED_KEY = 'watermelon-shed';
 
@@ -14,26 +14,48 @@ function migrateShed(raw: unknown): ShedStorage {
   if (!raw || typeof raw !== 'object') return DEFAULT_SHED_STORAGE;
   const s = raw as Record<string, unknown>;
   const result: ShedStorage = {
-    seeds: 0,
+    seeds: { ...DEFAULT_SEED_COUNTS },
     items: { ...DEFAULT_SHED_STORAGE.items },
     totalSliced: 0,
+    pity: { ...DEFAULT_PITY },
   };
-  if (typeof s.seeds === 'number') result.seeds = s.seeds;
+
+  // Migrate seeds: old format was a single number, new format is { normal, epic, legendary }
+  if (typeof s.seeds === 'number') {
+    result.seeds.normal = s.seeds;
+  } else if (s.seeds && typeof s.seeds === 'object') {
+    const sc = s.seeds as Record<string, number>;
+    if (typeof sc.normal === 'number') result.seeds.normal = sc.normal;
+    if (typeof sc.epic === 'number') result.seeds.epic = sc.epic;
+    if (typeof sc.legendary === 'number') result.seeds.legendary = sc.legendary;
+  }
+
   if (typeof s.totalSliced === 'number') result.totalSliced = s.totalSliced;
+
   if (s.items && typeof s.items === 'object') {
     const items = s.items as Record<string, number>;
     for (const id of ALL_ITEM_IDS) {
       if (typeof items[id] === 'number') result.items[id] = items[id];
     }
   }
+
+  if (s.pity && typeof s.pity === 'object') {
+    const p = s.pity as Record<string, number>;
+    if (typeof p.epicPity === 'number') result.pity.epicPity = p.epicPity;
+    if (typeof p.legendaryPity === 'number') result.pity.legendaryPity = p.legendaryPity;
+  }
+
   return result;
 }
 
 export function useShedStorage() {
   const [shed, setShed] = useLocalStorage<ShedStorage>(SHED_KEY, DEFAULT_SHED_STORAGE, migrateShed);
 
-  const addSeeds = useCallback((count: number) => {
-    setShed(prev => ({ ...prev, seeds: prev.seeds + count }));
+  const addSeeds = useCallback((count: number, quality: SeedQuality = 'normal') => {
+    setShed(prev => ({
+      ...prev,
+      seeds: { ...prev.seeds, [quality]: prev.seeds[quality] + count },
+    }));
   }, [setShed]);
 
   const addItem = useCallback((id: ItemId) => {
@@ -47,9 +69,18 @@ export function useShedStorage() {
     setShed(prev => ({ ...prev, totalSliced: prev.totalSliced + 1 }));
   }, [setShed]);
 
-  const resetShed = useCallback(() => {
-    setShed({ ...DEFAULT_SHED_STORAGE, items: { ...DEFAULT_SHED_STORAGE.items } });
+  const updatePityCounter = useCallback((newPity: PityCounter) => {
+    setShed(prev => ({ ...prev, pity: newPity }));
   }, [setShed]);
 
-  return { shed, addSeeds, addItem, incrementSliced, resetShed };
+  const resetShed = useCallback(() => {
+    setShed({
+      seeds: { ...DEFAULT_SEED_COUNTS },
+      items: { ...DEFAULT_SHED_STORAGE.items },
+      totalSliced: 0,
+      pity: { ...DEFAULT_PITY },
+    });
+  }, [setShed]);
+
+  return { shed, addSeeds, addItem, incrementSliced, updatePityCounter, resetShed };
 }

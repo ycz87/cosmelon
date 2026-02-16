@@ -173,29 +173,54 @@ export function WarehousePage({ warehouse, shed, onSynthesize, onSynthesizeAll, 
         )}
 
         {/* ─── Seeds Section ─── */}
-        {shed.seeds > 0 && (
+        {(shed.seeds.normal > 0 || shed.seeds.epic > 0 || shed.seeds.legendary > 0) && (
           <div className="mb-5">
             <h3 className="text-sm font-semibold mb-3" style={{ color: theme.text }}>{t.shedSeedsTitle}</h3>
-            <div
-              className="flex items-center justify-between p-3 rounded-xl border"
-              style={{ backgroundColor: theme.inputBg, borderColor: theme.border }}
-            >
-              <div className="flex items-center gap-2">
-                <span className="text-xl">🌰</span>
-                <span className="text-sm font-medium" style={{ color: theme.text }}>
-                  {t.shedSeedsCount(shed.seeds)}
-                </span>
-              </div>
+            <div className="flex flex-col gap-2">
+              {shed.seeds.normal > 0 && (
+                <div className="flex items-center justify-between p-3 rounded-xl border"
+                  style={{ backgroundColor: theme.inputBg, borderColor: theme.border }}>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xl">🌰</span>
+                    <span className="text-sm font-medium" style={{ color: theme.text }}>
+                      {t.seedQualityLabel('normal')} {t.shedSeedsCount(shed.seeds.normal)}
+                    </span>
+                  </div>
+                </div>
+              )}
+              {shed.seeds.epic > 0 && (
+                <div className="flex items-center justify-between p-3 rounded-xl border"
+                  style={{ backgroundColor: '#a78bfa08', borderColor: '#a78bfa30' }}>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xl">💎</span>
+                    <span className="text-sm font-medium" style={{ color: '#a78bfa' }}>
+                      {t.seedQualityLabel('epic')} {t.shedSeedsCount(shed.seeds.epic)}
+                    </span>
+                  </div>
+                </div>
+              )}
+              {shed.seeds.legendary > 0 && (
+                <div className="flex items-center justify-between p-3 rounded-xl border"
+                  style={{ backgroundColor: '#fbbf2408', borderColor: '#fbbf2430' }}>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xl">🌟</span>
+                    <span className="text-sm font-medium" style={{ color: '#fbbf24' }}>
+                      {t.seedQualityLabel('legendary')} {t.shedSeedsCount(shed.seeds.legendary)}
+                    </span>
+                  </div>
+                </div>
+              )}
+            </div>
+            <div className="flex items-center justify-between mt-2">
+              <p className="text-xs ml-1" style={{ color: theme.textFaint }}>{t.shedFarmComingSoon}</p>
               <button
                 disabled
                 className="px-3 py-1.5 rounded-lg text-xs font-medium opacity-50 cursor-not-allowed"
                 style={{ backgroundColor: theme.inputBg, color: theme.textMuted, border: `1px solid ${theme.border}` }}
-                title={t.shedFarmComingSoon}
               >
                 {t.shedGoFarm}
               </button>
             </div>
-            <p className="text-xs mt-1.5 ml-1" style={{ color: theme.textFaint }}>{t.shedFarmComingSoon}</p>
           </div>
         )}
 

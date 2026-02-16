@@ -435,6 +435,7 @@ export const ja: Messages = {
   slicePerfectBonus: '+1 パーフェクトボーナス',
   sliceRare: 'レア',
   sliceCollect: '受け取る',
+  sliceContinue: '🔪 次をカット',
   sliceButton: '🔪 カット',
   itemName: (id) => ({
     'starlight-fertilizer': '⚡ スターライト肥料',
@@ -466,6 +467,9 @@ export const ja: Messages = {
   shedNoItems: 'アイテムはまだありません。スイカを切ってみよう！',
   shedSliceSection: '🔪 カット',
   shedTotalSliced: '総カット数',
+  seedQualityLabel: (q) => ({ normal: 'ノーマル', epic: 'エピック', legendary: 'レジェンド' }[q] ?? q),
+  comboExpert: '🔪 カット達人！',
+  comboGod: '⚡ 瓜神降臨！',
 
   tabFocus: '集中',
   tabWarehouse: '倉庫',

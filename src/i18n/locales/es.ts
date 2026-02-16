@@ -435,6 +435,7 @@ export const es: Messages = {
   slicePerfectBonus: '+1 Bonus perfecto',
   sliceRare: 'Raro',
   sliceCollect: 'Recoger',
+  sliceContinue: '🔪 Cortar siguiente',
   sliceButton: '🔪 Cortar',
   itemName: (id) => ({
     'starlight-fertilizer': '⚡ Fertilizante estelar',
@@ -466,6 +467,9 @@ export const es: Messages = {
   shedNoItems: 'Sin objetos aún — ¡corta sandías!',
   shedSliceSection: '🔪 Cortar',
   shedTotalSliced: 'Total cortado',
+  seedQualityLabel: (q) => ({ normal: 'Normal', epic: 'Épico', legendary: 'Legendario' }[q] ?? q),
+  comboExpert: '🔪 ¡Experto cortador!',
+  comboGod: '⚡ ¡Dios sandía!',
 
   tabFocus: 'Enfoque',
   tabWarehouse: 'Cobertizo',

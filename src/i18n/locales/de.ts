@@ -435,6 +435,7 @@ export const de: Messages = {
   slicePerfectBonus: '+1 Perfekt-Bonus',
   sliceRare: 'Selten',
   sliceCollect: 'Einsammeln',
+  sliceContinue: '🔪 Nächste schneiden',
   sliceButton: '🔪 Schneiden',
   itemName: (id) => ({
     'starlight-fertilizer': '⚡ Sternenlicht-Dünger',
@@ -466,6 +467,9 @@ export const de: Messages = {
   shedNoItems: 'Noch keine Gegenstände — schneide Melonen!',
   shedSliceSection: '🔪 Schneiden',
   shedTotalSliced: 'Gesamt geschnitten',
+  seedQualityLabel: (q) => ({ normal: 'Normal', epic: 'Episch', legendary: 'Legendär' }[q] ?? q),
+  comboExpert: '🔪 Schneide-Experte!',
+  comboGod: '⚡ Melonengott!',
 
   tabFocus: 'Fokus',
   tabWarehouse: 'Schuppen',

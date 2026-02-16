@@ -435,6 +435,7 @@ export const ko: Messages = {
   slicePerfectBonus: '+1 퍼펙트 보너스',
   sliceRare: '레어',
   sliceCollect: '수확',
+  sliceContinue: '🔪 다음 자르기',
   sliceButton: '🔪 자르기',
   itemName: (id) => ({
     'starlight-fertilizer': '⚡ 별빛 비료',
@@ -466,6 +467,9 @@ export const ko: Messages = {
   shedNoItems: '아이템이 없습니다. 수박을 잘라보세요!',
   shedSliceSection: '🔪 자르기',
   shedTotalSliced: '총 자른 수',
+  seedQualityLabel: (q) => ({ normal: '일반', epic: '에픽', legendary: '전설' }[q] ?? q),
+  comboExpert: '🔪 자르기 달인!',
+  comboGod: '⚡ 수박의 신!',
 
   tabFocus: '집중',
   tabWarehouse: '창고',

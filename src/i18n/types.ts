@@ -305,9 +305,13 @@ export interface Messages {
   slicePerfectBonus: string;
   sliceRare: string;
   sliceCollect: string;
+  sliceContinue: string;
   sliceButton: string;
   itemName: (id: string) => string;
   itemFlavor: (id: string) => string;
+  seedQualityLabel: (quality: string) => string;
+  comboExpert: string;
+  comboGod: string;
 
   // Shed sections
   shedSeedsTitle: string;
