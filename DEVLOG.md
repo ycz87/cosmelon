@@ -2,6 +2,42 @@
 
 ---
 
+## v0.21.3 — 修复移动端切瓜 pull-to-refresh（2026-02-16）
+
+### 背景
+手机端从上往下滑动切瓜时，浏览器 pull-to-refresh 被触发导致页面刷新（P0 bug）。
+
+### 改动
+1. **SlicingScene** — 组件挂载时设置 `document.body.style.overscrollBehavior = 'none'`，卸载时恢复原值
+2. **容器样式** — 全屏容器添加 `touchAction: 'none'` + `overscrollBehavior: 'none'`
+3. **触摸事件** — `touchstart`/`touchmove`/`touchend` 均调用 `e.preventDefault()` 阻止默认滚动行为
+
+### 影响范围
+- `src/components/SlicingScene.tsx`
+
+---
+
+## v0.21.2 — 农场动画与细节打磨（2026-02-16）
+
+### 背景
+FarmPage 的交互已经可用，但揭晓/收获反馈层级不足，尤其新品种和高稀有度的视觉差异不够明显。本次聚焦 FarmPage 细节体验升级，强化反馈辨识度。
+
+### 改动
+1. **RevealOverlay（品种揭晓）** — rare 及以上稀有度新增旋转光带与粒子环，强化文本发光与阴影；入场动画改为更长且更弹性的节奏
+2. **HarvestOverlay（收获动画）** — 新品种与重复品种彻底分流：  
+   新品种为全屏烟花粒子 + 光束 + `NEW` 闪烁徽记；重复品种简化背景并展示 `已收集 ×N`
+3. **PlotCard 进度条** — 保留稀有度颜色，新增发光效果（box-shadow）；epic / legendary 加入流动高光动画
+4. **数据与文案** — `harvestPlot` 返回 `collectedCount`，用于重复收获提示；i18n 新增 `farmNewFlash`（8 语言）
+
+### 文件变更
+- 修改 `src/components/FarmPage.tsx` — 三块动画与进度条视觉升级
+- 修改 `src/hooks/useFarmStorage.ts` — 收获返回 `collectedCount`
+- 修改 `src/i18n/types.ts` — 新增 `farmNewFlash`
+- 修改 `src/i18n/locales/{zh,en,ja,ko,es,fr,de,pt}.ts` — 新增 `farmNewFlash` 文案
+- 修改 `package.json` — 版本号 `0.21.1` → `0.21.2`
+
+---
+
 ## v0.21.1 — 连切 Combo + 保底机制（2026-02-16）
 
 ### 背景

@@ -327,5 +327,31 @@ export interface Messages {
   tabFocus: string;
   tabWarehouse: string;
   tabFarm: string;
-  farmComingSoon: string;
+
+  // ─── Farm ───
+  farmPlotsTab: string;
+  farmCollectionTab: string;
+  farmTodayFocus: (minutes: number) => string;
+  farmPlant: string;
+  farmHarvest: string;
+  farmWithered: string;
+  farmClear: string;
+  farmSelectSeed: string;
+  farmSeedHint: string;
+  farmNoSeeds: string;
+  farmGoSlice: string;
+  farmReveal: string;
+  farmNewVariety: string;
+  farmNewFlash: string;
+  farmAlreadyCollected: string;
+  farmStage: (stage: string) => string;
+  farmGoFarm: string;
+
+  // ─── Collection ───
+  collectionProgress: (collected: number, total: number) => string;
+  collectionLocked: string;
+  collectionUnlockHint: (galaxyId: string) => string;
+  galaxyName: (id: string) => string;
+  varietyName: (id: string) => string;
+  varietyStory: (id: string) => string;
 }

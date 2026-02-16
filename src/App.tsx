@@ -46,6 +46,7 @@ import { useProjectTimer } from './hooks/useProjectTimer';
 import { useWarehouse } from './hooks/useWarehouse';
 import { useShedStorage } from './hooks/useShedStorage';
 import { useAchievements } from './hooks/useAchievements';
+import { useFarmStorage } from './hooks/useFarmStorage';
 import { useAuth } from './hooks/useAuth';
 import { useSync } from './hooks/useSync';
 import { ThemeProvider } from './hooks/useTheme';
@@ -58,7 +59,8 @@ import {
   applyMixerConfig, stopAllAmbience,
 } from './audio';
 import { getTodayKey } from './utils/time';
-import { getStreak } from './utils/stats';
+import { getStreak, getDayMinutes } from './utils/stats';
+import { calculateDailyProgress, updatePlotGrowth, witherPlots, daysBetween } from './farm/growth';
 import { I18nProvider, getMessages } from './i18n';
 import type { PomodoroRecord, PomodoroSettings } from './types';
 import { DEFAULT_SETTINGS, migrateSettings, THEMES, getGrowthStage, GROWTH_EMOJI, rollLegendary } from './types';
@@ -93,7 +95,10 @@ function App() {
   const { warehouse, setWarehouse, addItem, addItems, updatePity, consumeMelon, synthesize, synthesizeAll, getHighestStage, resetWarehouse } = useWarehouse(syncWarehouse);
 
   // Shed storage (seeds + items from slicing)
-  const { shed, addSeeds, addItem: addShedItem, incrementSliced, updatePityCounter } = useShedStorage();
+  const { shed, addSeeds, addItem: addShedItem, incrementSliced, updatePityCounter, consumeSeed } = useShedStorage();
+
+  // Farm storage
+  const { farm, plantSeed, harvestPlot, clearPlot, updatePlots, updateActiveDate } = useFarmStorage();
 
   // Slicing scene state
   const [slicingMelon, setSlicingMelon] = useState<'ripe' | 'legendary' | null>(null);
@@ -101,6 +106,40 @@ function App() {
 
   // Achievements (with cloud sync callback)
   const achievements = useAchievements(records, projectRecords.length, syncAchievements);
+
+  // ─── Farm daily update ───
+  const todayKey = getTodayKey();
+  const todayFocusMinutes = useMemo(() => getDayMinutes(records, todayKey), [records, todayKey]);
+  const farmUpdatedRef = useRef(false);
+
+  useEffect(() => {
+    if (farmUpdatedRef.current) return;
+    if (!farm.lastActiveDate || farm.lastActiveDate === todayKey) {
+      // First visit or same day — just mark active
+      updateActiveDate(todayKey, 0);
+      farmUpdatedRef.current = true;
+      return;
+    }
+
+    // Days since last active
+    const daysSince = daysBetween(farm.lastActiveDate, todayKey);
+
+    if (daysSince >= 3) {
+      // Wither all growing/mature plots
+      updatePlots(witherPlots(farm.plots));
+      updateActiveDate(todayKey, daysSince);
+    } else {
+      // Apply growth for today (using yesterday's focus as proxy, or today's if available)
+      const dailyDays = calculateDailyProgress(todayFocusMinutes);
+      const newPlots = farm.plots.map(p => {
+        if (p.state !== 'growing') return p;
+        return updatePlotGrowth(p, dailyDays, todayKey).plot;
+      });
+      updatePlots(newPlots);
+      updateActiveDate(todayKey, 0);
+    }
+    farmUpdatedRef.current = true;
+  }, [todayKey]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Wrapped synthesize with achievement detection
   const handleSynthesize = useCallback((recipe: import('./types').SynthesisRecipe, count: number = 1): boolean => {
@@ -160,6 +199,16 @@ function App() {
 
   // 检查是否还有瓜可以继续切
   const canContinueSlicing = warehouse.items.ripe > 0 || warehouse.items.legendary > 0;
+
+  // ─── Farm handlers ───
+  const handleFarmPlant = useCallback((plotId: number, quality: import('./types/slicing').SeedQuality) => {
+    if (!consumeSeed(quality)) return '' as import('./types/farm').VarietyId;
+    return plantSeed(plotId, quality, todayKey);
+  }, [consumeSeed, plantSeed, todayKey]);
+
+  const handleFarmHarvest = useCallback((plotId: number) => {
+    return harvestPlot(plotId, todayKey);
+  }, [harvestPlot, todayKey]);
 
   // Modal states
   const [showAbandonConfirm, setShowAbandonConfirm] = useState(false);
@@ -482,7 +531,6 @@ function App() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [timer.status, timer.phase, ambienceMixerKey, isProjectWorking]);
 
-  const todayKey = getTodayKey();
   const todayRecords = records.filter((r) => r.date === todayKey);
 
   const totalDuration = (timer.phase === 'work' || timer.phase === 'overtime')
@@ -795,11 +843,21 @@ function App() {
             onSlice={handleStartSlice}
             highestStage={getHighestStage()}
             inline
+            onGoFarm={() => setActiveTab('farm')}
           />
         )}
 
-        {activeTab === 'farm' && <FarmPage />}
-
+        {activeTab === 'farm' && (
+          <FarmPage
+            farm={farm}
+            seeds={shed.seeds}
+            todayFocusMinutes={todayFocusMinutes}
+            onPlant={handleFarmPlant}
+            onHarvest={handleFarmHarvest}
+            onClear={clearPlot}
+            onGoWarehouse={() => setActiveTab('warehouse')}
+          />
+        )}
         {/* 全屏切瓜场景 */}
         {slicingMelon && (
           <SlicingScene

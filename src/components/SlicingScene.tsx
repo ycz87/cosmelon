@@ -62,6 +62,13 @@ export function SlicingScene({ melonType, comboCount, canContinue, pity, onCompl
   const dragStart = useRef<{ x: number; y: number } | null>(null);
   const hasSwiped = useRef(false);
 
+  // 禁用移动端 pull-to-refresh / 页面滚动
+  useEffect(() => {
+    const prev = document.body.style.overscrollBehavior;
+    document.body.style.overscrollBehavior = 'none';
+    return () => { document.body.style.overscrollBehavior = prev; };
+  }, []);
+
   const melonEmoji = melonType === 'legendary' ? '👑' : '🍉';
   const juiceColors = melonType === 'legendary' ? GOLD_JUICE_COLORS : JUICE_COLORS;
 
@@ -190,10 +197,16 @@ export function SlicingScene({ melonType, comboCount, canContinue, pity, onCompl
   }, [phase, melonType, comboCount, pity, spawnParticles, t]);
 
   const handleTouchStart = useCallback((e: React.TouchEvent) => {
+    e.preventDefault();
     dragStart.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
   }, []);
 
+  const handleTouchMove = useCallback((e: React.TouchEvent) => {
+    e.preventDefault();
+  }, []);
+
   const handleTouchEnd = useCallback((e: React.TouchEvent) => {
+    e.preventDefault();
     if (!dragStart.current) return;
     const touch = e.changedTouches[0];
     handleSlice(dragStart.current.x, dragStart.current.y, touch.clientX, touch.clientY);
@@ -221,8 +234,9 @@ export function SlicingScene({ melonType, comboCount, canContinue, pity, onCompl
     <div
       ref={containerRef}
       className="fixed inset-0 z-[70] flex flex-col items-center justify-center select-none"
-      style={{ backgroundColor: 'rgba(0,0,0,0.85)', cursor: phase === 'ready' ? 'crosshair' : 'default' }}
+      style={{ backgroundColor: 'rgba(0,0,0,0.85)', cursor: phase === 'ready' ? 'crosshair' : 'default', touchAction: 'none', overscrollBehavior: 'none' }}
       onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
       onMouseDown={handleMouseDown}
       onMouseUp={handleMouseUp}

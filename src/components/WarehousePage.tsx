@@ -20,6 +20,7 @@ interface WarehousePageProps {
   highestStage: GrowthStage | null;
   onClose?: () => void;
   inline?: boolean;
+  onGoFarm?: () => void;
 }
 
 const DISPLAY_ORDER: GrowthStage[] = ['seed', 'sprout', 'bloom', 'green', 'ripe', 'legendary'];
@@ -36,7 +37,7 @@ function getStageName(stage: GrowthStage, t: ReturnType<typeof useI18n>): string
   return map[stage];
 }
 
-export function WarehousePage({ warehouse, shed, onSynthesize, onSynthesizeAll, onSlice, highestStage, onClose, inline }: WarehousePageProps) {
+export function WarehousePage({ warehouse, shed, onSynthesize, onSynthesizeAll, onSlice, highestStage, onClose, inline, onGoFarm }: WarehousePageProps) {
   const theme = useTheme();
   const t = useI18n();
   const [toast, setToast] = useState<string | null>(null);
@@ -214,11 +215,11 @@ export function WarehousePage({ warehouse, shed, onSynthesize, onSynthesizeAll, 
             <div className="flex items-center justify-between mt-2">
               <p className="text-xs ml-1" style={{ color: theme.textFaint }}>{t.shedFarmComingSoon}</p>
               <button
-                disabled
-                className="px-3 py-1.5 rounded-lg text-xs font-medium opacity-50 cursor-not-allowed"
-                style={{ backgroundColor: theme.inputBg, color: theme.textMuted, border: `1px solid ${theme.border}` }}
+                onClick={onGoFarm}
+                className="px-3 py-1.5 rounded-lg text-xs font-medium cursor-pointer transition-all"
+                style={{ backgroundColor: `${theme.accent}15`, color: theme.accent, border: `1px solid ${theme.accent}30` }}
               >
-                {t.shedGoFarm}
+                {t.farmGoFarm}
               </button>
             </div>
           </div>

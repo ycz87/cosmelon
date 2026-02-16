@@ -82,5 +82,16 @@ export function useShedStorage() {
     });
   }, [setShed]);
 
-  return { shed, addSeeds, addItem, incrementSliced, updatePityCounter, resetShed };
+  /** 消耗一颗种子（种植时调用），返回是否成功 */
+  const consumeSeed = useCallback((quality: SeedQuality): boolean => {
+    let success = false;
+    setShed(prev => {
+      if (prev.seeds[quality] <= 0) return prev;
+      success = true;
+      return { ...prev, seeds: { ...prev.seeds, [quality]: prev.seeds[quality] - 1 } };
+    });
+    return success;
+  }, [setShed]);
+
+  return { shed, addSeeds, addItem, incrementSliced, updatePityCounter, consumeSeed, resetShed };
 }
