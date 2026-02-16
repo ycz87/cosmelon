@@ -2,13 +2,14 @@
  * AchievementsPage — full-screen achievement gallery
  * Shows all 44 achievements grouped by series with progress bars.
  */
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { useTheme } from '../hooks/useTheme';
 import { useI18n } from '../i18n';
 import type { AchievementData, AchievementSeries } from '../achievements/types';
 import { SERIES_CONFIG } from '../achievements/types';
 import { ACHIEVEMENTS_BY_SERIES, ALL_ACHIEVEMENTS } from '../achievements/definitions';
+import { getBadgeUrl } from '../achievements/badges';
 import type { AchievementDef } from '../achievements/types';
 
 interface AchievementsPageProps {
@@ -25,20 +26,69 @@ function BadgeIcon({ def, unlocked, series, size = 64 }: {
 }) {
   const config = SERIES_CONFIG[series];
   const isHidden = series === 'hidden';
+  const [imageError, setImageError] = useState(false);
+  const badgeUrl = getBadgeUrl(def.id);
+  const canShowImage = !imageError && badgeUrl.length > 0;
+
+  useEffect(() => {
+    setImageError(false);
+  }, [def.id]);
 
   if (!unlocked) {
+    if (isHidden) {
+      return (
+        <div
+          className="rounded-full flex items-center justify-center shrink-0"
+          style={{
+            width: size, height: size,
+            backgroundColor: 'rgba(128,128,128,0.2)',
+            border: '2px solid rgba(128,128,128,0.3)',
+          }}
+        >
+          <span style={{ fontSize: size * 0.35 }}>❓</span>
+        </div>
+      );
+    }
+
     return (
       <div
-        className="rounded-full flex items-center justify-center shrink-0"
+        className="rounded-full flex items-center justify-center shrink-0 overflow-hidden"
         style={{
           width: size, height: size,
           backgroundColor: 'rgba(128,128,128,0.2)',
           border: '2px solid rgba(128,128,128,0.3)',
         }}
       >
-        <span style={{ fontSize: size * 0.35 }}>
-          {isHidden ? '❓' : '🔒'}
-        </span>
+        {canShowImage ? (
+          <img
+            src={badgeUrl}
+            alt={`${def.id} badge`}
+            className="w-full h-full object-contain"
+            style={{ filter: 'grayscale(1) opacity(0.4)' }}
+            onError={() => setImageError(true)}
+          />
+        ) : (
+          <span style={{ fontSize: size * 0.35 }}>🔒</span>
+        )}
+      </div>
+    );
+  }
+
+  if (canShowImage) {
+    return (
+      <div
+        className="rounded-full flex items-center justify-center shrink-0 overflow-hidden"
+        style={{
+          width: size, height: size,
+          boxShadow: `0 0 ${size * 0.3}px ${config.color}40`,
+        }}
+      >
+        <img
+          src={badgeUrl}
+          alt={`${def.id} badge`}
+          className="w-full h-full object-contain"
+          onError={() => setImageError(true)}
+        />
       </div>
     );
   }

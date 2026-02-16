@@ -2,6 +2,27 @@
 
 ---
 
+## v0.20.0 — 徽章图片接入成就页面（2026-02-16）
+
+### 背景
+成就页面之前使用 emoji 占位，44 张 AI 生成的徽章 PNG（512×512 透明背景）已在 `docs/badges/` 就绪，需要接入到成就页面。
+
+### 改动
+1. **图片资源** — 44 张 PNG 从 `docs/badges/` 复制到 `public/badges/`，通过 URL 加载（不 inline 进 JS bundle）
+2. **映射文件** — 新增 `src/achievements/badges.ts`，建立 achievement id → 图片文件名映射 + `getBadgeUrl()` 函数
+3. **BadgeIcon 组件** — 已解锁显示真实图片（带系列色 glow）；未解锁非隐藏显示灰色图片（`grayscale(1) opacity(0.4)`）；未解锁隐藏显示 ❓；图片加载失败 fallback 到 emoji
+4. **庆祝弹窗** — `AchievementCelebration.tsx` 灰→彩色动画也使用真实图片 + fallback
+5. **详情弹窗** — 96px 大尺寸徽章图片
+
+### 文件变更
+- 新增 `public/badges/` — 44 张 PNG
+- 新增 `src/achievements/badges.ts` — ID→文件名映射
+- 修改 `src/components/AchievementsPage.tsx` — BadgeIcon 图片渲染
+- 修改 `src/components/AchievementCelebration.tsx` — 庆祝弹窗图片渲染
+- 修改 `package.json` — 版本号 0.19.4 → 0.20.0
+
+---
+
 ## v0.19.4 — 全面代码审查 + 安全修复（2026-02-15）
 
 ### 背景

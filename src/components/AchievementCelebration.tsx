@@ -9,6 +9,7 @@ import { useTheme } from '../hooks/useTheme';
 import { useI18n } from '../i18n';
 import { SERIES_CONFIG } from '../achievements/types';
 import { getAchievementById } from '../achievements/definitions';
+import { getBadgeUrl } from '../achievements/badges';
 
 interface AchievementCelebrationProps {
   unlockedIds: string[];
@@ -22,6 +23,7 @@ function SingleCelebration({ achievementId, language, onDone }: {
   const theme = useTheme();
   const i18n = useI18n();
   const [phase, setPhase] = useState<'gray' | 'reveal' | 'show' | 'exit'>('gray');
+  const [imageError, setImageError] = useState(false);
   const def = getAchievementById(achievementId);
   const isZh = language.startsWith('zh');
 
@@ -33,15 +35,18 @@ function SingleCelebration({ achievementId, language, onDone }: {
     return () => { clearTimeout(t1); clearTimeout(t2); clearTimeout(t3); clearTimeout(t4); };
   }, [onDone]);
 
+  useEffect(() => {
+    setImageError(false);
+  }, [achievementId]);
+
   if (!def) return null;
 
   const config = SERIES_CONFIG[def.series];
   const name = isZh ? def.nameZh : def.nameEn;
   const desc = isZh ? def.descZh : def.descEn;
   const isRevealed = phase === 'reveal' || phase === 'show';
-  const bg = config.colorEnd
-    ? `linear-gradient(135deg, ${config.color}, ${config.colorEnd})`
-    : config.color;
+  const badgeUrl = getBadgeUrl(def.id);
+  const canShowImage = !imageError && badgeUrl.length > 0;
 
   // Generate gold particles
   const particles = useMemo(() =>
@@ -85,20 +90,39 @@ function SingleCelebration({ achievementId, language, onDone }: {
             transform: isRevealed ? 'scale(0.8)' : 'scale(1)',
           }}
         >
-          <span style={{ fontSize: 48, filter: 'grayscale(1) opacity(0.4)' }}>{def.emoji}</span>
+          {canShowImage ? (
+            <img
+              src={badgeUrl}
+              alt={`${name} badge`}
+              className="w-full h-full object-contain"
+              style={{ filter: 'grayscale(1) opacity(0.4)' }}
+              onError={() => setImageError(true)}
+            />
+          ) : (
+            <span style={{ fontSize: 48, filter: 'grayscale(1) opacity(0.4)' }}>{def.emoji}</span>
+          )}
         </div>
 
         {/* Color state */}
         <div
           className="absolute inset-0 rounded-full flex items-center justify-center transition-all duration-800"
           style={{
-            background: bg,
+            background: 'transparent',
             opacity: isRevealed ? 1 : 0,
             transform: isRevealed ? 'scale(1)' : 'scale(0.5)',
             boxShadow: isRevealed ? `0 0 40px ${config.color}60, 0 0 80px ${config.color}30` : 'none',
           }}
         >
-          <span style={{ fontSize: 48 }}>{def.emoji}</span>
+          {canShowImage ? (
+            <img
+              src={badgeUrl}
+              alt={`${name} badge`}
+              className="w-full h-full object-contain"
+              onError={() => setImageError(true)}
+            />
+          ) : (
+            <span style={{ fontSize: 48 }}>{def.emoji}</span>
+          )}
           <div className="absolute inset-0 rounded-full" style={{
             background: 'radial-gradient(circle, rgba(255,255,255,0.2) 0%, transparent 60%)',
           }} />
