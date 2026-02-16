@@ -86,7 +86,6 @@ function BadgeIcon({ def, unlocked, series, size = 64 }: {
         className="flex items-center justify-center shrink-0"
         style={{
           width: size, height: size,
-          boxShadow: `0 0 ${size * 0.3}px ${config.color}40`,
         }}
       >
         <img
