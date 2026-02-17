@@ -79,9 +79,8 @@ export function FarmPage({ farm, seeds, todayFocusMinutes, addSeeds, onPlant, on
   const totalSeeds = seeds.normal + seeds.epic + seeds.legendary;
   const plotCount = farm.plots.length;
   const plotCols = plotCount <= 4 ? 2 : 3;
-  const plotRows = plotCount <= 6 ? 2 : 3;
+  const plotRows = Math.max(1, Math.ceil(plotCount / plotCols));
   const centerIsoX = (plotCols - plotRows) / 2;
-  const boardSpan = plotRows + plotCols - 1;
   const plotLayout = farm.plots.map((plot, index) => {
     const row = Math.floor(index / plotCols);
     const col = index % plotCols;
@@ -91,6 +90,7 @@ export function FarmPage({ farm, seeds, todayFocusMinutes, addSeeds, onPlant, on
       isoY: col + row,
     };
   });
+  const maxIsoY = plotLayout.reduce((max, item) => Math.max(max, item.isoY), 0);
 
   const handlePlant = useCallback((galaxyId: GalaxyId, quality: SeedQuality) => {
     if (plantingPlotId === null) return;
@@ -151,9 +151,9 @@ export function FarmPage({ farm, seeds, todayFocusMinutes, addSeeds, onPlant, on
             '--farm-iso-tilt': '60deg',
             '--farm-iso-rot': '-45deg',
             '--farm-tile-size': 'clamp(112px, 27vw, 170px)',
-            '--farm-step-x': 'calc(var(--farm-tile-size) * 0.5)',
-            '--farm-step-y': 'calc(var(--farm-tile-size) * 0.3)',
-            height: `calc(var(--farm-tile-size) + ${boardSpan} * var(--farm-step-y) + 10px)`,
+            '--farm-step-x': 'calc(var(--farm-tile-size) * 0.55)',
+            '--farm-step-y': 'calc(var(--farm-tile-size) * 0.33)',
+            height: `calc(var(--farm-tile-size) + ${maxIsoY} * var(--farm-step-y) + 20px)`,
           } as React.CSSProperties}
         >
           <div
@@ -244,20 +244,35 @@ function SubTabHeader({ subTab, setSubTab, theme, t }: {
   t: ReturnType<typeof useI18n>;
 }) {
   return (
-    <div className="flex gap-4 px-1 py-3">
-      {(['plots', 'collection'] as const).map(tab => (
-        <button
-          key={tab}
-          onClick={() => setSubTab(tab)}
-          className="text-sm font-semibold pb-1 transition-colors"
+    <div className="px-1 py-3">
+      <div className="relative flex items-center rounded-full p-[3px]" style={{ backgroundColor: theme.inputBg }}>
+        <div
+          className="absolute top-[3px] bottom-[3px] rounded-full transition-all duration-200 ease-out"
           style={{
-            color: subTab === tab ? theme.accent : theme.textMuted,
-            borderBottom: subTab === tab ? `2px solid ${theme.accent}` : '2px solid transparent',
+            backgroundColor: theme.border,
+            width: 'calc(50% - 3px)',
+            left: subTab === 'plots' ? '3px' : 'calc(50%)',
+          }}
+        />
+        <button
+          onClick={() => setSubTab('plots')}
+          className="relative z-10 px-3.5 py-1.5 rounded-full text-xs font-medium transition-colors duration-200 cursor-pointer flex-1"
+          style={{
+            color: subTab === 'plots' ? theme.text : theme.textMuted,
           }}
         >
-          {tab === 'plots' ? t.farmPlotsTab : t.farmCollectionTab}
+          🌱 {t.farmPlotsTab}
         </button>
-      ))}
+        <button
+          onClick={() => setSubTab('collection')}
+          className="relative z-10 px-3.5 py-1.5 rounded-full text-xs font-medium transition-colors duration-200 cursor-pointer flex-1"
+          style={{
+            color: subTab === 'collection' ? theme.text : theme.textMuted,
+          }}
+        >
+          📖 {t.farmCollectionTab}
+        </button>
+      </div>
     </div>
   );
 }
@@ -333,11 +348,11 @@ function PlotCard({ plot, theme, t, onPlantClick, onHarvestClick, onClearClick }
         {plot.state === 'empty' && (
           <button
             onClick={onPlantClick}
-            className="absolute inset-[8%] flex h-auto w-auto flex-col items-center justify-center gap-1.5"
+            className="absolute inset-[8%] flex h-auto w-auto flex-col items-center justify-center gap-1 text-center"
             style={{ clipPath: diamondClip }}
           >
-            <span className="text-[clamp(1.7rem,5vw,2.4rem)] font-light" style={{ color: '#f8eddc' }}>+</span>
-            <span className="text-[10px] font-medium tracking-wide" style={{ color: '#f8eddc' }}>
+            <span className="text-[clamp(1.7rem,5vw,2.4rem)] font-light leading-none" style={{ color: '#f8eddc' }}>+</span>
+            <span className="text-[10px] font-medium tracking-wide leading-none" style={{ color: '#f8eddc' }}>
               {t.farmPlant}
             </span>
           </button>
