@@ -496,6 +496,7 @@ export const de: Messages = {
   farmStage: (s) => ({ seed: 'Samen', sprout: 'Keimling', leaf: 'Blatt', flower: 'Blüte', fruit: 'Frucht' }[s] ?? s),
   farmGoFarm: 'Zur Farm 🌱',
 
+  starJourneyTitle: '🚀 Sternenreise',
   collectionProgress: (c, t) => `${c}/${t} gesammelt`,
   collectionLocked: 'Gesperrt',
   collectionUnlockHint: (id) => ({
@@ -600,4 +601,8 @@ export const de: Messages = {
     'alloy-melon': 'Spurmetalle machen sie zur kostbaren Nahrung für Bergleute.',
     'eternal-melon': 'Über Äonen im Kern geschmiedet, verrottet sie niemals.',
   }[id] ?? ''),
+  varietyDetailTitle: 'Sortendetails',
+  varietyDetailFirstObtained: 'Erstmals erhalten',
+  varietyDetailHarvestCount: (count) => `Insgesamt geerntet: ${count}x`,
+  varietyDetailClose: 'Schließen',
 };

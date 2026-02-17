@@ -496,6 +496,7 @@ export const ja: Messages = {
   farmStage: (s) => ({ seed: '種子期', sprout: '発芽期', leaf: '成長期', flower: '開花期', fruit: '結実期' }[s] ?? s),
   farmGoFarm: '農場へ 🌱',
 
+  starJourneyTitle: '🚀 星間の旅',
   collectionProgress: (c, t) => `${c}/${t} 収集済み`,
   collectionLocked: '未解放',
   collectionUnlockHint: (id) => ({
@@ -600,4 +601,8 @@ export const ja: Messages = {
     'alloy-melon': '希少金属の微量元素を含み、鉱夫の貴重な栄養源となる。',
     'eternal-melon': '原初の金片が核で鍛えられ、永遠に朽ちない果実となった。',
   }[id] ?? ''),
+  varietyDetailTitle: '品種の詳細',
+  varietyDetailFirstObtained: '初回獲得日',
+  varietyDetailHarvestCount: (count) => `累計収穫回数：${count}回`,
+  varietyDetailClose: '閉じる',
 };

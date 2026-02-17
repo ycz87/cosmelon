@@ -351,10 +351,15 @@ export interface Messages {
   farmGoFarm: string;
 
   // ─── Collection ───
+  starJourneyTitle: string;
   collectionProgress: (collected: number, total: number) => string;
   collectionLocked: string;
   collectionUnlockHint: (galaxyId: string) => string;
   galaxyName: (id: string) => string;
   varietyName: (id: string) => string;
   varietyStory: (id: string) => string;
+  varietyDetailTitle: string;
+  varietyDetailFirstObtained: string;
+  varietyDetailHarvestCount: (count: number) => string;
+  varietyDetailClose: string;
 }

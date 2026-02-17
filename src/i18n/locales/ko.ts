@@ -496,6 +496,7 @@ export const ko: Messages = {
   farmStage: (s) => ({ seed: '씨앗기', sprout: '발아기', leaf: '성장기', flower: '개화기', fruit: '결실기' }[s] ?? s),
   farmGoFarm: '농장으로 🌱',
 
+  starJourneyTitle: '🚀 성간 여정',
   collectionProgress: (c, t) => `${c}/${t} 수집`,
   collectionLocked: '잠김',
   collectionUnlockHint: (id) => ({
@@ -600,4 +601,8 @@ export const ko: Messages = {
     'alloy-melon': '희귀 금속 미량원소가 많아 광부들의 귀한 영양원이 된다.',
     'eternal-melon': '원초 금 조각이 핵에서 단련되어 영원히 썩지 않는 열매가 되었다.',
   }[id] ?? ''),
+  varietyDetailTitle: '품종 상세',
+  varietyDetailFirstObtained: '첫 획득일',
+  varietyDetailHarvestCount: (count) => `누적 수확 ${count}회`,
+  varietyDetailClose: '닫기',
 };

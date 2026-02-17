@@ -496,6 +496,7 @@ export const en: Messages = {
   farmStage: (s) => ({ seed: 'Seed', sprout: 'Sprout', leaf: 'Leaf', flower: 'Flower', fruit: 'Fruit' }[s] ?? s),
   farmGoFarm: 'Go Farm 🌱',
 
+  starJourneyTitle: '🚀 Star Journey',
   collectionProgress: (c, t) => `Collected ${c}/${t}`,
   collectionLocked: 'Locked',
   collectionUnlockHint: (id) => ({
@@ -600,4 +601,8 @@ export const en: Messages = {
     'alloy-melon': 'Trace rare metals make it prized nourishment for miners.',
     'eternal-melon': 'Forged for eons in the core, it never decays.',
   }[id] ?? ''),
+  varietyDetailTitle: 'Variety Details',
+  varietyDetailFirstObtained: 'First Obtained',
+  varietyDetailHarvestCount: (count) => `Total Harvests: ${count}`,
+  varietyDetailClose: 'Close',
 };

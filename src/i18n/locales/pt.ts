@@ -496,6 +496,7 @@ export const pt: Messages = {
   farmStage: (s) => ({ seed: 'Semente', sprout: 'Broto', leaf: 'Folha', flower: 'Flor', fruit: 'Fruto' }[s] ?? s),
   farmGoFarm: 'Ir para fazenda 🌱',
 
+  starJourneyTitle: '🚀 Jornada Estelar',
   collectionProgress: (c, t) => `${c}/${t} coletadas`,
   collectionLocked: 'Bloqueado',
   collectionUnlockHint: (id) => ({
@@ -600,4 +601,8 @@ export const pt: Messages = {
     'alloy-melon': 'Traços de metais raros a tornam alimento valioso para mineradores.',
     'eternal-melon': 'Forjado por eras no núcleo, jamais apodrece.',
   }[id] ?? ''),
+  varietyDetailTitle: 'Detalhes da variedade',
+  varietyDetailFirstObtained: 'Primeira obtenção',
+  varietyDetailHarvestCount: (count) => `Colhida ${count} vezes`,
+  varietyDetailClose: 'Fechar',
 };

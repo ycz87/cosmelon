@@ -498,6 +498,7 @@ export const zh: Messages = {
   farmGoFarm: '去农场种植 🌱',
 
   // Collection
+  starJourneyTitle: '🚀 星际旅程',
   collectionProgress: (c, t) => `已收集 ${c}/${t}`,
   collectionLocked: '未解锁',
   collectionUnlockHint: (id) => ({
@@ -602,4 +603,8 @@ export const zh: Messages = {
     'alloy-melon': '果肉中含有多种稀有金属的微量元素，是玄金星矿工们最珍贵的营养来源',
     'eternal-melon': '原初西瓜的金之碎片坠入玄金星核心，经亿万年锻造，化为永不腐烂的纯金果实',
   }[id] ?? ''),
+  varietyDetailTitle: '品种详情',
+  varietyDetailFirstObtained: '首次获得日期',
+  varietyDetailHarvestCount: (count) => `累计收获 ${count} 次`,
+  varietyDetailClose: '关闭',
 };
