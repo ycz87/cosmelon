@@ -69,6 +69,20 @@ export function FarmPage({ farm, seeds, todayFocusMinutes, onPlant, onHarvest, o
   }, [farm.plots]);
 
   const totalSeeds = seeds.normal + seeds.epic + seeds.legendary;
+  const plotCount = farm.plots.length;
+  const plotCols = plotCount <= 4 ? 2 : 3;
+  const plotRows = plotCount <= 6 ? 2 : 3;
+  const centerIsoX = (plotCols - plotRows) / 2;
+  const boardSpan = plotRows + plotCols - 1;
+  const plotLayout = farm.plots.map((plot, index) => {
+    const row = Math.floor(index / plotCols);
+    const col = index % plotCols;
+    return {
+      plot,
+      isoX: col - row,
+      isoY: col + row,
+    };
+  });
 
   const handlePlant = useCallback((quality: SeedQuality) => {
     if (plantingPlotId === null) return;
@@ -113,22 +127,52 @@ export function FarmPage({ farm, seeds, todayFocusMinutes, onPlant, onHarvest, o
         </span>
       </div>
 
-      {/* 地块网格 2×2 */}
-      <div className="grid grid-cols-2 gap-3 mb-4">
-        {farm.plots.map(plot => (
-          <PlotCard
-            key={plot.id}
-            plot={plot}
-            theme={theme}
-            t={t}
-            onPlantClick={() => {
-              if (totalSeeds > 0) setPlantingPlotId(plot.id);
-              else onGoWarehouse();
+      {/* 等距地块网格 */}
+      <div className="relative mb-5">
+        <div
+          className="relative mx-auto w-full max-w-[760px] overflow-visible"
+          style={{
+            '--farm-iso-tilt': '60deg',
+            '--farm-iso-rot': '-45deg',
+            '--farm-tile-size': 'clamp(112px, 27vw, 170px)',
+            '--farm-step-x': 'calc(var(--farm-tile-size) * 0.5)',
+            '--farm-step-y': 'calc(var(--farm-tile-size) * 0.3)',
+            height: `calc(var(--farm-tile-size) + ${boardSpan} * var(--farm-step-y) + 10px)`,
+          } as React.CSSProperties}
+        >
+          <div
+            className="pointer-events-none absolute left-1/2 top-1/2 h-[74%] w-[74%] -translate-x-1/2 -translate-y-1/2 rounded-[36px]"
+            style={{
+              background: `radial-gradient(circle, ${theme.surface}66 0%, ${theme.surface}00 72%)`,
+              transform: 'rotateX(var(--farm-iso-tilt)) rotateZ(var(--farm-iso-rot))',
+              transformStyle: 'preserve-3d',
             }}
-            onHarvestClick={() => handleHarvest(plot.id)}
-            onClearClick={() => onClear(plot.id)}
           />
-        ))}
+          {plotLayout.map(({ plot, isoX, isoY }) => (
+            <div
+              key={plot.id}
+              className="absolute"
+              style={{
+                left: `calc(50% + ${(isoX - centerIsoX).toFixed(3)} * var(--farm-step-x))`,
+                top: `calc(${isoY} * var(--farm-step-y))`,
+                transform: 'translate(-50%, 0)',
+                zIndex: isoY + 1,
+              }}
+            >
+              <PlotCard
+                plot={plot}
+                theme={theme}
+                t={t}
+                onPlantClick={() => {
+                  if (totalSeeds > 0) setPlantingPlotId(plot.id);
+                  else onGoWarehouse();
+                }}
+                onHarvestClick={() => handleHarvest(plot.id)}
+                onClearClick={() => onClear(plot.id)}
+              />
+            </div>
+          ))}
+        </div>
       </div>
 
       {/* 没有种子提示 */}
@@ -220,122 +264,175 @@ function PlotCard({ plot, theme, t, onPlantClick, onHarvestClick, onClearClick }
     : `0 0 6px ${rarityColor}66`;
   const hasFlowingShine = variety ? (variety.rarity === 'epic' || variety.rarity === 'legendary') : false;
   const flowShineColor = variety?.rarity === 'legendary' ? 'rgba(255,255,255,0.8)' : 'rgba(255,255,255,0.62)';
+  const diamondClip = 'polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%)';
+  const tileBackground = plot.state === 'empty'
+    ? 'linear-gradient(145deg, #8b5a2b 0%, #6f4424 100%)'
+    : plot.state === 'withered'
+      ? `linear-gradient(145deg, ${theme.surface} 0%, ${theme.border} 100%)`
+      : `linear-gradient(145deg, ${theme.surface} 0%, ${theme.inputBg} 100%)`;
+  const tileBorderColor = plot.state === 'mature'
+    ? '#fbbf24'
+    : plot.state === 'empty'
+      ? '#7b4b2b'
+      : theme.border;
+  const tileShadow = plot.state === 'mature'
+    ? '0 14px 26px rgba(251,191,36,0.26), 0 0 16px rgba(251,191,36,0.22)'
+    : '0 10px 20px rgba(0,0,0,0.2)';
 
   return (
-    <div
-      className="relative rounded-2xl border p-3 flex flex-col items-center justify-center min-h-[140px] transition-all"
-      style={{
-        backgroundColor: plot.state === 'withered' ? `${theme.surface}80` : theme.surface,
-        borderColor: plot.state === 'mature' ? '#fbbf24' : theme.border,
-        boxShadow: plot.state === 'mature' ? '0 0 12px rgba(251,191,36,0.2)' : 'none',
-        opacity: plot.state === 'withered' ? 0.6 : 1,
-      }}
-    >
-      {/* Empty plot */}
-      {plot.state === 'empty' && (
-        <button
-          onClick={onPlantClick}
-          className="flex flex-col items-center gap-2 w-full h-full justify-center"
-        >
-          <span className="text-3xl" style={{ color: theme.textFaint }}>+</span>
-          <span className="text-xs" style={{ color: theme.textFaint }}>{t.farmPlant}</span>
-        </button>
-      )}
+    <div className="group relative h-[var(--farm-tile-size)] w-[var(--farm-tile-size)] select-none">
+      <div className="pointer-events-none absolute inset-0">
+        <div
+          className="absolute left-1/2 top-1/2 h-[74%] w-[74%] -translate-x-1/2 -translate-y-1/2 rounded-2xl"
+          style={{
+            backgroundColor: `${theme.border}52`,
+            transform: 'rotateX(var(--farm-iso-tilt)) rotateZ(var(--farm-iso-rot))',
+            filter: 'blur(0.4px)',
+          }}
+        />
+      </div>
 
-      {/* Growing plot */}
-      {plot.state === 'growing' && (
-        <div className="flex flex-col items-center gap-1.5 w-full">
-          <span className="text-4xl" style={{
-            filter: variety && revealed && variety.rarity !== 'common'
-              ? `drop-shadow(0 0 6px ${rarityColor})`
-              : 'none',
-          }}>
-            {stageEmoji}
-          </span>
-          {revealed && variety && (
-            <span className="text-xs font-medium" style={{ color: theme.text }}>
-              {t.varietyName(plot.varietyId!)}
+      <div className="relative h-full w-full transition-transform duration-200 group-hover:-translate-y-1">
+        <div
+          className="absolute inset-[8%] border-2"
+          style={{
+            clipPath: diamondClip,
+            background: tileBackground,
+            borderColor: tileBorderColor,
+            boxShadow: tileShadow,
+            opacity: plot.state === 'withered' ? 0.74 : 1,
+          }}
+        />
+        <div
+          className="pointer-events-none absolute inset-[8%]"
+          style={{
+            clipPath: diamondClip,
+            background: 'linear-gradient(180deg, rgba(255,255,255,0.18) 0%, rgba(255,255,255,0) 46%)',
+          }}
+        />
+
+        {/* Empty plot */}
+        {plot.state === 'empty' && (
+          <button
+            onClick={onPlantClick}
+            className="absolute inset-[8%] flex h-auto w-auto flex-col items-center justify-center gap-1.5"
+            style={{ clipPath: diamondClip }}
+          >
+            <span className="text-[clamp(1.7rem,5vw,2.4rem)] font-light" style={{ color: '#f8eddc' }}>+</span>
+            <span className="text-[10px] font-medium tracking-wide" style={{ color: '#f8eddc' }}>
+              {t.farmPlant}
             </span>
-          )}
-          {!revealed && (
-            <span className="text-xs" style={{ color: theme.textFaint }}>???</span>
-          )}
-          {/* Progress bar */}
-          <div className="w-full h-1.5 rounded-full overflow-hidden mt-1 relative" style={{ backgroundColor: `${theme.border}` }}>
-            <div
-              className="h-full rounded-full transition-all duration-500 relative overflow-hidden"
+          </button>
+        )}
+
+        {/* Growing plot */}
+        {plot.state === 'growing' && (
+          <div
+            className="absolute inset-[8%] flex h-auto w-auto flex-col items-center justify-center px-4 py-4 text-center"
+            style={{ clipPath: diamondClip }}
+          >
+            <span
+              className="text-[clamp(1.9rem,6vw,2.6rem)]"
               style={{
-                width: `${progressPercent}%`,
-                backgroundColor: rarityColor,
-                boxShadow: progressPercent > 1 ? progressGlow : 'none',
+                filter: variety && revealed && variety.rarity !== 'common'
+                  ? `drop-shadow(0 0 6px ${rarityColor})`
+                  : 'none',
               }}
             >
-              {hasFlowingShine && progressPercent > 2 && (
-                <span
-                  className="absolute inset-y-0 left-[-35%] w-[35%] rounded-full"
-                  style={{
-                    background: `linear-gradient(115deg, transparent 0%, ${flowShineColor} 50%, transparent 100%)`,
-                    filter: 'blur(0.5px)',
-                    animation: 'progressShine 1.7s linear infinite',
-                  }}
-                />
-              )}
+              {stageEmoji}
+            </span>
+            {revealed && variety ? (
+              <span className="text-[11px] font-semibold leading-tight" style={{ color: theme.text }}>
+                {t.varietyName(plot.varietyId!)}
+              </span>
+            ) : (
+              <span className="text-[11px] font-medium" style={{ color: theme.textFaint }}>???</span>
+            )}
+            <div className="mt-1 h-1.5 w-[74%] overflow-hidden rounded-full" style={{ backgroundColor: theme.border }}>
+              <div
+                className="relative h-full overflow-hidden rounded-full transition-all duration-500"
+                style={{
+                  width: `${progressPercent}%`,
+                  backgroundColor: rarityColor,
+                  boxShadow: progressPercent > 1 ? progressGlow : 'none',
+                }}
+              >
+                {hasFlowingShine && progressPercent > 2 && (
+                  <span
+                    className="absolute inset-y-0 left-[-35%] w-[35%] rounded-full"
+                    style={{
+                      background: `linear-gradient(115deg, transparent 0%, ${flowShineColor} 50%, transparent 100%)`,
+                      filter: 'blur(0.5px)',
+                      animation: 'progressShine 1.7s linear infinite',
+                    }}
+                  />
+                )}
+              </div>
             </div>
+            <span className="mt-1 text-[10px]" style={{ color: theme.textFaint }}>
+              {t.farmStage(stage)}
+            </span>
           </div>
-          <span className="text-[10px]" style={{ color: theme.textFaint }}>
-            {t.farmStage(stage)}
-          </span>
-        </div>
-      )}
+        )}
 
-      {/* Mature plot */}
-      {plot.state === 'mature' && variety && (
-        <div className="flex flex-col items-center gap-1.5 w-full">
-          <span className="text-4xl" style={{
-            filter: `drop-shadow(0 0 8px ${rarityColor})`,
-            animation: 'maturePulse 2s ease-in-out infinite',
-          }}>
-            {variety.emoji}
-          </span>
-          <span className="text-xs font-medium" style={{ color: theme.text }}>
-            {t.varietyName(plot.varietyId!)}
-          </span>
+        {/* Mature plot */}
+        {plot.state === 'mature' && variety && (
           <button
             onClick={onHarvestClick}
-            className="mt-1 px-4 py-1.5 rounded-xl text-xs font-semibold"
-            style={{ backgroundColor: '#fbbf24', color: '#000' }}
+            className="absolute inset-[8%] flex h-auto w-auto flex-col items-center justify-center px-4 py-4 text-center"
+            style={{ clipPath: diamondClip }}
           >
-            ✋ {t.farmHarvest}
+            <span className="text-[clamp(2rem,6vw,2.7rem)]" style={{
+              filter: `drop-shadow(0 0 8px ${rarityColor})`,
+              animation: 'maturePulse 2s ease-in-out infinite',
+            }}>
+              {variety.emoji}
+            </span>
+            <span className="text-[11px] font-semibold leading-tight" style={{ color: theme.text }}>
+              {t.varietyName(plot.varietyId!)}
+            </span>
+            <span
+              className="mt-1 rounded-full px-3 py-1 text-[10px] font-bold"
+              style={{ backgroundColor: '#fbbf24', color: '#000' }}
+            >
+              ✋ {t.farmHarvest}
+            </span>
           </button>
-        </div>
-      )}
+        )}
 
-      {/* Withered plot */}
-      {plot.state === 'withered' && (
-        <div className="flex flex-col items-center gap-1.5 w-full">
-          <span className="text-4xl grayscale">💀</span>
-          <span className="text-xs" style={{ color: theme.textMuted }}>{t.farmWithered}</span>
+        {/* Withered plot */}
+        {plot.state === 'withered' && (
           <button
             onClick={onClearClick}
-            className="mt-1 px-3 py-1 rounded-lg text-xs"
-            style={{ color: theme.textMuted, backgroundColor: `${theme.border}50` }}
+            className="absolute inset-[8%] flex h-auto w-auto flex-col items-center justify-center px-4 py-4 text-center"
+            style={{ clipPath: diamondClip }}
           >
-            {t.farmClear}
+            <span className="text-[clamp(1.9rem,6vw,2.5rem)] grayscale">💀</span>
+            <span className="text-[11px] font-medium" style={{ color: theme.textMuted }}>{t.farmWithered}</span>
+            <span
+              className="mt-1 rounded-full px-3 py-1 text-[10px] font-medium"
+              style={{ color: theme.textMuted, backgroundColor: `${theme.border}66` }}
+            >
+              {t.farmClear}
+            </span>
           </button>
-        </div>
-      )}
+        )}
 
-      {/* Seed quality badge */}
-      {plot.seedQuality && plot.state !== 'empty' && plot.state !== 'withered' && (
-        <div className="absolute top-1.5 right-1.5">
-          <span className="text-[10px] px-1.5 py-0.5 rounded-full font-medium" style={{
-            backgroundColor: plot.seedQuality === 'legendary' ? '#fbbf2420' : plot.seedQuality === 'epic' ? '#a78bfa20' : `${theme.border}50`,
-            color: plot.seedQuality === 'legendary' ? '#fbbf24' : plot.seedQuality === 'epic' ? '#a78bfa' : theme.textFaint,
-          }}>
-            {t.seedQualityLabel(plot.seedQuality)}
-          </span>
-        </div>
-      )}
+        {/* Seed quality badge */}
+        {plot.seedQuality && plot.state !== 'empty' && plot.state !== 'withered' && (
+          <div className="absolute right-[10%] top-[11%] z-20">
+            <span
+              className="rounded-full px-1.5 py-0.5 text-[10px] font-medium"
+              style={{
+                backgroundColor: plot.seedQuality === 'legendary' ? '#fbbf2420' : plot.seedQuality === 'epic' ? '#a78bfa20' : `${theme.border}50`,
+                color: plot.seedQuality === 'legendary' ? '#fbbf24' : plot.seedQuality === 'epic' ? '#a78bfa' : theme.textFaint,
+              }}
+            >
+              {t.seedQualityLabel(plot.seedQuality)}
+            </span>
+          </div>
+        )}
+      </div>
 
       <style>{`
         @keyframes maturePulse {
