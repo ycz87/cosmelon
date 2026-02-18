@@ -65,7 +65,7 @@ const ITEM_ACTIONS: ReadonlyArray<{
   { stage: 'legendary', label: 'legendary', emoji: '👑', counts: [1] },
 ];
 
-const MULTIPLIERS = [1, 5, 10, 50, 100, 1000] as const;
+const MULTIPLIERS = [1, 100, 1000, 10000] as const;
 
 export function DebugToolbar({
   addItems,
