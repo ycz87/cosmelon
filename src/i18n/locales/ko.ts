@@ -506,7 +506,7 @@ export const ko: Messages = {
   farmNewVariety: '새 품종!',
   farmNewFlash: 'NEW',
   farmAlreadyCollected: '이미 수집됨',
-  farmStage: (s) => ({ seed: '씨앗기', sprout: '발아기', leaf: '성장기', flower: '개화기', fruit: '결실기' }[s] ?? s),
+  farmStage: (s) => ({ seed: '씨앗기', sprout: '발아기', leaf: '성장기', flower: '개화기', green: '청과기', fruit: '결실기' }[s] ?? s),
   farmGrowthTime: (a, t) => `성장 ${formatDuration(a)} / 필요 ${formatDuration(t)}`,
   farmRemainingTime: (r) => `${formatDuration(r)} 남음`,
   farmFocusBoostHint: '집중하면 더 빨리 자라요 ⚡',

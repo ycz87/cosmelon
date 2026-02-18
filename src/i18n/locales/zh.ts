@@ -507,7 +507,7 @@ export const zh: Messages = {
   farmNewVariety: '新品种！',
   farmNewFlash: 'NEW',
   farmAlreadyCollected: '已收藏',
-  farmStage: (s) => ({ seed: '种子期', sprout: '发芽期', leaf: '长叶期', flower: '开花期', fruit: '结果期' }[s] ?? s),
+  farmStage: (s) => ({ seed: '种子期', sprout: '发芽期', leaf: '长叶期', flower: '开花期', green: '青瓜期', fruit: '结果期' }[s] ?? s),
   farmGrowthTime: (a, t) => `已生长 ${formatDuration(a)} / 共需 ${formatDuration(t)}`,
   farmRemainingTime: (r) => `还需 ${formatDuration(r)}`,
   farmFocusBoostHint: '专注可加速生长 ⚡',

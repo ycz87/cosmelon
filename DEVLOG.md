@@ -2,6 +2,27 @@
 
 ---
 
+## v0.25.0 — 青瓜阶段 + 揭晓延后 + 种植修复 + 流程简化（2026-02-18）
+
+### 背景
+Charles 反馈：1) 生长阶段太少 2) 品种揭晓太早 3) 种子扣了但地块没种上 4) 种植时不应选星系
+
+### 改动
+
+| 文件 | 变更 |
+|------|------|
+| `src/types/farm.ts` | GrowthStage 加 green，GROWTH_STAGES 6 阶段重新分配阈值 |
+| `src/farm/growth.ts` | isVarietyRevealed 阈值 0.20→0.60；rollVariety 改为接收星系列表 |
+| `src/hooks/useFarmStorage.ts` | plantSeed 加地块 empty 校验，失败返回空 |
+| `src/App.tsx` | handleFarmPlant 先种后扣种子，内部获取已解锁星系 |
+| `src/components/FarmPage.tsx` | 摇摆动画适配 green；PlantModal 去掉星系选择 |
+| `src/i18n/locales/*.ts` | 8 种语言 farmStage 加 green |
+
+### 测试
+- 构建通过
+
+---
+
 ## v0.24.3 — Tooltip 层级修复 + 倍率调整（2026-02-18）
 
 ### 背景

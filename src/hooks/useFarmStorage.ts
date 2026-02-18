@@ -57,26 +57,37 @@ export function useFarmStorage() {
   const [farm, setFarm] = useLocalStorage<FarmStorage>(FARM_KEY, DEFAULT_FARM_STORAGE, migrateFarm);
 
   /** 种植种子到指定地块 */
-  const plantSeed = useCallback((plotId: number, galaxyId: GalaxyId, seedQuality: SeedQuality, todayKey: string) => {
+  const plantSeed = useCallback((plotId: number, unlockedGalaxies: GalaxyId[], seedQuality: SeedQuality, todayKey: string) => {
     const nowTimestamp = Date.now();
-    const varietyId = rollVariety(galaxyId, seedQuality);
-    setFarm(prev => ({
-      ...prev,
-      plots: prev.plots.map(p =>
-        p.id === plotId ? {
-          ...p,
-          state: 'growing' as const,
-          seedQuality,
-          varietyId,
-          progress: 0,
-          accumulatedMinutes: 0,
-          plantedDate: todayKey,
-          lastUpdateDate: todayKey,
-          lastActivityTimestamp: nowTimestamp,
-        } : p
-      ),
-    }));
-    return varietyId;
+    const varietyId = rollVariety(unlockedGalaxies, seedQuality);
+    let success = true;
+
+    setFarm(prev => {
+      const targetPlot = prev.plots.find(p => p.id === plotId);
+      if (!targetPlot || targetPlot.state !== 'empty') {
+        success = false;
+        return prev;
+      }
+
+      return {
+        ...prev,
+        plots: prev.plots.map(p =>
+          p.id === plotId ? {
+            ...p,
+            state: 'growing' as const,
+            seedQuality,
+            varietyId,
+            progress: 0,
+            accumulatedMinutes: 0,
+            plantedDate: todayKey,
+            lastUpdateDate: todayKey,
+            lastActivityTimestamp: nowTimestamp,
+          } : p
+        ),
+      };
+    });
+
+    return success ? varietyId : ('' as VarietyId);
   }, [setFarm]);
 
   /** 收获地块 */

@@ -506,7 +506,7 @@ export const ja: Messages = {
   farmNewVariety: '新品種！',
   farmNewFlash: 'NEW',
   farmAlreadyCollected: '収集済み',
-  farmStage: (s) => ({ seed: '種子期', sprout: '発芽期', leaf: '成長期', flower: '開花期', fruit: '結実期' }[s] ?? s),
+  farmStage: (s) => ({ seed: '種子期', sprout: '発芽期', leaf: '成長期', flower: '開花期', green: '青果期', fruit: '結実期' }[s] ?? s),
   farmGrowthTime: (a, t) => `成長 ${formatDuration(a)} / 必要 ${formatDuration(t)}`,
   farmRemainingTime: (r) => `あと ${formatDuration(r)}`,
   farmFocusBoostHint: '集中で成長加速 ⚡',

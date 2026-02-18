@@ -506,7 +506,7 @@ export const pt: Messages = {
   farmNewVariety: 'Nova variedade!',
   farmNewFlash: 'NEW',
   farmAlreadyCollected: 'Já coletada',
-  farmStage: (s) => ({ seed: 'Semente', sprout: 'Broto', leaf: 'Folha', flower: 'Flor', fruit: 'Fruto' }[s] ?? s),
+  farmStage: (s) => ({ seed: 'Semente', sprout: 'Broto', leaf: 'Folha', flower: 'Flor', green: 'Verde', fruit: 'Fruto' }[s] ?? s),
   farmGrowthTime: (a, t) => `Cresceu ${formatDuration(a)} / ${formatDuration(t)} necessários`,
   farmRemainingTime: (r) => `Faltam ${formatDuration(r)}`,
   farmFocusBoostHint: 'Foco acelera o crescimento ⚡',
