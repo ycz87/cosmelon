@@ -177,7 +177,7 @@ test.describe('Farm vitality AC coverage', () => {
     await openDebugPanel(page);
 
     const multiplierSection = page.locator('section').filter({ hasText: '时间倍率' });
-    await multiplierSection.getByRole('button', { name: '100x' }).click();
+    await multiplierSection.getByRole('button', { name: '1000x' }).click();
 
     const initialProgress = await readProgress(page, 0);
     if (initialProgress === null) throw new Error('plot progress not found before multiplier update');
@@ -189,14 +189,14 @@ test.describe('Farm vitality AC coverage', () => {
     expect(progressed).toBeGreaterThan(initialProgress);
   });
 
-  test('AC5: Debug Toolbar 时间倍率区可用 1000x 按钮', async ({ page }) => {
+  test('AC5: Debug Toolbar 时间倍率区可用 10000x 按钮', async ({ page }) => {
     await goToFarm(page);
     await page.evaluate(() => localStorage.setItem('watermelon-debug', 'true'));
     await activateDebugToolbar(page);
     await openDebugPanel(page);
 
     const multiplierSection = page.locator('section').filter({ hasText: '时间倍率' });
-    const button1000x = multiplierSection.getByRole('button', { name: '1000x' });
+    const button1000x = multiplierSection.getByRole('button', { name: '10000x' });
     await expect(button1000x).toBeVisible();
     await expect(button1000x).toBeEnabled();
   });

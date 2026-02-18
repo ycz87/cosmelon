@@ -2,6 +2,23 @@
 
 ---
 
+## v0.24.3 — Tooltip 层级修复 + 倍率调整（2026-02-18）
+
+### 背景
+Tooltip 在 3×3 grid 中被后面地块遮挡（DOM 顺序导致层叠问题）；倍率档位过多且低档位不实用。
+
+### 改动
+
+| 文件 | 变更 |
+|------|------|
+| `src/components/FarmPage.tsx` | PlotCard 容器在 tooltip 打开时加 `z-[100]` |
+| `src/components/DebugToolbar.tsx` | MULTIPLIERS 改为 `[1, 100, 1000, 10000]` |
+
+### 测试
+- 构建通过，改动极小（2 行），不影响现有 E2E
+
+---
+
 ## v0.24.2 — 农场体验补丁（Tooltip + 实时倍率）（2026-02-18）
 
 ### 背景

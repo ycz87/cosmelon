@@ -355,7 +355,7 @@ function PlotCard({ plot, theme, t, isTooltipOpen, onTooltipToggle, onPlantClick
     : '0 10px 20px rgba(0,0,0,0.2), inset 0 -10px 16px rgba(0,0,0,0.14)';
 
   return (
-    <div className="group relative aspect-square sm:aspect-[3/4] w-full select-none">
+    <div className={`group relative aspect-square sm:aspect-[3/4] w-full select-none${isTooltipOpen ? ' z-[100]' : ''}`}>
       <div className="relative h-full w-full transition-transform duration-200 group-hover:-translate-y-1">
         <div
           className="absolute inset-0 rounded-2xl border-2"
