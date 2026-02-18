@@ -7,11 +7,10 @@
 import { useState, useCallback, useEffect, useRef, useMemo } from 'react';
 import { useTheme } from '../hooks/useTheme';
 import { useI18n } from '../i18n';
-import type { Plot, VarietyId, FarmStorage, GalaxyId } from '../types/farm';
+import type { Plot, VarietyId, FarmStorage } from '../types/farm';
 import type { SeedQuality, SeedCounts } from '../types/slicing';
-import { VARIETY_DEFS, RARITY_COLOR, RARITY_STARS, GALAXIES, PLOT_MILESTONES } from '../types/farm';
+import { VARIETY_DEFS, RARITY_COLOR, RARITY_STARS, PLOT_MILESTONES } from '../types/farm';
 import { getGrowthStage, getStageEmoji, isVarietyRevealed } from '../farm/growth';
-import { getUnlockedGalaxies } from '../farm/galaxy';
 import { CollectionPage } from './CollectionPage';
 
 interface FarmPageProps {
@@ -19,7 +18,7 @@ interface FarmPageProps {
   seeds: SeedCounts;
   todayFocusMinutes: number;
   addSeeds: (count: number, quality?: SeedQuality) => void;
-  onPlant: (plotId: number, galaxyId: GalaxyId, quality: SeedQuality) => VarietyId;
+  onPlant: (plotId: number, quality: SeedQuality) => VarietyId;
   onHarvest: (plotId: number) => { varietyId?: VarietyId; isNew: boolean; collectedCount?: number; rewardSeedQuality?: SeedQuality };
   onClear: (plotId: number) => void;
   onGoWarehouse: () => void;
@@ -48,7 +47,6 @@ const PLOT_UNLOCK_BY_TOTAL = new Map(PLOT_MILESTONES.map((milestone) => [milesto
 export function FarmPage({ farm, seeds, todayFocusMinutes, addSeeds, onPlant, onHarvest, onClear, onGoWarehouse }: FarmPageProps) {
   const theme = useTheme();
   const t = useI18n();
-  const unlockedGalaxies = useMemo(() => getUnlockedGalaxies(farm.collection), [farm.collection]);
 
   const [subTab, setSubTab] = useState<SubTab>('plots');
   const [plantingPlotId, setPlantingPlotId] = useState<number | null>(null);
@@ -99,9 +97,9 @@ export function FarmPage({ farm, seeds, todayFocusMinutes, addSeeds, onPlant, on
     [farm.plots],
   );
 
-  const handlePlant = useCallback((galaxyId: GalaxyId, quality: SeedQuality) => {
+  const handlePlant = useCallback((quality: SeedQuality) => {
     if (plantingPlotId === null) return;
-    onPlant(plantingPlotId, galaxyId, quality);
+    onPlant(plantingPlotId, quality);
     setPlantingPlotId(null);
   }, [plantingPlotId, onPlant]);
 
@@ -235,7 +233,6 @@ export function FarmPage({ farm, seeds, todayFocusMinutes, addSeeds, onPlant, on
       {plantingPlotId !== null && (
         <PlantModal
           seeds={seeds}
-          unlockedGalaxies={unlockedGalaxies}
           theme={theme}
           t={t}
           onSelect={handlePlant}
@@ -339,7 +336,9 @@ function PlotCard({ plot, theme, t, isTooltipOpen, onTooltipToggle, onPlantClick
     ? 'plantSwaySm 4s ease-in-out infinite'
     : stage === 'leaf' || stage === 'flower'
       ? 'plantSwayMd 3.5s ease-in-out infinite'
-      : 'plantSwayLg 3.8s ease-in-out infinite';
+      : stage === 'green'
+        ? 'plantSwayMd 3.2s ease-in-out infinite'
+        : 'plantSwayLg 3.8s ease-in-out infinite';
   const tileBackground = plot.state === 'empty'
     ? 'linear-gradient(145deg, #8b5a2b 0%, #6f4424 100%)'
     : plot.state === 'withered'
@@ -586,117 +585,47 @@ function LockedPlotCard({ requiredVarieties, theme, t }: {
 }
 
 // ─── 种植弹窗 ───
-function PlantModal({ seeds, unlockedGalaxies, theme, t, onSelect, onClose }: {
+function PlantModal({ seeds, theme, t, onSelect, onClose }: {
   seeds: SeedCounts;
-  unlockedGalaxies: GalaxyId[];
   theme: ReturnType<typeof useTheme>;
   t: ReturnType<typeof useI18n>;
-  onSelect: (galaxyId: GalaxyId, quality: SeedQuality) => void;
+  onSelect: (quality: SeedQuality) => void;
   onClose: () => void;
 }) {
-  const [selectedGalaxyId, setSelectedGalaxyId] = useState<GalaxyId | null>(
-    unlockedGalaxies.length === 1 ? unlockedGalaxies[0] : null,
-  );
-  const galaxyEmojiMap = useMemo(
-    () => Object.fromEntries(GALAXIES.map(g => [g.id, g.emoji])) as Record<GalaxyId, string>,
-    [],
-  );
-
-  useEffect(() => {
-    if (unlockedGalaxies.length === 1) {
-      setSelectedGalaxyId(unlockedGalaxies[0]);
-      return;
-    }
-    if (selectedGalaxyId && !unlockedGalaxies.includes(selectedGalaxyId)) {
-      setSelectedGalaxyId(null);
-    }
-  }, [selectedGalaxyId, unlockedGalaxies]);
-
-  const showGalaxyStep = unlockedGalaxies.length > 1 && selectedGalaxyId === null;
-  const activeGalaxyId = selectedGalaxyId ?? unlockedGalaxies[0] ?? 'thick-earth';
-  const options: { quality: SeedQuality; emoji: string; count: number; color: string }[] = [
-    { quality: 'normal', emoji: '🌰', count: seeds.normal, color: '#a3a3a3' },
-    { quality: 'epic', emoji: '💎', count: seeds.epic, color: '#a78bfa' },
-    { quality: 'legendary', emoji: '🌟', count: seeds.legendary, color: '#fbbf24' },
+  const options = [
+    { quality: 'normal' as SeedQuality, emoji: '🌰', count: seeds.normal, color: '#a3a3a3' },
+    { quality: 'epic' as SeedQuality, emoji: '💎', count: seeds.epic, color: '#a78bfa' },
+    { quality: 'legendary' as SeedQuality, emoji: '🌟', count: seeds.legendary, color: '#fbbf24' },
   ];
 
   return (
     <div className="fixed inset-0 z-[60] flex items-center justify-center" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
       <div className="rounded-2xl border p-5 mx-4 max-w-sm w-full" style={{ backgroundColor: theme.surface, borderColor: theme.border }}>
-        <h3 className="text-base font-semibold text-center mb-4" style={{ color: theme.text }}>
-          {showGalaxyStep ? t.farmSelectGalaxy : t.farmSelectSeed}
-        </h3>
-        {showGalaxyStep ? (
-          <div className="flex flex-col gap-2">
-            {unlockedGalaxies.map(galaxyId => (
-              <button
-                key={galaxyId}
-                onClick={() => setSelectedGalaxyId(galaxyId)}
-                className="flex items-center justify-between p-3 rounded-xl border transition-all"
-                style={{
-                  backgroundColor: `${theme.accent}08`,
-                  borderColor: `${theme.accent}30`,
-                }}
-              >
-                <div className="flex items-center gap-2">
-                  <span className="text-xl">{galaxyEmojiMap[galaxyId] ?? '🪐'}</span>
-                  <span className="text-sm font-medium" style={{ color: theme.text }}>
-                    {t.galaxyName(galaxyId)}
-                  </span>
-                </div>
-              </button>
-            ))}
-          </div>
-        ) : (
-          <>
-            <div className="mb-3 rounded-xl border px-3 py-2 text-xs flex items-center justify-between" style={{ borderColor: theme.border, backgroundColor: `${theme.inputBg}80` }}>
-              <span style={{ color: theme.textMuted }}>
-                {`${galaxyEmojiMap[activeGalaxyId] ?? '🪐'} ${t.galaxyName(activeGalaxyId)}`}
-              </span>
-              {unlockedGalaxies.length > 1 && (
-                <button
-                  onClick={() => setSelectedGalaxyId(null)}
-                  className="font-medium"
-                  style={{ color: theme.accent }}
-                >
-                  {t.farmSelectGalaxy}
-                </button>
-              )}
-            </div>
-            <div className="flex flex-col gap-2">
-              {options.map(opt => (
-                <button
-                  key={opt.quality}
-                  disabled={opt.count <= 0}
-                  onClick={() => onSelect(activeGalaxyId, opt.quality)}
-                  className="flex items-center justify-between p-3 rounded-xl border transition-all"
-                  style={{
-                    backgroundColor: opt.count > 0 ? `${opt.color}08` : theme.inputBg,
-                    borderColor: opt.count > 0 ? `${opt.color}30` : theme.border,
-                    opacity: opt.count > 0 ? 1 : 0.4,
-                    cursor: opt.count > 0 ? 'pointer' : 'not-allowed',
-                  }}
-                >
-                  <div className="flex items-center gap-2">
-                    <span className="text-xl">{opt.emoji}</span>
-                    <span className="text-sm font-medium" style={{ color: opt.count > 0 ? opt.color : theme.textMuted }}>
-                      {t.seedQualityLabel(opt.quality)}
-                    </span>
-                  </div>
-                  <span className="text-sm" style={{ color: theme.textMuted }}>×{opt.count}</span>
-                </button>
-              ))}
-            </div>
-            <p className="text-xs text-center mt-3" style={{ color: theme.textFaint }}>
-              {t.farmSeedHint}
-            </p>
-          </>
-        )}
-        <button
-          onClick={onClose}
-          className="w-full mt-3 py-2.5 rounded-xl text-sm"
-          style={{ color: theme.textMuted, backgroundColor: `${theme.border}30` }}
-        >
+        <h3 className="text-base font-semibold text-center mb-4" style={{ color: theme.text }}>{t.farmSelectSeed}</h3>
+        <div className="flex flex-col gap-2">
+          {options.map(opt => (
+            <button
+              key={opt.quality}
+              disabled={opt.count <= 0}
+              onClick={() => onSelect(opt.quality)}
+              className="flex items-center justify-between p-3 rounded-xl border transition-all"
+              style={{
+                backgroundColor: opt.count > 0 ? opt.color + '08' : theme.inputBg,
+                borderColor: opt.count > 0 ? opt.color + '30' : theme.border,
+                opacity: opt.count > 0 ? 1 : 0.4,
+                cursor: opt.count > 0 ? 'pointer' : 'not-allowed',
+              }}
+            >
+              <div className="flex items-center gap-2">
+                <span className="text-xl">{opt.emoji}</span>
+                <span className="text-sm font-medium" style={{ color: opt.count > 0 ? opt.color : theme.textMuted }}>{t.seedQualityLabel(opt.quality)}</span>
+              </div>
+              <span className="text-sm" style={{ color: theme.textMuted }}>×{opt.count}</span>
+            </button>
+          ))}
+        </div>
+        <p className="text-xs text-center mt-3" style={{ color: theme.textFaint }}>{t.farmSeedHint}</p>
+        <button onClick={onClose} className="w-full mt-3 py-2.5 rounded-xl text-sm" style={{ color: theme.textMuted, backgroundColor: theme.border + '30' }}>
           {t.cancel}
         </button>
       </div>

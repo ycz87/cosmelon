@@ -89,9 +89,9 @@ export function getStageEmoji(progress: number, varietyId?: VarietyId): string {
   return GROWTH_STAGES.find(s => s.id === stage)?.emoji ?? '🌰';
 }
 
-/** 品种是否已揭晓（进度 >= 20%） */
+/** 品种是否已揭晓（进度 >= 60%） */
 export function isVarietyRevealed(progress: number): boolean {
-  return progress >= 0.20;
+  return progress >= 0.60;
 }
 
 // ─── 品种随机 ───
@@ -101,11 +101,13 @@ export function isVarietyRevealed(progress: number): boolean {
  * epic 种子：稀有+ 概率 ×2
  * legendary 种子：稀有+ 概率 ×4
  */
-export function rollVariety(galaxyId: GalaxyId, seedQuality: SeedQuality = 'normal'): VarietyId {
+export function rollVariety(unlockedGalaxies: GalaxyId[], seedQuality: SeedQuality = 'normal'): VarietyId {
   const multiplier = seedQuality === 'legendary' ? 4 : seedQuality === 'epic' ? 2 : 1;
-  const sourcePool = GALAXY_VARIETIES[galaxyId].length > 0
-    ? GALAXY_VARIETIES[galaxyId]
-    : GALAXY_VARIETIES['thick-earth'];
+  const sourcePool: VarietyId[] = [];
+  for (const gid of unlockedGalaxies) {
+    sourcePool.push(...(GALAXY_VARIETIES[gid] || []));
+  }
+  if (sourcePool.length === 0) sourcePool.push(...GALAXY_VARIETIES['thick-earth']);
 
   // 构建加权池
   const pool: { id: VarietyId; weight: number }[] = sourcePool.map(id => {

@@ -68,6 +68,7 @@ import {
   updatePlotGrowth,
   witherPlots,
 } from './farm/growth';
+import { getUnlockedGalaxies } from './farm/galaxy';
 import { I18nProvider, getMessages } from './i18n';
 import type { PomodoroRecord, PomodoroSettings } from './types';
 import { DEFAULT_SETTINGS, migrateSettings, THEMES, getGrowthStage, GROWTH_EMOJI, rollLegendary } from './types';
@@ -252,12 +253,15 @@ function App() {
   // ─── Farm handlers ───
   const handleFarmPlant = useCallback((
     plotId: number,
-    galaxyId: import('./types/farm').GalaxyId,
     quality: import('./types/slicing').SeedQuality,
   ) => {
-    if (!consumeSeed(quality)) return '' as import('./types/farm').VarietyId;
-    return plantSeed(plotId, galaxyId, quality, todayKey);
-  }, [consumeSeed, plantSeed, todayKey]);
+    const unlockedGalaxies = getUnlockedGalaxies(farm.collection);
+    const varietyId = plantSeed(plotId, unlockedGalaxies, quality, todayKey);
+    if (varietyId) {
+      consumeSeed(quality);
+    }
+    return varietyId;
+  }, [consumeSeed, farm.collection, plantSeed, todayKey]);
 
   const handleFarmHarvest = useCallback((plotId: number) => {
     return harvestPlot(plotId, todayKey);

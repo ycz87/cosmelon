@@ -290,7 +290,7 @@ export const ALL_VARIETY_IDS: VarietyId[] = [
 ];
 
 // ─── 生长阶段 ───
-export type GrowthStage = 'seed' | 'sprout' | 'leaf' | 'flower' | 'fruit';
+export type GrowthStage = 'seed' | 'sprout' | 'leaf' | 'flower' | 'green' | 'fruit';
 
 export interface StageDef {
   id: GrowthStage;
@@ -300,9 +300,10 @@ export interface StageDef {
 
 export const GROWTH_STAGES: StageDef[] = [
   { id: 'seed',   threshold: 0,    emoji: '🌰' },
-  { id: 'sprout', threshold: 0.20, emoji: '🌱' },
-  { id: 'leaf',   threshold: 0.50, emoji: '🌿' },
-  { id: 'flower', threshold: 0.75, emoji: '🌼' },
+  { id: 'sprout', threshold: 0.15, emoji: '🌱' },
+  { id: 'leaf',   threshold: 0.35, emoji: '🌿' },
+  { id: 'flower', threshold: 0.55, emoji: '🌼' },
+  { id: 'green',  threshold: 0.80, emoji: '🍈' },
   { id: 'fruit',  threshold: 1.00, emoji: '🍉' },
 ];
 
