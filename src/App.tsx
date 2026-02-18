@@ -48,6 +48,7 @@ import { useWarehouse } from './hooks/useWarehouse';
 import { useShedStorage } from './hooks/useShedStorage';
 import { useAchievements } from './hooks/useAchievements';
 import { useFarmStorage } from './hooks/useFarmStorage';
+import { useGeneStorage } from './hooks/useGeneStorage';
 import { useAuth } from './hooks/useAuth';
 import { useSync } from './hooks/useSync';
 import { ThemeProvider } from './hooks/useTheme';
@@ -75,7 +76,7 @@ import { DEFAULT_SETTINGS, migrateSettings, THEMES, getGrowthStage, GROWTH_EMOJI
 import type { GrowthStage } from './types';
 import type { AppMode } from './types/project';
 import type { ProjectRecord } from './types/project';
-import { DEFAULT_FARM_STORAGE } from './types/farm';
+import { DEFAULT_FARM_STORAGE, VARIETY_DEFS } from './types/farm';
 import type { CollectedVariety, Plot } from './types/farm';
 
 function App() {
@@ -112,6 +113,7 @@ function App() {
 
   // Farm storage
   const { farm, setFarm, plantSeed, harvestPlot, clearPlot, updatePlots, updateActiveDate } = useFarmStorage();
+  const { geneInventory, addFragment } = useGeneStorage();
   const farmPlotsRef = useRef(farm.plots);
   const updatePlotsRef = useRef(updatePlots);
 
@@ -264,8 +266,13 @@ function App() {
   }, [consumeSeed, farm.collection, plantSeed, todayKey]);
 
   const handleFarmHarvest = useCallback((plotId: number) => {
-    return harvestPlot(plotId, todayKey);
-  }, [harvestPlot, todayKey]);
+    const result = harvestPlot(plotId, todayKey);
+    if (result.varietyId) {
+      const variety = VARIETY_DEFS[result.varietyId];
+      addFragment(variety.galaxy, result.varietyId, variety.rarity);
+    }
+    return result;
+  }, [addFragment, harvestPlot, todayKey]);
 
   // ─── Debug mode ───
   const activateDebugMode = useCallback(() => {
@@ -935,6 +942,7 @@ function App() {
         {activeTab === 'farm' && (
           <FarmPage
             farm={farm}
+            geneInventory={geneInventory}
             seeds={shed.seeds}
             todayFocusMinutes={todayFocusMinutes}
             addSeeds={addSeeds}

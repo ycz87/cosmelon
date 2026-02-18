@@ -631,4 +631,12 @@ export const zh: Messages = {
   varietyDetailFirstObtained: '首次获得日期',
   varietyDetailHarvestCount: (count) => `累计收获 ${count} 次`,
   varietyDetailClose: '关闭',
+  geneLabTab: '🧬 实验室',
+  geneLabTitle: '基因背包',
+  geneLabEmpty: '还没有基因片段，收获品种后自动获得',
+  geneLabFragments: '基因片段',
+  geneLabFragmentCount: (count) => `${count} 份`,
+  geneLabVarietySource: '来源品种',
+  geneLabObtainedAt: '获得时间',
+  geneLabGalaxySection: (galaxyName, count) => `${galaxyName} · ${count} 份`,
 };

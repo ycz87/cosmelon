@@ -8,13 +8,16 @@ import { useState, useCallback, useEffect, useRef, useMemo } from 'react';
 import { useTheme } from '../hooks/useTheme';
 import { useI18n } from '../i18n';
 import type { Plot, VarietyId, FarmStorage } from '../types/farm';
+import type { GeneInventory } from '../types/gene';
 import type { SeedQuality, SeedCounts } from '../types/slicing';
 import { VARIETY_DEFS, RARITY_COLOR, RARITY_STARS, PLOT_MILESTONES } from '../types/farm';
 import { getGrowthStage, getStageEmoji, isVarietyRevealed } from '../farm/growth';
 import { CollectionPage } from './CollectionPage';
+import { GeneLabPage } from './GeneLabPage';
 
 interface FarmPageProps {
   farm: FarmStorage;
+  geneInventory: GeneInventory;
   seeds: SeedCounts;
   todayFocusMinutes: number;
   addSeeds: (count: number, quality?: SeedQuality) => void;
@@ -24,7 +27,7 @@ interface FarmPageProps {
   onGoWarehouse: () => void;
 }
 
-type SubTab = 'plots' | 'collection';
+type SubTab = 'plots' | 'collection' | 'lab';
 
 // ─── 动画 overlay 类型 ───
 interface RevealAnim { varietyId: VarietyId; plotId: number }
@@ -44,7 +47,17 @@ const TOTAL_PLOT_SLOTS = 9;
 const LAST_PLOT_UNLOCK_REQUIRED = PLOT_MILESTONES[PLOT_MILESTONES.length - 1]?.requiredVarieties ?? 0;
 const PLOT_UNLOCK_BY_TOTAL = new Map(PLOT_MILESTONES.map((milestone) => [milestone.totalPlots, milestone.requiredVarieties]));
 
-export function FarmPage({ farm, seeds, todayFocusMinutes, addSeeds, onPlant, onHarvest, onClear, onGoWarehouse }: FarmPageProps) {
+export function FarmPage({
+  farm,
+  geneInventory,
+  seeds,
+  todayFocusMinutes,
+  addSeeds,
+  onPlant,
+  onHarvest,
+  onClear,
+  onGoWarehouse,
+}: FarmPageProps) {
   const theme = useTheme();
   const t = useI18n();
 
@@ -129,6 +142,16 @@ export function FarmPage({ farm, seeds, todayFocusMinutes, addSeeds, onPlant, on
         {/* Sub-tab header */}
         <SubTabHeader subTab={subTab} setSubTab={setSubTab} theme={theme} t={t} />
         <CollectionPage collection={farm.collection} />
+      </div>
+    );
+  }
+
+  if (subTab === 'lab') {
+    return (
+      <div className="flex-1 flex flex-col w-full">
+        {/* Sub-tab header */}
+        <SubTabHeader subTab={subTab} setSubTab={setSubTab} theme={theme} t={t} />
+        <GeneLabPage geneInventory={geneInventory} />
       </div>
     );
   }
@@ -275,6 +298,12 @@ function SubTabHeader({ subTab, setSubTab, theme, t }: {
   theme: ReturnType<typeof useTheme>;
   t: ReturnType<typeof useI18n>;
 }) {
+  const subTabIndex: Record<SubTab, number> = {
+    plots: 0,
+    collection: 1,
+    lab: 2,
+  };
+
   return (
     <div className="px-1 py-3">
       <div className="relative flex items-center rounded-full p-[3px]" style={{ backgroundColor: theme.inputBg }}>
@@ -282,8 +311,9 @@ function SubTabHeader({ subTab, setSubTab, theme, t }: {
           className="absolute top-[3px] bottom-[3px] rounded-full transition-all duration-200 ease-out"
           style={{
             backgroundColor: theme.border,
-            width: 'calc(50% - 3px)',
-            left: subTab === 'plots' ? '3px' : 'calc(50%)',
+            width: 'calc((100% - 6px) / 3)',
+            left: '3px',
+            transform: `translateX(${subTabIndex[subTab] * 100}%)`,
           }}
         />
         <button
@@ -303,6 +333,15 @@ function SubTabHeader({ subTab, setSubTab, theme, t }: {
           }}
         >
           📖 {t.farmCollectionTab}
+        </button>
+        <button
+          onClick={() => setSubTab('lab')}
+          className="relative z-10 px-3.5 py-1.5 rounded-full text-xs font-medium transition-colors duration-200 cursor-pointer flex-1"
+          style={{
+            color: subTab === 'lab' ? theme.text : theme.textMuted,
+          }}
+        >
+          {t.geneLabTab}
         </button>
       </div>
     </div>

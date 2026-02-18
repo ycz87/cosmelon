@@ -48,14 +48,21 @@
 - 图片/资源是否需要懒加载
 - API 调用是否需要缓存或防抖
 
+### E2E 测试（Playwright）
+- 测试文件在 `e2e/` 目录，配置在 `playwright.config.ts`
+- 每条验收标准是否有对应测试用例
+- 测试是否有合理的超时和等待策略（避免 flaky）
+- 是否正确清理测试状态
+
 ## 验证命令
 
 审查时可以运行以下命令辅助判断：
 
 ```bash
-npx tsc --noEmit    # 类型检查
-npm run build       # 构建验证
-npm run lint        # Lint 检查
+npx tsc --noEmit          # 类型检查
+npm run build             # 构建验证
+npm run lint              # Lint 检查
+npx playwright test       # E2E 测试
 ```
 
 ## 输出格式

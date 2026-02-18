@@ -629,4 +629,12 @@ export const fr: Messages = {
   varietyDetailFirstObtained: 'Première obtention',
   varietyDetailHarvestCount: (count) => `Récoltée ${count} fois`,
   varietyDetailClose: 'Fermer',
+  geneLabTab: '🧬 Labo',
+  geneLabTitle: 'Inventaire génétique',
+  geneLabEmpty: 'Pas encore de fragments génétiques. Récoltez des variétés pour en obtenir.',
+  geneLabFragments: 'Fragments génétiques',
+  geneLabFragmentCount: (count) => `${count} fragment${count !== 1 ? 's' : ''}`,
+  geneLabVarietySource: 'Variété source',
+  geneLabObtainedAt: 'Obtenu le',
+  geneLabGalaxySection: (galaxyName, count) => `${galaxyName} · ${count} fragment${count !== 1 ? 's' : ''}`,
 };

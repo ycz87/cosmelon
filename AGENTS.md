@@ -27,6 +27,19 @@ cosmelon/
 │   ├── types.ts             # 核心类型（PomodoroRecord, Settings, Theme 等）
 │   ├── vite-env.d.ts
 │   ├── components/          # UI 组件（每个文件一个组件，PascalCase.tsx）
+│   │   ├── Timer.tsx        # 番茄钟主界面
+│   │   ├── FarmPage.tsx     # 农场页面（瓜田 + 种植 + 实验室）
+│   │   ├── GeneLabPage.tsx  # 基因实验室（背包 UI，按星系分组）
+│   │   ├── WarehousePage.tsx # 仓库页面（收获物展示）
+│   │   ├── CollectionPage.tsx # 图鉴/收藏页面
+│   │   ├── AchievementsPage.tsx # 成就页面
+│   │   ├── SlicingScene.tsx # 切瓜场景
+│   │   ├── DebugToolbar.tsx # 调试工具栏（版本号 7 连击激活）
+│   │   ├── GrowthIcon.tsx   # 生长阶段图标
+│   │   ├── Settings.tsx     # 设置面板
+│   │   ├── LoginPanel.tsx   # 登录面板
+│   │   ├── UserProfile.tsx  # 用户资料
+│   │   └── ...              # 更多组件见目录
 │   ├── hooks/               # 自定义 hooks（useXxx.ts）
 │   │   ├── useTimer.ts      # 番茄钟状态机
 │   │   ├── useProjectTimer.ts # 项目模式状态机
@@ -36,18 +49,29 @@ cosmelon/
 │   │   ├── useWarehouse.ts  # 仓库（收获物）
 │   │   ├── useShedStorage.ts # 瓜棚（种子+道具）
 │   │   ├── useFarmStorage.ts # 农场存储
+│   │   ├── useGeneStorage.ts # 基因片段存储（背包 CRUD + localStorage）
 │   │   ├── useAchievements.ts # 成就检测
-│   │   └── ...
+│   │   ├── useLocalStorage.ts # localStorage 封装
+│   │   └── useDragScroll.ts # 拖拽滚动
 │   ├── i18n/                # 国际化
 │   │   ├── types.ts         # Messages 接口（所有 key 的类型定义）
 │   │   ├── index.ts         # Context + useI18n hook + locale 注册
 │   │   └── locales/         # 8 种语言：zh/en/ja/ko/de/fr/es/pt
 │   ├── achievements/        # 成就系统（定义、检测、徽章映射）
-│   ├── farm/                # 农场引擎（生长计算、品种随机）
+│   ├── farm/                # 农场引擎
+│   │   ├── growth.ts        # 生长计算（6 阶段青瓜系统）
+│   │   └── galaxy.ts        # 星系/品种定义（五星系 40 品种）
 │   ├── slicing/             # 切瓜系统（逻辑引擎 + Web Audio 音效）
 │   ├── audio/               # 音效系统（提醒音 + 背景音 + mixer）
-│   ├── types/               # 子系统类型（farm.ts, project.ts, slicing.ts）
+│   ├── types/               # 子系统类型（farm.ts, gene.ts, project.ts, slicing.ts）
 │   └── utils/               # 工具函数（stats.ts, time.ts）
+├── e2e/                     # Playwright E2E 测试
+│   ├── debug-toolbar.spec.ts
+│   ├── farm-layout-v023.spec.ts
+│   ├── farm-mobile-square.spec.ts
+│   └── farm-vitality.spec.ts
+│   └── gene-lab.spec.ts
+├── playwright.config.ts     # Playwright 配置
 ├── public/                  # 静态资源
 │   ├── badges/              # 44 张成就徽章 PNG
 │   └── *.png/ico/svg        # App 图标

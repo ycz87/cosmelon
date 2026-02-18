@@ -372,5 +372,16 @@ export interface Messages {
   varietyDetailTitle: string;
   varietyDetailFirstObtained: string;
   varietyDetailHarvestCount: (count: number) => string;
+
+  // ─── Gene Lab (v0.26.0) ───
+  geneLabTab: string;
+  geneLabTitle: string;
+  geneLabEmpty: string;
+  geneLabFragments: string;
+  geneLabFragmentCount: (count: number) => string;
+  geneLabVarietySource: string;
+  geneLabObtainedAt: string;
+  geneLabGalaxySection: (galaxyName: string, count: number) => string;
+
   varietyDetailClose: string;
 }

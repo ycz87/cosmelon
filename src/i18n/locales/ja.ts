@@ -629,4 +629,12 @@ export const ja: Messages = {
   varietyDetailFirstObtained: '初回獲得日',
   varietyDetailHarvestCount: (count) => `累計収穫回数：${count}回`,
   varietyDetailClose: '閉じる',
+  geneLabTab: '🧬 ラボ',
+  geneLabTitle: '遺伝子インベントリ',
+  geneLabEmpty: 'まだ遺伝子フラグメントがありません。品種を収穫して入手しましょう。',
+  geneLabFragments: '遺伝子フラグメント',
+  geneLabFragmentCount: (count) => `${count} 個`,
+  geneLabVarietySource: '元品種',
+  geneLabObtainedAt: '入手日',
+  geneLabGalaxySection: (galaxyName, count) => `${galaxyName} · ${count} 個`,
 };

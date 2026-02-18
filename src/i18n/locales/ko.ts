@@ -629,4 +629,12 @@ export const ko: Messages = {
   varietyDetailFirstObtained: '첫 획득일',
   varietyDetailHarvestCount: (count) => `누적 수확 ${count}회`,
   varietyDetailClose: '닫기',
+  geneLabTab: '🧬 연구소',
+  geneLabTitle: '유전자 인벤토리',
+  geneLabEmpty: '아직 유전자 조각이 없습니다. 품종을 수확하면 자동으로 획득됩니다.',
+  geneLabFragments: '유전자 조각',
+  geneLabFragmentCount: (count) => `${count}개`,
+  geneLabVarietySource: '원본 품종',
+  geneLabObtainedAt: '획득일',
+  geneLabGalaxySection: (galaxyName, count) => `${galaxyName} · ${count}개`,
 };
