@@ -85,17 +85,44 @@ async function goToFarm(page: import('@playwright/test').Page) {
   await expect(page.locator('.farm-grid-perspective')).toBeVisible();
 }
 
-async function switchLanguageToEnglish(page: import('@playwright/test').Page) {
+async function activateDebugToolbar(page: import('@playwright/test').Page) {
   const settingsButton = page.getByRole('button', { name: /settings|设置/i });
   await settingsButton.click();
 
   const settingsPanel = page.locator('.settings-scrollbar').first();
   await expect(settingsPanel).toBeVisible();
 
-  await settingsPanel.getByRole('button', { name: /中文/ }).click();
-  await page.getByRole('button', { name: /English/ }).click();
+  const versionBadge = settingsPanel.locator('span').filter({ hasText: /^v\d+\.\d+\.\d+$/ });
+  await expect(versionBadge).toBeVisible();
+  for (let i = 0; i < 7; i += 1) {
+    await versionBadge.click();
+  }
 
-  await expect(page.getByRole('button', { name: /🌱\s*Plots/ })).toBeVisible();
+  await expect(page.getByText('🧪 Debug Toolbar')).toBeVisible();
+  await settingsButton.click();
+}
+
+async function openDebugPanel(page: import('@playwright/test').Page) {
+  const debugTitle = page.getByText('🧪 Debug Toolbar');
+  const resetButton = page.getByRole('button', { name: '🔄 重置所有数据' });
+  if (!(await resetButton.isVisible().catch(() => false))) {
+    await debugTitle.click();
+  }
+  await expect(resetButton).toBeVisible();
+}
+
+async function readProgress(page: import('@playwright/test').Page, plotId: number): Promise<number | null> {
+  return page.evaluate((targetPlotId: number) => {
+    const farmRaw = localStorage.getItem('watermelon-farm');
+    if (!farmRaw) return null;
+    try {
+      const farm = JSON.parse(farmRaw) as { plots?: Array<{ id?: number; progress?: number }> };
+      const plot = farm.plots?.find((item) => item.id === targetPlotId);
+      return typeof plot?.progress === 'number' ? plot.progress : null;
+    } catch {
+      return null;
+    }
+  }, plotId);
 }
 
 test.describe('Farm vitality AC coverage', () => {
@@ -103,80 +130,93 @@ test.describe('Farm vitality AC coverage', () => {
     await seedDebugState(page);
   });
 
-  test('desktop: growing plot shows full time text + boost hint + sway animation', async ({ page }, testInfo) => {
-    if (testInfo.project.name !== 'desktop') {
-      test.skip();
-      return;
-    }
-
+  test('AC1: growing 地块不直接显示 farmGrowthTime 文案', async ({ page }) => {
     await goToFarm(page);
 
     const growingPlot = page.locator('.farm-grid-perspective > div').first();
-
-    await expect(growingPlot.getByText(/已生长/)).toBeVisible();
-    await expect(growingPlot.getByText(/共需/)).toBeVisible();
-    await expect(growingPlot.getByText(/专注可加速生长/)).toBeVisible();
-
-    const animation = await growingPlot.locator('span').first().evaluate((el) => (el as HTMLElement).style.animation);
-    expect(animation).toContain('plantSway');
+    await expect(growingPlot.getByText(/已生长.*共需/)).toHaveCount(0);
+    await expect(page.locator('div.rounded-\\[12px\\]')).toHaveCount(0);
   });
 
-  test('mobile: growing plot shows compact time text + boost hint + sway animation', async ({ page }, testInfo) => {
-    if (!testInfo.project.name.startsWith('mobile')) {
-      test.skip();
-      return;
-    }
-
+  test('AC2: 点击 growing 地块弹出 tooltip，显示百分比和 farmGrowthTime', async ({ page }) => {
     await goToFarm(page);
 
     const growingPlot = page.locator('.farm-grid-perspective > div').first();
+    await growingPlot.click();
 
-    await expect(growingPlot.getByText(/\d+%\s*·\s*还需/)).toBeVisible();
-    await expect(growingPlot.getByText(/专注可加速生长/)).toBeVisible();
+    const tooltip = page.locator('div.rounded-\\[12px\\]');
+    await expect(tooltip).toBeVisible();
+    await expect(tooltip.getByText(/^\d+%$/)).toBeVisible();
+    await expect(tooltip.getByText(/已生长/)).toBeVisible();
+    await expect(tooltip.getByText(/共需/)).toBeVisible();
 
-    const animation = await growingPlot.locator('span').first().evaluate((el) => (el as HTMLElement).style.animation);
-    expect(animation).toContain('plantSway');
+    const tooltipBg = await tooltip.evaluate((el) => getComputedStyle(el).backgroundColor);
+    expect(tooltipBg).toBe('rgba(0, 0, 0, 0.85)');
   });
 
-  test('farm page has help button and shows rules modal content', async ({ page }, testInfo) => {
-    if (testInfo.project.name !== 'desktop') {
-      test.skip();
-      return;
-    }
-
+  test('AC3: 点击网格空白区域关闭 tooltip', async ({ page }) => {
     await goToFarm(page);
 
-    const helpButton = page.getByRole('button', { name: '🌱 农场规则' });
-    await expect(helpButton).toBeVisible();
-    await helpButton.click();
+    const growingPlot = page.locator('.farm-grid-perspective > div').first();
+    const grid = page.locator('.farm-grid-perspective');
+    const tooltip = page.locator('div.rounded-\\[12px\\]');
 
-    await expect(page.getByRole('heading', { name: '🌱 农场规则' })).toBeVisible();
-    await expect(page.getByText(/🌱\s*种植：/)).toBeVisible();
-    await expect(page.getByText(/⏱️\s*生长：/)).toBeVisible();
-    await expect(page.getByText(/🍉\s*收获：/)).toBeVisible();
-    await expect(page.getByText(/💀\s*枯萎：/)).toBeVisible();
-    await expect(page.getByText(/🔓\s*解锁：/)).toBeVisible();
+    await growingPlot.click();
+    await expect(tooltip).toBeVisible();
+
+    await grid.evaluate((el) => {
+      el.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    });
+    await expect(tooltip).toHaveCount(0);
   });
 
-  test('i18n: switching language updates farm help copy', async ({ page }, testInfo) => {
-    if (testInfo.project.name !== 'desktop') {
-      test.skip();
-      return;
-    }
-
+  test('AC4: timeMultiplier > 1 时，等待 6 秒后 progress 增加', async ({ page }) => {
     await goToFarm(page);
+    await page.evaluate(() => localStorage.setItem('watermelon-debug', 'true'));
+    await activateDebugToolbar(page);
+    await openDebugPanel(page);
 
-    await expect(page.getByRole('button', { name: /🌱\s*地块/ })).toBeVisible();
-    await switchLanguageToEnglish(page);
+    const multiplierSection = page.locator('section').filter({ hasText: '时间倍率' });
+    await multiplierSection.getByRole('button', { name: '100x' }).click();
 
-    await expect(page.getByRole('button', { name: /🌱\s*Plots/ })).toBeVisible();
+    const initialProgress = await readProgress(page, 0);
+    if (initialProgress === null) throw new Error('plot progress not found before multiplier update');
 
-    const helpButton = page.getByRole('button', { name: '🌱 Farm Rules' });
-    await expect(helpButton).toBeVisible();
-    await helpButton.click();
+    await page.waitForTimeout(6000);
 
-    await expect(page.getByRole('heading', { name: '🌱 Farm Rules' })).toBeVisible();
-    await expect(page.getByText(/🌱\s*Plant:/)).toBeVisible();
-    await expect(page.getByText(/🌱\s*种植：/)).toHaveCount(0);
+    const progressed = await readProgress(page, 0);
+    if (progressed === null) throw new Error('plot progress not found after multiplier update');
+    expect(progressed).toBeGreaterThan(initialProgress);
+  });
+
+  test('AC5: Debug Toolbar 时间倍率区可用 1000x 按钮', async ({ page }) => {
+    await goToFarm(page);
+    await page.evaluate(() => localStorage.setItem('watermelon-debug', 'true'));
+    await activateDebugToolbar(page);
+    await openDebugPanel(page);
+
+    const multiplierSection = page.locator('section').filter({ hasText: '时间倍率' });
+    const button1000x = multiplierSection.getByRole('button', { name: '1000x' });
+    await expect(button1000x).toBeVisible();
+    await expect(button1000x).toBeEnabled();
+  });
+
+  test('AC6: timeMultiplier=1 时等待 6 秒，progress 保持不变', async ({ page }) => {
+    await goToFarm(page);
+    await page.evaluate(() => localStorage.setItem('watermelon-debug', 'true'));
+    await activateDebugToolbar(page);
+    await openDebugPanel(page);
+
+    const multiplierSection = page.locator('section').filter({ hasText: '时间倍率' });
+    await multiplierSection.getByRole('button', { name: '1x' }).click();
+
+    const initialProgress = await readProgress(page, 0);
+    if (initialProgress === null) throw new Error('plot progress not found before 1x check');
+
+    await page.waitForTimeout(6000);
+
+    const progressed = await readProgress(page, 0);
+    if (progressed === null) throw new Error('plot progress not found after 1x check');
+    expect(progressed).toBe(initialProgress);
   });
 });

@@ -111,6 +111,8 @@ function App() {
 
   // Farm storage
   const { farm, setFarm, plantSeed, harvestPlot, clearPlot, updatePlots, updateActiveDate } = useFarmStorage();
+  const farmPlotsRef = useRef(farm.plots);
+  const updatePlotsRef = useRef(updatePlots);
 
   // Slicing scene state
   const [slicingMelon, setSlicingMelon] = useState<'ripe' | 'legendary' | null>(null);
@@ -119,6 +121,14 @@ function App() {
   useEffect(() => {
     timeMultiplierRef.current = timeMultiplier;
   }, [timeMultiplier]);
+
+  useEffect(() => {
+    farmPlotsRef.current = farm.plots;
+  }, [farm.plots]);
+
+  useEffect(() => {
+    updatePlotsRef.current = updatePlots;
+  }, [updatePlots]);
 
   // Achievements (with cloud sync callback)
   const achievements = useAchievements(records, projectRecords.length, syncAchievements);
@@ -162,6 +172,23 @@ function App() {
     }
     farmUpdatedRef.current = true;
   }, [todayKey]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    if (timeMultiplier <= 1) return;
+
+    const TICK_INTERVAL_MS = 5000; // 每 5 秒 tick 一次
+    const intervalId = window.setInterval(() => {
+      const minutesPerTick = (TICK_INTERVAL_MS / 60000) * timeMultiplier;
+      const nowTimestamp = Date.now();
+      const newPlots = farmPlotsRef.current.map((plot) => {
+        if (plot.state !== 'growing') return plot;
+        return updatePlotGrowth(plot, minutesPerTick, nowTimestamp).plot;
+      });
+      updatePlotsRef.current(newPlots);
+    }, TICK_INTERVAL_MS);
+
+    return () => window.clearInterval(intervalId);
+  }, [timeMultiplier]);
 
   // Wrapped synthesize with achievement detection
   const handleSynthesize = useCallback((recipe: import('./types').SynthesisRecipe, count: number = 1): boolean => {
