@@ -1,7 +1,7 @@
 /**
  * FarmPage — 农场主页面
  *
- * 4 块地块网格 + 种植/收获/清除交互 + 品种揭晓动画 + 收获动画。
+ * 3×3 地块网格（未解锁显示锁定卡）+ 种植/收获/清除交互 + 品种揭晓动画 + 收获动画。
  * 内嵌图鉴入口（顶部 tab 切换）。
  */
 import { useState, useCallback, useEffect, useRef, useMemo } from 'react';
@@ -9,7 +9,7 @@ import { useTheme } from '../hooks/useTheme';
 import { useI18n } from '../i18n';
 import type { Plot, VarietyId, FarmStorage, GalaxyId } from '../types/farm';
 import type { SeedQuality, SeedCounts } from '../types/slicing';
-import { VARIETY_DEFS, RARITY_COLOR, RARITY_STARS, GALAXIES } from '../types/farm';
+import { VARIETY_DEFS, RARITY_COLOR, RARITY_STARS, GALAXIES, PLOT_MILESTONES } from '../types/farm';
 import { getGrowthStage, getStageEmoji, isVarietyRevealed } from '../farm/growth';
 import { getUnlockedGalaxies } from '../farm/galaxy';
 import { CollectionPage } from './CollectionPage';
@@ -41,6 +41,9 @@ const REVEAL_DURATION_RARE_PLUS_MS = 3800;
 const HARVEST_DURATION_NEW_MS = 4200;
 const HARVEST_DURATION_REPEAT_MS = 2800;
 const REVEAL_RARE_PLUS_MIN_STARS = 2;
+const TOTAL_PLOT_SLOTS = 9;
+const LAST_PLOT_UNLOCK_REQUIRED = PLOT_MILESTONES[PLOT_MILESTONES.length - 1]?.requiredVarieties ?? 0;
+const PLOT_UNLOCK_BY_TOTAL = new Map(PLOT_MILESTONES.map((milestone) => [milestone.totalPlots, milestone.requiredVarieties]));
 
 export function FarmPage({ farm, seeds, todayFocusMinutes, addSeeds, onPlant, onHarvest, onClear, onGoWarehouse }: FarmPageProps) {
   const theme = useTheme();
@@ -77,20 +80,22 @@ export function FarmPage({ farm, seeds, todayFocusMinutes, addSeeds, onPlant, on
   }, [farm.plots]);
 
   const totalSeeds = seeds.normal + seeds.epic + seeds.legendary;
-  const plotCount = farm.plots.length;
-  const plotCols = plotCount <= 4 ? 2 : 3;
-  const plotRows = Math.max(1, Math.ceil(plotCount / plotCols));
-  const centerIsoX = (plotCols - plotRows) / 2;
-  const plotLayout = farm.plots.map((plot, index) => {
-    const row = Math.floor(index / plotCols);
-    const col = index % plotCols;
-    return {
-      plot,
-      isoX: col - row,
-      isoY: col + row,
-    };
-  });
-  const maxIsoY = plotLayout.reduce((max, item) => Math.max(max, item.isoY), 0);
+  const plotSlots = useMemo(
+    () => Array.from({ length: TOTAL_PLOT_SLOTS }, (_, index) => {
+      const plot = farm.plots[index];
+      if (plot) {
+        return {
+          kind: 'plot' as const,
+          plot,
+        };
+      }
+      return {
+        kind: 'locked' as const,
+        requiredVarieties: PLOT_UNLOCK_BY_TOTAL.get(index + 1) ?? LAST_PLOT_UNLOCK_REQUIRED,
+      };
+    }),
+    [farm.plots],
+  );
 
   const handlePlant = useCallback((galaxyId: GalaxyId, quality: SeedQuality) => {
     if (plantingPlotId === null) return;
@@ -143,51 +148,43 @@ export function FarmPage({ farm, seeds, todayFocusMinutes, addSeeds, onPlant, on
         </span>
       </div>
 
-      {/* 等距地块网格 */}
+      {/* 3×3 俯视网格 */}
       <div className="relative mb-5">
-        <div
-          className="relative mx-auto w-full max-w-[760px] overflow-visible"
-          style={{
-            '--farm-iso-tilt': '60deg',
-            '--farm-iso-rot': '-45deg',
-            '--farm-tile-size': 'clamp(112px, 27vw, 170px)',
-            '--farm-step-x': 'calc(var(--farm-tile-size) * 0.55)',
-            '--farm-step-y': 'calc(var(--farm-tile-size) * 0.33)',
-            height: `calc(var(--farm-tile-size) + ${maxIsoY} * var(--farm-step-y) + 20px)`,
-          } as React.CSSProperties}
-        >
+        <div className="relative mx-auto w-full max-w-[760px]">
           <div
-            className="pointer-events-none absolute left-1/2 top-1/2 h-[74%] w-[74%] -translate-x-1/2 -translate-y-1/2 rounded-[36px]"
+            className="pointer-events-none absolute inset-0 rounded-[30px]"
             style={{
-              background: `radial-gradient(circle, ${theme.surface}66 0%, ${theme.surface}00 72%)`,
-              transform: 'rotateX(var(--farm-iso-tilt)) rotateZ(var(--farm-iso-rot))',
-              transformStyle: 'preserve-3d',
+              background: `radial-gradient(circle at 50% 16%, ${theme.surface}66 0%, ${theme.surface}00 72%)`,
             }}
           />
-          {plotLayout.map(({ plot, isoX, isoY }) => (
-            <div
-              key={plot.id}
-              className="absolute"
-              style={{
-                left: `calc(50% + ${(isoX - centerIsoX).toFixed(3)} * var(--farm-step-x))`,
-                top: `calc(${isoY} * var(--farm-step-y))`,
-                transform: 'translate(-50%, 0)',
-                zIndex: isoY + 1,
-              }}
-            >
-              <PlotCard
-                plot={plot}
-                theme={theme}
-                t={t}
-                onPlantClick={() => {
-                  if (totalSeeds > 0) setPlantingPlotId(plot.id);
-                  else onGoWarehouse();
-                }}
-                onHarvestClick={() => handleHarvest(plot.id)}
-                onClearClick={() => onClear(plot.id)}
-              />
-            </div>
-          ))}
+          <div
+            className="relative grid grid-cols-3 gap-2"
+            style={{
+              transform: 'perspective(800px) rotateX(18deg)',
+              transformOrigin: 'center top',
+              transformStyle: 'preserve-3d',
+            }}
+          >
+            {plotSlots.map((slot, index) => (
+              <div key={slot.kind === 'plot' ? `plot-${slot.plot.id}` : `locked-${index}`}>
+                {slot.kind === 'plot' ? (
+                  <PlotCard
+                    plot={slot.plot}
+                    theme={theme}
+                    t={t}
+                    onPlantClick={() => {
+                      if (totalSeeds > 0) setPlantingPlotId(slot.plot.id);
+                      else onGoWarehouse();
+                    }}
+                    onHarvestClick={() => handleHarvest(slot.plot.id)}
+                    onClearClick={() => onClear(slot.plot.id)}
+                  />
+                ) : (
+                  <LockedPlotCard requiredVarieties={slot.requiredVarieties} theme={theme} t={t} />
+                )}
+              </div>
+            ))}
+          </div>
         </div>
       </div>
 
@@ -297,7 +294,6 @@ function PlotCard({ plot, theme, t, onPlantClick, onHarvestClick, onClearClick }
     : `0 0 6px ${rarityColor}66`;
   const hasFlowingShine = variety ? (variety.rarity === 'epic' || variety.rarity === 'legendary') : false;
   const flowShineColor = variety?.rarity === 'legendary' ? 'rgba(255,255,255,0.8)' : 'rgba(255,255,255,0.62)';
-  const diamondClip = 'polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%)';
   const tileBackground = plot.state === 'empty'
     ? 'linear-gradient(145deg, #8b5a2b 0%, #6f4424 100%)'
     : plot.state === 'withered'
@@ -310,26 +306,14 @@ function PlotCard({ plot, theme, t, onPlantClick, onHarvestClick, onClearClick }
       : theme.border;
   const tileShadow = plot.state === 'mature'
     ? '0 14px 26px rgba(251,191,36,0.26), 0 0 16px rgba(251,191,36,0.22)'
-    : '0 10px 20px rgba(0,0,0,0.2)';
+    : '0 10px 20px rgba(0,0,0,0.2), inset 0 -10px 16px rgba(0,0,0,0.14)';
 
   return (
-    <div className="group relative h-[var(--farm-tile-size)] w-[var(--farm-tile-size)] select-none">
-      <div className="pointer-events-none absolute inset-0">
-        <div
-          className="absolute left-1/2 top-1/2 h-[74%] w-[74%] -translate-x-1/2 -translate-y-1/2 rounded-2xl"
-          style={{
-            backgroundColor: `${theme.border}52`,
-            transform: 'rotateX(var(--farm-iso-tilt)) rotateZ(var(--farm-iso-rot))',
-            filter: 'blur(0.4px)',
-          }}
-        />
-      </div>
-
+    <div className="group relative aspect-square w-full select-none">
       <div className="relative h-full w-full transition-transform duration-200 group-hover:-translate-y-1">
         <div
-          className="absolute inset-[8%] border-2"
+          className="absolute inset-0 rounded-2xl border-2"
           style={{
-            clipPath: diamondClip,
             background: tileBackground,
             borderColor: tileBorderColor,
             boxShadow: tileShadow,
@@ -337,9 +321,8 @@ function PlotCard({ plot, theme, t, onPlantClick, onHarvestClick, onClearClick }
           }}
         />
         <div
-          className="pointer-events-none absolute inset-[8%]"
+          className="pointer-events-none absolute inset-0 rounded-2xl"
           style={{
-            clipPath: diamondClip,
             background: 'linear-gradient(180deg, rgba(255,255,255,0.18) 0%, rgba(255,255,255,0) 46%)',
           }}
         />
@@ -348,8 +331,7 @@ function PlotCard({ plot, theme, t, onPlantClick, onHarvestClick, onClearClick }
         {plot.state === 'empty' && (
           <button
             onClick={onPlantClick}
-            className="absolute inset-[8%] flex h-auto w-auto flex-col items-center justify-center gap-1 text-center"
-            style={{ clipPath: diamondClip }}
+            className="absolute inset-0 rounded-2xl flex flex-col items-center justify-center gap-1 text-center"
           >
             <span className="text-[clamp(1.7rem,5vw,2.4rem)] font-light leading-none" style={{ color: '#f8eddc' }}>+</span>
             <span className="text-[10px] font-medium tracking-wide leading-none" style={{ color: '#f8eddc' }}>
@@ -361,8 +343,7 @@ function PlotCard({ plot, theme, t, onPlantClick, onHarvestClick, onClearClick }
         {/* Growing plot */}
         {plot.state === 'growing' && (
           <div
-            className="absolute inset-[8%] flex h-auto w-auto flex-col items-center justify-center px-4 py-4 text-center"
-            style={{ clipPath: diamondClip }}
+            className="absolute inset-0 rounded-2xl flex flex-col items-center justify-center px-3 py-3 text-center"
           >
             <span
               className="text-[clamp(1.9rem,6vw,2.6rem)]"
@@ -412,8 +393,7 @@ function PlotCard({ plot, theme, t, onPlantClick, onHarvestClick, onClearClick }
         {plot.state === 'mature' && variety && (
           <button
             onClick={onHarvestClick}
-            className="absolute inset-[8%] flex h-auto w-auto flex-col items-center justify-center px-4 py-4 text-center"
-            style={{ clipPath: diamondClip }}
+            className="absolute inset-0 rounded-2xl flex flex-col items-center justify-center px-3 py-3 text-center"
           >
             <span className="text-[clamp(2rem,6vw,2.7rem)]" style={{
               filter: `drop-shadow(0 0 8px ${rarityColor})`,
@@ -437,8 +417,7 @@ function PlotCard({ plot, theme, t, onPlantClick, onHarvestClick, onClearClick }
         {plot.state === 'withered' && (
           <button
             onClick={onClearClick}
-            className="absolute inset-[8%] flex h-auto w-auto flex-col items-center justify-center px-4 py-4 text-center"
-            style={{ clipPath: diamondClip }}
+            className="absolute inset-0 rounded-2xl flex flex-col items-center justify-center px-3 py-3 text-center"
           >
             <span className="text-[clamp(1.9rem,6vw,2.5rem)] grayscale">💀</span>
             <span className="text-[11px] font-medium" style={{ color: theme.textMuted }}>{t.farmWithered}</span>
@@ -453,7 +432,7 @@ function PlotCard({ plot, theme, t, onPlantClick, onHarvestClick, onClearClick }
 
         {/* Seed quality badge */}
         {plot.seedQuality && plot.state !== 'empty' && plot.state !== 'withered' && (
-          <div className="absolute right-[10%] top-[11%] z-20">
+          <div className="absolute right-2 top-2 z-20">
             <span
               className="rounded-full px-1.5 py-0.5 text-[10px] font-medium"
               style={{
@@ -478,6 +457,39 @@ function PlotCard({ plot, theme, t, onPlantClick, onHarvestClick, onClearClick }
           100% { transform: translateX(390%); opacity: 0; }
         }
       `}</style>
+    </div>
+  );
+}
+
+function LockedPlotCard({ requiredVarieties, theme, t }: {
+  requiredVarieties: number;
+  theme: ReturnType<typeof useTheme>;
+  t: ReturnType<typeof useI18n>;
+}) {
+  return (
+    <div className="relative aspect-square w-full select-none">
+      <div
+        className="absolute inset-0 rounded-2xl border-2"
+        style={{
+          background: `linear-gradient(145deg, ${theme.surface} 0%, ${theme.inputBg} 100%)`,
+          borderColor: theme.border,
+          opacity: 0.8,
+          boxShadow: '0 8px 16px rgba(0,0,0,0.16), inset 0 -10px 14px rgba(0,0,0,0.14)',
+        }}
+      />
+      <div
+        className="pointer-events-none absolute inset-0 rounded-2xl"
+        style={{ background: 'linear-gradient(180deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 56%)' }}
+      />
+      <div className="absolute inset-0 flex flex-col items-center justify-center px-3 text-center">
+        <span className="text-[clamp(1.5rem,4.8vw,2.2rem)]">🔒</span>
+        <span className="mt-1 text-[11px] font-semibold" style={{ color: theme.textMuted }}>
+          {t.collectionLocked}
+        </span>
+        <span className="mt-1 text-[10px] leading-snug" style={{ color: theme.textFaint }}>
+          {t.farmUnlockHint(requiredVarieties)}
+        </span>
+      </div>
     </div>
   );
 }

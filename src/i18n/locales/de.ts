@@ -495,6 +495,7 @@ export const de: Messages = {
   farmAlreadyCollected: 'Bereits gesammelt',
   farmStage: (s) => ({ seed: 'Samen', sprout: 'Keimling', leaf: 'Blatt', flower: 'Blüte', fruit: 'Frucht' }[s] ?? s),
   farmGoFarm: 'Zur Farm 🌱',
+  farmUnlockHint: (n) => `${n} Sorten sammeln zum Freischalten`,
 
   starJourneyTitle: '🚀 Sternenreise',
   collectionProgress: (c, t) => `${c}/${t} gesammelt`,

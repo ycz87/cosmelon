@@ -495,6 +495,7 @@ export const ko: Messages = {
   farmAlreadyCollected: '이미 수집됨',
   farmStage: (s) => ({ seed: '씨앗기', sprout: '발아기', leaf: '성장기', flower: '개화기', fruit: '결실기' }[s] ?? s),
   farmGoFarm: '농장으로 🌱',
+  farmUnlockHint: (n) => `${n}품종 수집 시 해제`,
 
   starJourneyTitle: '🚀 성간 여정',
   collectionProgress: (c, t) => `${c}/${t} 수집`,

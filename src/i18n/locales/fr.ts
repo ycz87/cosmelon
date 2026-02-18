@@ -495,6 +495,7 @@ export const fr: Messages = {
   farmAlreadyCollected: 'Déjà collectée',
   farmStage: (s) => ({ seed: 'Graine', sprout: 'Pousse', leaf: 'Feuille', flower: 'Fleur', fruit: 'Fruit' }[s] ?? s),
   farmGoFarm: 'Aller à la ferme 🌱',
+  farmUnlockHint: (n) => `Collectez ${n} variétés pour débloquer`,
 
   starJourneyTitle: '🚀 Voyage stellaire',
   collectionProgress: (c, t) => `${c}/${t} collectées`,

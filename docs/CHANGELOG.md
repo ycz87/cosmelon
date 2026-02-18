@@ -1,3 +1,22 @@
+## v0.23.0 — 瓜田布局改版：俯视微倾斜 3×3 网格（2026-02-18）
+
+### 新增
+- 瓜田从菱形等距布局改为俯视微倾斜 3×3 CSS Grid
+- 始终显示 9 块地：已开发地块正常交互，未开发地块灰显锁定 + 🔒 + 解锁条件提示
+- 新增 LockedPlotCard 组件，根据 PLOT_MILESTONES 显示解锁条件
+- 新增 farmUnlockHint i18n key，8 种语言覆盖
+
+### 改进
+- 地块改为圆角矩形（rounded-2xl），去掉菱形 clipPath
+- 整体网格加 perspective(800px) + rotateX(18deg) 伪3D倾斜感
+- 地块大小用 aspect-square 自适应横竖屏
+- PlotCard 加 inset box-shadow 增强立体感
+
+### 移除
+- 菱形等距布局相关代码（--farm-iso-tilt/rot、diamondClip、isoX/isoY 计算）
+
+---
+
 ## v0.22.0 — 农场 Phase 2：五星系 + 等距瓜田 + 图鉴升级（2026-02-17）
 
 ### 新增

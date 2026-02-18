@@ -496,6 +496,7 @@ export const zh: Messages = {
   farmAlreadyCollected: '已收藏',
   farmStage: (s) => ({ seed: '种子期', sprout: '发芽期', leaf: '长叶期', flower: '开花期', fruit: '结果期' }[s] ?? s),
   farmGoFarm: '去农场种植 🌱',
+  farmUnlockHint: (n) => `集齐 ${n} 个品种解锁`,
 
   // Collection
   starJourneyTitle: '🚀 星际旅程',

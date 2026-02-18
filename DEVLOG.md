@@ -2,6 +2,23 @@
 
 ---
 
+## v0.23.0 — 瓜田布局改版：俯视微倾斜 3×3 网格（2026-02-18）
+
+### 背景
+Charles 反馈菱形等距瓜田在竖屏下留白多、地块小，改为俯视微倾斜 3×3 网格。
+
+### 改动
+1. **布局重构** — 菱形等距 → 3×3 CSS Grid + perspective(800px) rotateX(18deg)
+2. **始终 9 块地** — 已开发地块正常交互，未开发地块显示 LockedPlotCard（🔒 + 解锁条件）
+3. **圆角矩形地块** — 去掉 diamondClip，改为 rounded-2xl + aspect-square
+4. **i18n** — 新增 farmUnlockHint key，8 种语言
+
+### 影响范围
+- 重构：src/components/FarmPage.tsx（布局 + PlotCard + 新增 LockedPlotCard）
+- 更新：src/i18n/types.ts + 8 个语言文件
+
+---
+
 ## v0.22.0 — 农场 Phase 2 完整实现（2026-02-17）
 
 ### 背景

@@ -495,6 +495,7 @@ export const ja: Messages = {
   farmAlreadyCollected: '収集済み',
   farmStage: (s) => ({ seed: '種子期', sprout: '発芽期', leaf: '成長期', flower: '開花期', fruit: '結実期' }[s] ?? s),
   farmGoFarm: '農場へ 🌱',
+  farmUnlockHint: (n) => `${n}品種集めて解放`,
 
   starJourneyTitle: '🚀 星間の旅',
   collectionProgress: (c, t) => `${c}/${t} 収集済み`,

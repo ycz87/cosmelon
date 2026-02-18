@@ -349,6 +349,7 @@ export interface Messages {
   farmAlreadyCollected: string;
   farmStage: (stage: string) => string;
   farmGoFarm: string;
+  farmUnlockHint: (requiredVarieties: number) => string;
 
   // ─── Collection ───
   starJourneyTitle: string;
