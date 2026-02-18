@@ -55,6 +55,7 @@ export function FarmPage({ farm, seeds, todayFocusMinutes, addSeeds, onPlant, on
   const [revealAnim, setRevealAnim] = useState<RevealAnim | null>(null);
   const [harvestAnim, setHarvestAnim] = useState<HarvestAnim | null>(null);
   const [showFarmHelp, setShowFarmHelp] = useState(false);
+  const [activeTooltipPlotId, setActiveTooltipPlotId] = useState<number | null>(null);
 
   // 追踪已揭晓的地块（避免重复触发动画）
   const revealedRef = useRef<Set<number>>(new Set());
@@ -175,6 +176,7 @@ export function FarmPage({ farm, seeds, todayFocusMinutes, addSeeds, onPlant, on
           />
           <div
             className="farm-grid-perspective relative grid grid-cols-3 gap-1 sm:gap-2"
+            onClick={() => setActiveTooltipPlotId(null)}
           >
             {plotSlots.map((slot, index) => (
               <div key={slot.kind === 'plot' ? `plot-${slot.plot.id}` : `locked-${index}`}>
@@ -183,6 +185,10 @@ export function FarmPage({ farm, seeds, todayFocusMinutes, addSeeds, onPlant, on
                     plot={slot.plot}
                     theme={theme}
                     t={t}
+                    isTooltipOpen={activeTooltipPlotId === slot.plot.id}
+                    onTooltipToggle={() => {
+                      setActiveTooltipPlotId((prev) => (prev === slot.plot.id ? null : slot.plot.id));
+                    }}
                     onPlantClick={() => {
                       if (totalSeeds > 0) setPlantingPlotId(slot.plot.id);
                       else onGoWarehouse();
@@ -307,10 +313,12 @@ function SubTabHeader({ subTab, setSubTab, theme, t }: {
 }
 
 // ─── 地块卡片 ───
-function PlotCard({ plot, theme, t, onPlantClick, onHarvestClick, onClearClick }: {
+function PlotCard({ plot, theme, t, isTooltipOpen, onTooltipToggle, onPlantClick, onHarvestClick, onClearClick }: {
   plot: Plot;
   theme: ReturnType<typeof useTheme>;
   t: ReturnType<typeof useI18n>;
+  isTooltipOpen: boolean;
+  onTooltipToggle: () => void;
   onPlantClick: () => void;
   onHarvestClick: () => void;
   onClearClick: () => void;
@@ -327,7 +335,6 @@ function PlotCard({ plot, theme, t, onPlantClick, onHarvestClick, onClearClick }
   const hasFlowingShine = variety ? (variety.rarity === 'epic' || variety.rarity === 'legendary') : false;
   const flowShineColor = variety?.rarity === 'legendary' ? 'rgba(255,255,255,0.8)' : 'rgba(255,255,255,0.62)';
   const matureMinutes = variety?.matureMinutes ?? 10000;
-  const remainingMinutes = Math.max(0, matureMinutes - plot.accumulatedMinutes);
   const stageSwayAnimation = stage === 'seed' || stage === 'sprout'
     ? 'plantSwaySm 4s ease-in-out infinite'
     : stage === 'leaf' || stage === 'flower'
@@ -382,7 +389,11 @@ function PlotCard({ plot, theme, t, onPlantClick, onHarvestClick, onClearClick }
         {/* Growing plot */}
         {plot.state === 'growing' && (
           <div
-            className="absolute inset-0 rounded-2xl flex flex-col items-center justify-center px-3 py-3 text-center"
+            className="absolute inset-0 rounded-2xl flex flex-col items-center justify-center px-3 py-3 text-center cursor-pointer"
+            onClick={(e) => {
+              e.stopPropagation();
+              onTooltipToggle();
+            }}
           >
             <span
               className="text-[clamp(1.9rem,6vw,2.6rem)]"
@@ -427,16 +438,28 @@ function PlotCard({ plot, theme, t, onPlantClick, onHarvestClick, onClearClick }
             <span className="mt-1 text-[10px]" style={{ color: theme.textFaint }}>
               {t.farmStage(stage)}
             </span>
-            <span className="mt-0.5 hidden sm:block text-[9px]" style={{ color: theme.textFaint }}>
-              {t.farmGrowthTime(plot.accumulatedMinutes, matureMinutes)}
-            </span>
-            <span className="mt-0.5 sm:hidden text-[9px]" style={{ color: theme.textFaint }}>
-              {`${Math.round(progressPercent)}% · ${t.farmRemainingTime(remainingMinutes)}`}
-            </span>
-            {plot.progress < 0.5 && (
-              <span className="mt-0.5 text-[9px]" style={{ color: theme.textFaint, animation: 'fadeIn 0.45s ease-out' }}>
-                {t.farmFocusBoostHint}
-              </span>
+            {isTooltipOpen && (
+              <div
+                className="absolute left-1/2 top-full z-50 mt-2 w-max max-w-[200px] -translate-x-1/2 rounded-[12px] px-4 py-3 text-[11px] leading-relaxed text-white"
+                style={{ backgroundColor: 'rgba(0,0,0,0.85)' }}
+              >
+                <span
+                  className="absolute left-1/2 top-[-6px] -translate-x-1/2"
+                  style={{
+                    width: 0,
+                    height: 0,
+                    borderLeft: '6px solid transparent',
+                    borderRight: '6px solid transparent',
+                    borderBottom: '6px solid rgba(0,0,0,0.85)',
+                  }}
+                />
+                {revealed && variety && (
+                  <div className="font-semibold">{t.varietyName(plot.varietyId!)}</div>
+                )}
+                <div>{`${Math.round(progressPercent)}%`}</div>
+                <div>{t.farmGrowthTime(plot.accumulatedMinutes, matureMinutes)}</div>
+                {plot.progress < 0.5 && <div>{t.farmFocusBoostHint}</div>}
+              </div>
             )}
           </div>
         )}
