@@ -4,6 +4,29 @@
 
 ---
 
+## [0.35.0] - 2026-02-20
+### Added
+- 🌦️ 天气系统（Phase 6 Step 3）
+  - 5种天气：sunny/cloudy/rainy/night/rainbow
+  - 每6小时随机切换（彩虹5%概率，其他均分）
+  - 离线补算（打开 app 时自动计算错过的切换）
+  - 天气背景层 + CSS filter 效果
+- 🐝 小动物装饰系统
+  - 4种小动物：bee/butterfly/ladybug/bird
+  - 每次打开 app 10% 概率出现一只
+  - 随机位置 + 停留 5-15 秒后消失
+  - CSS 动画（hover 效果）
+- 👽 外星人对话系统
+  - 瓜瓜星人：≥3棵瓜时每天10%概率出现
+  - 变异博士：使用基因改造液时15%概率触发
+  - 对话气泡显示 3 秒后自动消失
+- 🧪 E2E 测试 3 个用例覆盖天气/小动物/外星人数据结构验证
+
+### Fixed
+- 修复 useAlienVisit useEffect 依赖项使用对象属性可能导致的问题（改为 expiresAt）
+- 修复 Math.random() 在 updater 函数内调用导致 StrictMode 双重执行的问题
+- 修复 t[alien.messageKey] 的类型安全问题（改为显式 switch）
+
 ## [0.34.0] - 2026-02-20
 ### Added
 - 🌑 暗物质星融合系统（Phase 6 Step 2）

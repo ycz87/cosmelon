@@ -2,6 +2,82 @@
 
 ---
 
+## v0.35.0 — Phase 6 Step 3: 天气 + 生命感系统
+日期：2026-02-20
+
+### 新增
+- **天气系统**
+  - 5 种天气类型：sunny（晴天）、cloudy（多云）、rainy（雨天）、night（夜晚）、rainbow（彩虹）
+  - 切换机制：每 6 小时随机切换（WEATHER_SWITCH_INTERVAL_MS = 6 * 60 * 60 * 1000）
+  - 概率分布：彩虹 5% 概率，其他 4 种均分（各 23.75%）
+  - 离线补算：打开 app 时自动计算错过的切换次数（rotateWeatherState）
+  - 持久化：localStorage 存储 weatherState（current + lastChangeAt）
+  - 迁移逻辑：migrateWeatherState 处理脏数据
+
+- **天气 UI 渲染**
+  - 天气背景层：WeatherLayer 组件，渲染渐变背景 + 装饰 emoji（☀️✨🌤️ / ☁️🌥️ / 🌧️💧 / 🌙✨⭐ / 🌈✨）
+  - CSS filter 效果：getWeatherGridFilter 对瓜田网格应用 saturate + brightness
+  - 天气图标：农场页顶部显示当前天气（WEATHER_ICON + farmWeatherName）
+  - 动画：weatherDrift（飘动）+ weatherRainDrop（雨滴下落）
+
+- **小动物装饰系统**
+  - 4 种小动物：bee（蜜蜂）、butterfly（蝴蝶）、ladybug（瓢虫）、bird（小鸟）
+  - 出现机制：每次打开 app 10% 概率出现一只（shouldSpawnCreature）
+  - 停留时长：5-15 秒随机（CREATURE_MIN_STAY_MS / CREATURE_MAX_STAY_MS）
+  - 位置：随机 x（8-88%）、y（10-66%）
+  - 自动消失：useCreatures hook 设置 timeout 清理过期小动物
+  - 持久化：localStorage 存储 creatures 数组
+  - 迁移逻辑：migrateCreatures 过滤已过期的小动物
+
+- **小动物 UI 渲染**
+  - CreatureLayer 组件：absolute 定位在瓜田上方（z-index 30）
+  - CSS 动画：creatureHover（上下浮动 + 缩放）
+  - emoji 渲染：🐝🦋🐞🐦
+
+- **外星人对话系统**
+  - 瓜瓜星人（melon-alien）：≥3 棵瓜时每天 10% 概率出现
+    * 触发条件：plantedMelonCount >= 3 && lastMelonAlienCheckDate !== todayKey
+    * 对话：alienMelonGreeting（"我们检测到你的瓜田生命力很旺，继续种植吧！"）
+  - 变异博士（mutation-doctor）：使用基因改造液时 15% 概率触发
+    * 触发条件：mutationDoctorSignal 递增时 15% roll
+    * 对话：alienMutationDoctor（"你使用了基因改造液，变异波动正在上升！"）
+  - 显示时长：3 秒（ALIEN_DISPLAY_DURATION_MS = 3000）
+  - 自动消失：useAlienVisit hook 设置 timeout 清理过期外星人
+  - 持久化：localStorage 存储 alienVisit（lastMelonAlienCheckDate + current）
+  - 迁移逻辑：migrateAlienVisit + normalizeAppearance
+
+- **外星人 UI 渲染**
+  - AlienLayer 组件：absolute 定位在瓜田右下角（z-index 35）
+  - 头像：👽（瓜瓜星人）/ 🧪（变异博士）
+  - 对话气泡：显式 switch 判断 messageKey（提升类型安全）
+  - CSS 动画：alienPop（弹出效果）
+
+- **i18n 8 语言翻译**
+  - 新增 3 个 i18n key：
+    * farmWeatherName(weather: string) => string（天气名称）
+    * alienMelonGreeting: string（瓜瓜星人对话）
+    * alienMutationDoctor: string（变异博士对话）
+  - 覆盖 zh/en/ja/ko/es/fr/de/ru
+
+- **E2E 测试**
+  - 新增 `e2e/phase6-step3-weather-life.spec.ts`，3 个测试用例全部通过
+  - 覆盖：天气系统初始化、小动物数据结构、外星人数据结构
+
+### 修复
+- 修复 useAlienVisit useEffect 依赖项使用对象属性可能导致的问题（改为依赖 alienVisit.current?.expiresAt）
+- 修复 Math.random() 在 updater 函数内调用导致 StrictMode 双重执行的问题（移到 updater 外部）
+- 修复 t[alien.messageKey] 的类型安全问题（改为显式 switch 判断）
+
+### 技术细节
+- 新增类型：Weather、WeatherState、CreatureType、Creature、AlienType、AlienDialogueKey、AlienAppearance、AlienVisit
+- 新增 hooks：useWeather、useCreatures、useAlienVisit
+- 新增 utils：weather.ts（rollWeather、rotateWeatherState、getMsUntilNextWeatherSwitch）、creatures.ts（createRandomCreature、pruneExpiredCreatures）
+- 新增 App.tsx state：mutationDoctorSignal（变异博士触发信号）
+- 新增 FarmPage 组件：WeatherLayer、CreatureLayer、AlienLayer
+- CSS keyframes：weatherDrift、weatherRainDrop、creatureHover、alienPop
+
+---
+
 ## v0.34.0 — Phase 6 Step 2: 暗物质星融合系统
 日期：2026-02-20
 
