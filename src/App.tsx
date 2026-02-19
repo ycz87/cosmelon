@@ -52,6 +52,7 @@ import { useAchievements } from './hooks/useAchievements';
 import { useFarmStorage } from './hooks/useFarmStorage';
 import { useGeneStorage } from './hooks/useGeneStorage';
 import { useMelonCoin } from './hooks/useMelonCoin';
+import { useWeeklyShop } from './hooks/useWeeklyShop';
 import { useAuth } from './hooks/useAuth';
 import { useSync } from './hooks/useSync';
 import { ThemeProvider } from './hooks/useTheme';
@@ -101,7 +102,7 @@ import {
 } from './types/farm';
 import type { CollectedVariety, FusionHistory, Plot, VarietyId } from './types/farm';
 import { SHOP_ITEMS, PLOT_PRICES } from './types/market';
-import type { ShopItemId } from './types/market';
+import type { ShopItemId, WeeklyItem } from './types/market';
 import type { DarkMatterFusion, DarkMatterFusionType, FusionResult } from './types/gene';
 
 const ONE_DAY_MS = 24 * 60 * 60 * 1000;
@@ -219,6 +220,27 @@ function App() {
   } = useFarmStorage();
   const { geneInventory, setGeneInventory, addFragment, removeFragment, removeFragmentsByGalaxy } = useGeneStorage();
   const { balance, addCoins, spendCoins } = useMelonCoin();
+  const handleGrantWeeklyItem = useCallback((item: WeeklyItem) => {
+    if (item.type === 'rare-gene-fragment') {
+      const varietyDef = VARIETY_DEFS[item.data.varietyId];
+      addFragment(varietyDef.galaxy, item.data.varietyId, item.data.rarity);
+      return;
+    }
+
+    if (item.type === 'legendary-seed') {
+      addPrismaticSeed({
+        id: createInjectedSeedId(),
+        varietyId: item.data.varietyId,
+      });
+      return;
+    }
+
+    addShedItem(item.data.decorationId, 1);
+  }, [addFragment, addPrismaticSeed, addShedItem]);
+  const { weeklyShop, buyWeeklyItem } = useWeeklyShop({
+    spendCoins,
+    onGrantItem: handleGrantWeeklyItem,
+  });
   const farmPlotsRef = useRef(farm.plots);
   const previousFarmPlotsRef = useRef<Plot[] | null>(null);
   const updatePlotsRef = useRef(updatePlots);
@@ -1704,8 +1726,10 @@ function App() {
             collection={farm.collection}
             onSellVariety={handleSellVariety}
             onBuyItem={handleBuyItem}
+            onBuyWeeklyItem={buyWeeklyItem}
             onBuyPlot={handleBuyPlot}
             unlockedPlotCount={farm.plots.length}
+            weeklyShop={weeklyShop}
             messages={t}
           />
         )}
