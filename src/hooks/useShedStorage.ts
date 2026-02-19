@@ -5,8 +5,9 @@
  */
 import { useCallback } from 'react';
 import { useLocalStorage } from './useLocalStorage';
-import type { ItemId, ShedStorage, SeedQuality, PityCounter, InjectedSeed } from '../types/slicing';
+import type { ItemId, ShedStorage, SeedQuality, PityCounter, InjectedSeed, HybridSeed } from '../types/slicing';
 import { DEFAULT_SHED_STORAGE, ALL_ITEM_IDS, DEFAULT_PITY, DEFAULT_SEED_COUNTS } from '../types/slicing';
+import { HYBRID_GALAXY_PAIRS } from '../types/farm';
 
 const SHED_KEY = 'watermelon-shed';
 const INJECTED_SEED_QUALITIES: SeedQuality[] = ['normal', 'epic', 'legendary'];
@@ -23,6 +24,7 @@ function migrateShed(raw: unknown): ShedStorage {
     totalSliced: 0,
     pity: { ...DEFAULT_PITY },
     injectedSeeds: [],
+    hybridSeeds: [],
   };
 
   // Migrate seeds: old format was a single number, new format is { normal, epic, legendary }
@@ -68,6 +70,22 @@ function migrateShed(raw: unknown): ShedStorage {
     }
   }
 
+  if (Array.isArray(s.hybridSeeds)) {
+    for (const seed of s.hybridSeeds) {
+      if (!seed || typeof seed !== 'object') continue;
+      const candidate = seed as Record<string, unknown>;
+      if (
+        typeof candidate.id === 'string'
+        && HYBRID_GALAXY_PAIRS.includes(candidate.galaxyPair as HybridSeed['galaxyPair'])
+      ) {
+        result.hybridSeeds.push({
+          id: candidate.id,
+          galaxyPair: candidate.galaxyPair as HybridSeed['galaxyPair'],
+        });
+      }
+    }
+  }
+
   return result;
 }
 
@@ -103,6 +121,7 @@ export function useShedStorage() {
       totalSliced: 0,
       pity: { ...DEFAULT_PITY },
       injectedSeeds: [],
+      hybridSeeds: [],
     });
   }, [setShed]);
 
@@ -131,6 +150,31 @@ export function useShedStorage() {
     return success;
   }, [setShed]);
 
+  const addHybridSeed = useCallback((seed: HybridSeed): void => {
+    setShed(prev => ({
+      ...prev,
+      hybridSeeds: [...prev.hybridSeeds, seed],
+    }));
+  }, [setShed]);
+
+  /** 消耗一颗杂交种子（返回是否成功） */
+  const consumeHybridSeed = useCallback((id: string): boolean => {
+    let success = false;
+    setShed(prev => {
+      const index = prev.hybridSeeds.findIndex(seed => seed.id === id);
+      if (index < 0) return prev;
+      success = true;
+      return {
+        ...prev,
+        hybridSeeds: [
+          ...prev.hybridSeeds.slice(0, index),
+          ...prev.hybridSeeds.slice(index + 1),
+        ],
+      };
+    });
+    return success;
+  }, [setShed]);
+
   /** 消耗一颗种子（种植时调用），返回是否成功 */
   const consumeSeed = useCallback((quality: SeedQuality): boolean => {
     let success = false;
@@ -142,6 +186,17 @@ export function useShedStorage() {
     return success;
   }, [setShed]);
 
+  /** 消耗一个道具（返回是否成功） */
+  const consumeItem = useCallback((id: ItemId): boolean => {
+    let success = false;
+    setShed(prev => {
+      if (prev.items[id] <= 0) return prev;
+      success = true;
+      return { ...prev, items: { ...prev.items, [id]: prev.items[id] - 1 } };
+    });
+    return success;
+  }, [setShed]);
+
   return {
     shed,
     addSeeds,
@@ -149,8 +204,11 @@ export function useShedStorage() {
     incrementSliced,
     updatePityCounter,
     consumeSeed,
+    consumeItem,
     addInjectedSeed,
     consumeInjectedSeed,
+    addHybridSeed,
+    consumeHybridSeed,
     resetShed,
   };
 }

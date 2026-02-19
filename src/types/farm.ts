@@ -40,6 +40,11 @@ export const RARITY_COLOR: Record<Rarity, string> = {
 
 // ─── 品种 ───
 export type BreedType = 'pure' | 'hybrid' | 'prismatic';
+export type HybridGalaxyPair =
+  | 'earth-fire' | 'earth-water' | 'earth-wood' | 'earth-metal'
+  | 'fire-water' | 'fire-wood' | 'fire-metal'
+  | 'water-wood' | 'water-metal'
+  | 'wood-metal';
 
 export type VarietyId =
   // 厚土星系 8 个
@@ -56,11 +61,23 @@ export type VarietyId =
   | 'tree-ring' | 'world-tree' | 'spirit-root' | 'all-spirit'
   // 金星系 8 个
   | 'golden-armor' | 'copper-patina' | 'tinfoil-melon' | 'galaxy-stripe'
-  | 'mercury-melon' | 'meteorite-melon' | 'alloy-melon' | 'eternal-melon';
+  | 'mercury-melon' | 'meteorite-melon' | 'alloy-melon' | 'eternal-melon'
+  // 杂交品种 30 个（10 组 x 3）
+  | 'lava-field' | 'volcanic-ash' | 'earth-core'
+  | 'hot-spring' | 'mud-pool' | 'oasis'
+  | 'ancient-root' | 'fossil' | 'earth-mother'
+  | 'ore-vein' | 'amber' | 'gemstone'
+  | 'steam' | 'geyser' | 'mist'
+  | 'wildfire' | 'ash-bloom' | 'fire-seed'
+  | 'forge' | 'molten-iron' | 'solar-furnace'
+  | 'rainforest' | 'lotus' | 'dewdrop'
+  | 'ice-blade' | 'mirror' | 'mercury-spring'
+  | 'golden-leaf' | 'iron-tree' | 'mech-vine';
 
 export interface VarietyDef {
   id: VarietyId;
   galaxy: GalaxyId;
+  hybridPair?: HybridGalaxyPair;
   rarity: Rarity;
   dropRate: number;  // 基础掉率（0-1）
   emoji: string;
@@ -69,6 +86,7 @@ export interface VarietyDef {
 }
 
 const PURE_MATURE_MINUTES = 10000;
+export const HYBRID_MATURE_MINUTES = 20000;
 
 /** Phase 2 品种定义（当前全部为 pure） */
 export const VARIETY_DEFS: Record<VarietyId, VarietyDef> = {
@@ -241,6 +259,146 @@ export const VARIETY_DEFS: Record<VarietyId, VarietyDef> = {
     id: 'eternal-melon', galaxy: 'metal', rarity: 'legendary', dropRate: 0.01, emoji: '👑',
     breedType: 'pure', matureMinutes: PURE_MATURE_MINUTES,
   },
+
+  // earth-fire
+  'lava-field': {
+    id: 'lava-field', galaxy: 'thick-earth', hybridPair: 'earth-fire', rarity: 'common', dropRate: 0.60, emoji: '🌋',
+    breedType: 'hybrid', matureMinutes: HYBRID_MATURE_MINUTES,
+  },
+  'volcanic-ash': {
+    id: 'volcanic-ash', galaxy: 'thick-earth', hybridPair: 'earth-fire', rarity: 'rare', dropRate: 0.30, emoji: '🌫️',
+    breedType: 'hybrid', matureMinutes: HYBRID_MATURE_MINUTES,
+  },
+  'earth-core': {
+    id: 'earth-core', galaxy: 'thick-earth', hybridPair: 'earth-fire', rarity: 'epic', dropRate: 0.10, emoji: '🌎',
+    breedType: 'hybrid', matureMinutes: HYBRID_MATURE_MINUTES,
+  },
+
+  // earth-water
+  'hot-spring': {
+    id: 'hot-spring', galaxy: 'thick-earth', hybridPair: 'earth-water', rarity: 'common', dropRate: 0.60, emoji: '♨️',
+    breedType: 'hybrid', matureMinutes: HYBRID_MATURE_MINUTES,
+  },
+  'mud-pool': {
+    id: 'mud-pool', galaxy: 'thick-earth', hybridPair: 'earth-water', rarity: 'rare', dropRate: 0.30, emoji: '🟤',
+    breedType: 'hybrid', matureMinutes: HYBRID_MATURE_MINUTES,
+  },
+  oasis: {
+    id: 'oasis', galaxy: 'thick-earth', hybridPair: 'earth-water', rarity: 'epic', dropRate: 0.10, emoji: '🏝️',
+    breedType: 'hybrid', matureMinutes: HYBRID_MATURE_MINUTES,
+  },
+
+  // earth-wood
+  'ancient-root': {
+    id: 'ancient-root', galaxy: 'thick-earth', hybridPair: 'earth-wood', rarity: 'common', dropRate: 0.60, emoji: '🌱',
+    breedType: 'hybrid', matureMinutes: HYBRID_MATURE_MINUTES,
+  },
+  fossil: {
+    id: 'fossil', galaxy: 'thick-earth', hybridPair: 'earth-wood', rarity: 'rare', dropRate: 0.30, emoji: '🦴',
+    breedType: 'hybrid', matureMinutes: HYBRID_MATURE_MINUTES,
+  },
+  'earth-mother': {
+    id: 'earth-mother', galaxy: 'thick-earth', hybridPair: 'earth-wood', rarity: 'epic', dropRate: 0.10, emoji: '🌳',
+    breedType: 'hybrid', matureMinutes: HYBRID_MATURE_MINUTES,
+  },
+
+  // earth-metal
+  'ore-vein': {
+    id: 'ore-vein', galaxy: 'thick-earth', hybridPair: 'earth-metal', rarity: 'common', dropRate: 0.60, emoji: '⛏️',
+    breedType: 'hybrid', matureMinutes: HYBRID_MATURE_MINUTES,
+  },
+  amber: {
+    id: 'amber', galaxy: 'thick-earth', hybridPair: 'earth-metal', rarity: 'rare', dropRate: 0.30, emoji: '🟠',
+    breedType: 'hybrid', matureMinutes: HYBRID_MATURE_MINUTES,
+  },
+  gemstone: {
+    id: 'gemstone', galaxy: 'thick-earth', hybridPair: 'earth-metal', rarity: 'epic', dropRate: 0.10, emoji: '💎',
+    breedType: 'hybrid', matureMinutes: HYBRID_MATURE_MINUTES,
+  },
+
+  // fire-water
+  steam: {
+    id: 'steam', galaxy: 'thick-earth', hybridPair: 'fire-water', rarity: 'common', dropRate: 0.60, emoji: '☁️',
+    breedType: 'hybrid', matureMinutes: HYBRID_MATURE_MINUTES,
+  },
+  geyser: {
+    id: 'geyser', galaxy: 'thick-earth', hybridPair: 'fire-water', rarity: 'rare', dropRate: 0.30, emoji: '⛲',
+    breedType: 'hybrid', matureMinutes: HYBRID_MATURE_MINUTES,
+  },
+  mist: {
+    id: 'mist', galaxy: 'thick-earth', hybridPair: 'fire-water', rarity: 'epic', dropRate: 0.10, emoji: '🌫️',
+    breedType: 'hybrid', matureMinutes: HYBRID_MATURE_MINUTES,
+  },
+
+  // fire-wood
+  wildfire: {
+    id: 'wildfire', galaxy: 'thick-earth', hybridPair: 'fire-wood', rarity: 'common', dropRate: 0.60, emoji: '🔥',
+    breedType: 'hybrid', matureMinutes: HYBRID_MATURE_MINUTES,
+  },
+  'ash-bloom': {
+    id: 'ash-bloom', galaxy: 'thick-earth', hybridPair: 'fire-wood', rarity: 'rare', dropRate: 0.30, emoji: '🌸',
+    breedType: 'hybrid', matureMinutes: HYBRID_MATURE_MINUTES,
+  },
+  'fire-seed': {
+    id: 'fire-seed', galaxy: 'thick-earth', hybridPair: 'fire-wood', rarity: 'epic', dropRate: 0.10, emoji: '🌰',
+    breedType: 'hybrid', matureMinutes: HYBRID_MATURE_MINUTES,
+  },
+
+  // fire-metal
+  forge: {
+    id: 'forge', galaxy: 'thick-earth', hybridPair: 'fire-metal', rarity: 'common', dropRate: 0.60, emoji: '🔨',
+    breedType: 'hybrid', matureMinutes: HYBRID_MATURE_MINUTES,
+  },
+  'molten-iron': {
+    id: 'molten-iron', galaxy: 'thick-earth', hybridPair: 'fire-metal', rarity: 'rare', dropRate: 0.30, emoji: '🧲',
+    breedType: 'hybrid', matureMinutes: HYBRID_MATURE_MINUTES,
+  },
+  'solar-furnace': {
+    id: 'solar-furnace', galaxy: 'thick-earth', hybridPair: 'fire-metal', rarity: 'epic', dropRate: 0.10, emoji: '☀️',
+    breedType: 'hybrid', matureMinutes: HYBRID_MATURE_MINUTES,
+  },
+
+  // water-wood
+  rainforest: {
+    id: 'rainforest', galaxy: 'thick-earth', hybridPair: 'water-wood', rarity: 'common', dropRate: 0.60, emoji: '🌴',
+    breedType: 'hybrid', matureMinutes: HYBRID_MATURE_MINUTES,
+  },
+  lotus: {
+    id: 'lotus', galaxy: 'thick-earth', hybridPair: 'water-wood', rarity: 'rare', dropRate: 0.30, emoji: '🪷',
+    breedType: 'hybrid', matureMinutes: HYBRID_MATURE_MINUTES,
+  },
+  dewdrop: {
+    id: 'dewdrop', galaxy: 'thick-earth', hybridPair: 'water-wood', rarity: 'epic', dropRate: 0.10, emoji: '💧',
+    breedType: 'hybrid', matureMinutes: HYBRID_MATURE_MINUTES,
+  },
+
+  // water-metal
+  'ice-blade': {
+    id: 'ice-blade', galaxy: 'thick-earth', hybridPair: 'water-metal', rarity: 'common', dropRate: 0.60, emoji: '🗡️',
+    breedType: 'hybrid', matureMinutes: HYBRID_MATURE_MINUTES,
+  },
+  mirror: {
+    id: 'mirror', galaxy: 'thick-earth', hybridPair: 'water-metal', rarity: 'rare', dropRate: 0.30, emoji: '🪞',
+    breedType: 'hybrid', matureMinutes: HYBRID_MATURE_MINUTES,
+  },
+  'mercury-spring': {
+    id: 'mercury-spring', galaxy: 'thick-earth', hybridPair: 'water-metal', rarity: 'epic', dropRate: 0.10, emoji: '⚗️',
+    breedType: 'hybrid', matureMinutes: HYBRID_MATURE_MINUTES,
+  },
+
+  // wood-metal
+  'golden-leaf': {
+    id: 'golden-leaf', galaxy: 'thick-earth', hybridPair: 'wood-metal', rarity: 'common', dropRate: 0.60, emoji: '🍁',
+    breedType: 'hybrid', matureMinutes: HYBRID_MATURE_MINUTES,
+  },
+  'iron-tree': {
+    id: 'iron-tree', galaxy: 'thick-earth', hybridPair: 'wood-metal', rarity: 'rare', dropRate: 0.30, emoji: '🌲',
+    breedType: 'hybrid', matureMinutes: HYBRID_MATURE_MINUTES,
+  },
+  'mech-vine': {
+    id: 'mech-vine', galaxy: 'thick-earth', hybridPair: 'wood-metal', rarity: 'epic', dropRate: 0.10, emoji: '🤖',
+    breedType: 'hybrid', matureMinutes: HYBRID_MATURE_MINUTES,
+  },
 };
 
 export const THICK_EARTH_VARIETIES: VarietyId[] = [
@@ -268,6 +426,32 @@ export const METAL_VARIETIES: VarietyId[] = [
   'mercury-melon', 'meteorite-melon', 'alloy-melon', 'eternal-melon',
 ];
 
+export const HYBRID_GALAXY_PAIRS: HybridGalaxyPair[] = [
+  'earth-fire',
+  'earth-water',
+  'earth-wood',
+  'earth-metal',
+  'fire-water',
+  'fire-wood',
+  'fire-metal',
+  'water-wood',
+  'water-metal',
+  'wood-metal',
+];
+
+export const HYBRID_VARIETIES: Record<HybridGalaxyPair, VarietyId[]> = {
+  'earth-fire': ['lava-field', 'volcanic-ash', 'earth-core'],
+  'earth-water': ['hot-spring', 'mud-pool', 'oasis'],
+  'earth-wood': ['ancient-root', 'fossil', 'earth-mother'],
+  'earth-metal': ['ore-vein', 'amber', 'gemstone'],
+  'fire-water': ['steam', 'geyser', 'mist'],
+  'fire-wood': ['wildfire', 'ash-bloom', 'fire-seed'],
+  'fire-metal': ['forge', 'molten-iron', 'solar-furnace'],
+  'water-wood': ['rainforest', 'lotus', 'dewdrop'],
+  'water-metal': ['ice-blade', 'mirror', 'mercury-spring'],
+  'wood-metal': ['golden-leaf', 'iron-tree', 'mech-vine'],
+};
+
 // 兼容旧逻辑：蓝星品种等价于 thick-earth 品种池
 export const BLUE_STAR_VARIETIES: VarietyId[] = THICK_EARTH_VARIETIES;
 
@@ -287,6 +471,16 @@ export const ALL_VARIETY_IDS: VarietyId[] = [
   ...WATER_VARIETIES,
   ...WOOD_VARIETIES,
   ...METAL_VARIETIES,
+  ...HYBRID_VARIETIES['earth-fire'],
+  ...HYBRID_VARIETIES['earth-water'],
+  ...HYBRID_VARIETIES['earth-wood'],
+  ...HYBRID_VARIETIES['earth-metal'],
+  ...HYBRID_VARIETIES['fire-water'],
+  ...HYBRID_VARIETIES['fire-wood'],
+  ...HYBRID_VARIETIES['fire-metal'],
+  ...HYBRID_VARIETIES['water-wood'],
+  ...HYBRID_VARIETIES['water-metal'],
+  ...HYBRID_VARIETIES['wood-metal'],
 ];
 
 // ─── 生长阶段 ───

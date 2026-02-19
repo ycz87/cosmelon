@@ -333,6 +333,8 @@ export interface Messages {
   // ─── Farm ───
   farmPlotsTab: string;
   farmCollectionTab: string;
+  hybridDexTab?: string;
+  hybridDexTitle?: string;
   farmTodayFocus: (minutes: number) => string;
   farmPlant: string;
   farmHarvest: string;
@@ -395,6 +397,22 @@ export interface Messages {
   geneInjectCost: string;
   injectedSeedLabel: (galaxyName: string) => string;
   injectedSeedHint: string;
+  hybridSeedHint: string;
+
+  // ─── Gene Fusion (v0.28.0) ───
+  geneFusionTitle: string;
+  geneFusionDesc: string;
+  geneFusionSelectFirst: string;
+  geneFusionSelectSecond: string;
+  geneFusionRate: (rate: number) => string;
+  geneFusionButton: string;
+  geneFusionSuccess: string;
+  geneFusionFail: string;
+  geneFusionSameGalaxy: string;
+  geneFusionNoFragments: string;
+  hybridSeedLabel: (pairName: string) => string;
+  hybridGalaxyPairLabel: (pair: string) => string;
+  hybridGalaxyPairName: (pair: string) => string;
 
   varietyDetailClose: string;
 }
