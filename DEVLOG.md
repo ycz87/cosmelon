@@ -2,6 +2,44 @@
 
 ---
 
+## v0.33.0 — Phase 6 Step 1: 五行融合 + 幻彩星
+日期：2026-02-20
+
+### 新增
+- **五行融合系统**
+  - 五行共鸣条件判定：检查基因背包里五星系（金木水火土）各≥1 + 已收获杂交品种≥3
+  - 基因实验室新增第三个操作区 UI（五行融合按钮），前置条件未达成时锁定+提示
+  - 融合成功率计算：base 50% + 每个基因稀有度加成（⭐+0% / ⭐⭐+10% / ⭐⭐⭐+20% / ⭐⭐⭐⭐+30%），取5个基因平均
+  - 融合失败返还1份随机基因（从消耗的5个基因中随机，保留原 fragment 对象）
+  - 幻彩品种保底机制：同品种重复3次后下一次必出新品种（localStorage 存 fusionHistory）
+
+- **幻彩星 5 个品种**
+  - 品种数据录入：prism-melon（棱镜瓜）、bubble-melon（泡泡瓜）、nebula-melon（星云瓜）、aurora-cascade（极光瀑布瓜）、dream-melon（梦境瓜）
+  - 幻彩种子种植 + 50000min 成熟时间
+  - 幻彩不枯萎只暂停逻辑：离线>72h 时记录 pausedAt，每次打开计算暂停天数 × 5% 倒退进度（最多50%）
+
+- **i18n 8 语言翻译**
+  - 新增俄语支持（ru.ts）
+  - 所有五行融合相关 UI 文案覆盖 zh/en/ja/ko/es/fr/de/ru
+
+- **E2E 测试**
+  - 新增 `e2e/phase6-step1-fusion.spec.ts`，7 个测试用例全部通过
+  - 覆盖：锁定状态、解锁状态、成功/失败、保底、种植、暂停倒退
+
+### 修复
+- 修复 pt→ru 语言迁移会破坏现有葡萄牙语用户设置（改为 pt→en，删除 pt.ts 死代码）
+- 修复 handleFiveElementFusion 中融合失败返还基因创建新 fragment 而非保留原对象的问题
+- 修复 consumePrismaticSeed 的 success 变量竞态风险（改用 mutex ref 模式）
+- 修复幻彩暂停逻辑中 lastActivityTimestamp 更新导致暂停只触发一次的问题（移除 timestamp 更新）
+
+### 技术细节
+- 新增类型：FusionHistory、PlantState.pausedAt/pausedProgress、FusionResult
+- 新增函数：canFuseFiveElements、fiveElementFusionSuccessRate、rollPrismaticVariety
+- 修改 updatePlantGrowth 处理幻彩暂停逻辑
+- 新增 useShedStorage.consumePrismaticSeed mutex 保护
+
+---
+
 ## v0.32.1 — Phase 5 Step 2 Bug Fix: 结界激活 UI 响应修复
 日期：2026-02-19
 
