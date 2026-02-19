@@ -2,6 +2,90 @@
 
 ---
 
+## v0.36.0 — Phase 6 Step 4: 每周刷新商城
+日期：2026-02-20
+
+### 新增
+- **每周刷新商城系统**
+  - 刷新时间：每周一 00:00 UTC 自动刷新
+  - 刷新检测：每次打开 app 检查 `nowTimestamp >= weeklyShop.refreshAt`
+  - 离线补算：跨过刷新点时自动生成新商品
+  - 防重复刷新：`shouldRefreshWeeklyShop` 判定逻辑
+  - 持久化：localStorage 存储 weeklyShop（items + refreshAt + lastRefreshAt）
+
+- **商品生成逻辑**
+  - 随机数量：3-5 件商品（`Math.floor(Math.random() * 3) + 3`）
+  - 类型覆盖：每种类型至少 1 件（稀有基因/传说种子/限定装饰）
+  - 稀有基因片段：
+    * 从 ⭐⭐⭐/⭐⭐⭐⭐ 品种池随机选择
+    * 价格区间：200-500 瓜币（`Math.floor(Math.random() * 301) + 200`）
+    * 限购数量：1-3 件
+  - 传说种子：
+    * 从五星系 ⭐⭐⭐ 纯种品种池随机选择
+    * 固定价格：300 瓜币
+    * 限购数量：1 件
+  - 限定装饰：
+    * 5 种装饰物（star-lamp/melon-scarecrow/nebula-banner/mini-windmill/meteor-stone）
+    * 价格区间：100-200 瓜币（`Math.floor(Math.random() * 101) + 100`）
+    * 限购数量：1-2 件
+
+- **购买逻辑**
+  - 余额检查：`spendCoins(item.price)` 返回 boolean
+  - 扣款：成功扣款后才发放商品
+  - 发放映射：
+    * 稀有基因片段 → `addFragment(galaxy, varietyId, rarity)`
+    * 传说种子 → `addPrismaticSeed({ id, varietyId })`
+    * 限定装饰 → `addShedItem(decorationId, 1)`
+  - 库存更新：`setWeeklyShop` functional updater 原子性更新 stock
+  - 售罄处理：stock=0 时按钮置灰
+
+- **UI 布局**
+  - 商城新增第三个 tab：\"🎁 每周特惠\"
+  - 刷新倒计时：显示距离下周一还有 X 天 X 小时（`getTimeUntilNextRefresh`）
+  - 商品卡片：
+    * 图标：基因片段 💎 / 传说种子 🌟 / 限定装饰 🎨
+    * 名称：品种名 + 稀有度星级 / 品种名 + \"种子\" / 装饰物名称
+    * 价格：瓜币数量 + 💰 emoji
+    * 限购数量：\"限购 ×N\"
+    * 购买按钮：余额不足或售罄时置灰
+
+- **i18n 8 语言翻译**
+  - 新增 12 个 i18n key：
+    * marketTabWeekly: string（tab 标题）
+    * marketWeeklyTitle: string（刷新时间说明）
+    * marketWeeklyRefreshIn: (days, hours) => string（倒计时）
+    * marketWeeklyStock: (stock) => string（限购数量）
+    * marketWeeklyBuyButton: string（购买按钮）
+    * marketWeeklySoldOut: string（售罄提示）
+    * marketWeeklyTypeRareGene: string（稀有基因片段类型）
+    * marketWeeklyTypeLegendarySeed: string（传说种子类型）
+    * marketWeeklyTypeDecoration: string（限定装饰类型）
+    * marketWeeklyGeneName: (varietyName, stars) => string（基因片段名称）
+    * marketWeeklySeedName: (varietyName) => string（传说种子名称）
+    * marketWeeklyDecorationName: (decorationId) => string（装饰物名称）
+  - 覆盖 zh/en/ja/ko/es/fr/de/ru
+
+- **E2E 测试**
+  - 新增 `e2e/phase6-step4-weekly-shop.spec.ts`，7 个测试用例全部通过
+  - 覆盖：
+    * 每周商城初始化（验证 weeklyShop 存在和结构）
+    * 商品生成逻辑（验证 3-5 件商品，每种类型至少 1 件）
+    * 购买稀有基因片段（余额扣除 + 基因添加到背包 + stock-1）
+    * 购买传说种子（余额扣除 + 种子添加到背包 + stock-1）
+    * 购买限定装饰（余额扣除 + 装饰添加到背包 + stock-1）
+    * 售罄后按钮置灰（stock=0 时按钮禁用）
+    * 余额不足时按钮置灰（瓜币 < price 时按钮禁用）
+
+### 技术细节
+- 新增类型：WeeklyItem、WeeklyShop、WeeklyItemType、WeeklyDecorationId
+- 新增 hooks：useWeeklyShop（刷新检测 + 购买逻辑）
+- 新增 utils：weeklyShop.ts（getNextMondayUtcTimestamp、shouldRefreshWeeklyShop、generateWeeklyItems、getTimeUntilNextRefresh）
+- 新增 App.tsx callback：handleGrantWeeklyItem（商品发放映射）
+- 新增 MarketPage 组件：WeeklyTab（商城第三个 tab）
+- localStorage key：`watermelon-weekly-shop`
+
+---
+
 ## v0.35.0 — Phase 6 Step 3: 天气 + 生命感系统
 日期：2026-02-20
 
