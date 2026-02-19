@@ -9,28 +9,33 @@ import { useTheme } from '../hooks/useTheme';
 import { useI18n } from '../i18n';
 import type { Plot, VarietyId, FarmStorage, GalaxyId } from '../types/farm';
 import type { GeneInventory } from '../types/gene';
-import type { SeedQuality, SeedCounts, InjectedSeed } from '../types/slicing';
+import type { SeedQuality, SeedCounts, InjectedSeed, HybridSeed, ItemId } from '../types/slicing';
 import { VARIETY_DEFS, RARITY_COLOR, RARITY_STARS, PLOT_MILESTONES } from '../types/farm';
 import { getGrowthStage, getStageEmoji, isVarietyRevealed } from '../farm/growth';
 import { CollectionPage } from './CollectionPage';
+import { HybridDexPage } from './HybridDexPage';
 import { GeneLabPage } from './GeneLabPage';
 
 interface FarmPageProps {
   farm: FarmStorage;
   geneInventory: GeneInventory;
   seeds: SeedCounts;
+  items: Record<ItemId, number>;
   injectedSeeds: InjectedSeed[];
+  hybridSeeds: HybridSeed[];
   todayFocusMinutes: number;
   addSeeds: (count: number, quality?: SeedQuality) => void;
   onPlant: (plotId: number, quality: SeedQuality) => VarietyId;
   onPlantInjected: (plotId: number, seedId: string) => void;
+  onPlantHybrid: (plotId: number, seedId: string) => void;
   onInject: (galaxyId: GalaxyId, quality: SeedQuality) => void;
+  onFusion: (fragment1Id: string, fragment2Id: string, useModifier: boolean) => { success: boolean; galaxyPair: string } | null;
   onHarvest: (plotId: number) => { varietyId?: VarietyId; isNew: boolean; collectedCount?: number; rewardSeedQuality?: SeedQuality };
   onClear: (plotId: number) => void;
   onGoWarehouse: () => void;
 }
 
-type SubTab = 'plots' | 'collection' | 'lab';
+type SubTab = 'plots' | 'collection' | 'hybrid' | 'lab';
 
 // ─── 动画 overlay 类型 ───
 interface RevealAnim { varietyId: VarietyId; plotId: number }
@@ -54,12 +59,16 @@ export function FarmPage({
   farm,
   geneInventory,
   seeds,
+  items,
   injectedSeeds,
+  hybridSeeds,
   todayFocusMinutes,
   addSeeds,
   onPlant,
   onPlantInjected,
+  onPlantHybrid,
   onInject,
+  onFusion,
   onHarvest,
   onClear,
   onGoWarehouse,
@@ -99,7 +108,7 @@ export function FarmPage({
   }, [farm.plots]);
 
   const totalBaseSeeds = seeds.normal + seeds.epic + seeds.legendary;
-  const totalPlantableSeeds = totalBaseSeeds + injectedSeeds.length;
+  const totalPlantableSeeds = totalBaseSeeds + injectedSeeds.length + hybridSeeds.length;
   const plotSlots = useMemo(
     () => Array.from({ length: TOTAL_PLOT_SLOTS }, (_, index) => {
       const plot = farm.plots[index];
@@ -128,6 +137,12 @@ export function FarmPage({
     onPlantInjected(plantingPlotId, seedId);
     setPlantingPlotId(null);
   }, [plantingPlotId, onPlantInjected]);
+
+  const handlePlantHybrid = useCallback((seedId: string) => {
+    if (plantingPlotId === null) return;
+    onPlantHybrid(plantingPlotId, seedId);
+    setPlantingPlotId(null);
+  }, [plantingPlotId, onPlantHybrid]);
 
   const handleHarvest = useCallback((plotId: number) => {
     const result = onHarvest(plotId);
@@ -164,7 +179,24 @@ export function FarmPage({
       <div className="flex-1 flex flex-col w-full">
         {/* Sub-tab header */}
         <SubTabHeader subTab={subTab} setSubTab={setSubTab} theme={theme} t={t} />
-        <GeneLabPage geneInventory={geneInventory} seeds={seeds} onInject={onInject} />
+        <GeneLabPage
+          geneInventory={geneInventory}
+          seeds={seeds}
+          items={items}
+          hybridSeeds={hybridSeeds}
+          onInject={onInject}
+          onFusion={onFusion}
+        />
+      </div>
+    );
+  }
+
+  if (subTab === 'hybrid') {
+    return (
+      <div className="flex-1 flex flex-col w-full">
+        {/* Sub-tab header */}
+        <SubTabHeader subTab={subTab} setSubTab={setSubTab} theme={theme} t={t} />
+        <HybridDexPage collection={farm.collection} />
       </div>
     );
   }
@@ -270,10 +302,12 @@ export function FarmPage({
         <PlantModal
           seeds={seeds}
           injectedSeeds={injectedSeeds}
+          hybridSeeds={hybridSeeds}
           theme={theme}
           t={t}
           onSelect={handlePlant}
           onSelectInjected={handlePlantInjected}
+          onSelectHybrid={handlePlantHybrid}
           onClose={() => setPlantingPlotId(null)}
         />
       )}
@@ -316,7 +350,8 @@ function SubTabHeader({ subTab, setSubTab, theme, t }: {
   const subTabIndex: Record<SubTab, number> = {
     plots: 0,
     collection: 1,
-    lab: 2,
+    hybrid: 2,
+    lab: 3,
   };
 
   return (
@@ -326,7 +361,7 @@ function SubTabHeader({ subTab, setSubTab, theme, t }: {
           className="absolute top-[3px] bottom-[3px] rounded-full transition-all duration-200 ease-out"
           style={{
             backgroundColor: theme.border,
-            width: 'calc((100% - 6px) / 3)',
+            width: 'calc((100% - 6px) / 4)',
             left: '3px',
             transform: `translateX(${subTabIndex[subTab] * 100}%)`,
           }}
@@ -348,6 +383,15 @@ function SubTabHeader({ subTab, setSubTab, theme, t }: {
           }}
         >
           📖 {t.farmCollectionTab}
+        </button>
+        <button
+          onClick={() => setSubTab('hybrid')}
+          className="relative z-10 px-3.5 py-1.5 rounded-full text-xs font-medium transition-colors duration-200 cursor-pointer flex-1"
+          style={{
+            color: subTab === 'hybrid' ? theme.text : theme.textMuted,
+          }}
+        >
+          🧬 {t.hybridDexTab || '杂交'}
         </button>
         <button
           onClick={() => setSubTab('lab')}
@@ -639,13 +683,15 @@ function LockedPlotCard({ requiredVarieties, theme, t }: {
 }
 
 // ─── 种植弹窗 ───
-function PlantModal({ seeds, injectedSeeds, theme, t, onSelect, onSelectInjected, onClose }: {
+function PlantModal({ seeds, injectedSeeds, hybridSeeds, theme, t, onSelect, onSelectInjected, onSelectHybrid, onClose }: {
   seeds: SeedCounts;
   injectedSeeds: InjectedSeed[];
+  hybridSeeds: import('../types/slicing').HybridSeed[];
   theme: ReturnType<typeof useTheme>;
   t: ReturnType<typeof useI18n>;
   onSelect: (quality: SeedQuality) => void;
   onSelectInjected: (seedId: string) => void;
+  onSelectHybrid: (seedId: string) => void;
   onClose: () => void;
 }) {
   const options = [
@@ -658,6 +704,19 @@ function PlantModal({ seeds, injectedSeeds, theme, t, onSelect, onSelectInjected
     epic: '#a78bfa',
     legendary: '#fbbf24',
   };
+  const hybridSeedGroups = hybridSeeds.reduce<Array<{
+    galaxyPair: import('../types/slicing').HybridSeed['galaxyPair'];
+    seedId: string;
+    count: number;
+  }>>((groups, seed) => {
+    const existing = groups.find((group) => group.galaxyPair === seed.galaxyPair);
+    if (existing) {
+      existing.count += 1;
+      return groups;
+    }
+    groups.push({ galaxyPair: seed.galaxyPair, seedId: seed.id, count: 1 });
+    return groups;
+  }, []);
 
   return (
     <div className="fixed inset-0 z-[60] flex items-center justify-center" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
@@ -716,6 +775,34 @@ function PlantModal({ seeds, injectedSeeds, theme, t, onSelect, onSelectInjected
                   </button>
                 );
               })}
+            </div>
+          </div>
+        )}
+
+        {hybridSeedGroups.length > 0 && (
+          <div className="mt-3 pt-3 border-t" style={{ borderColor: theme.border }}>
+            <p className="text-xs mb-2 text-center" style={{ color: theme.textFaint }}>
+              {t.hybridSeedHint}
+            </p>
+            <div className="flex flex-col gap-2 max-h-44 overflow-y-auto">
+              {hybridSeedGroups.map((seed) => (
+                <button
+                  key={seed.galaxyPair}
+                  onClick={() => onSelectHybrid(seed.seedId)}
+                  className="flex items-center justify-between p-3 rounded-xl border transition-colors text-left"
+                  style={{
+                    backgroundColor: `${theme.accent}10`,
+                    borderColor: `${theme.accent}35`,
+                  }}
+                >
+                  <span className="text-sm font-medium truncate pr-3" style={{ color: theme.text }}>
+                    {t.hybridGalaxyPairLabel(seed.galaxyPair)}
+                  </span>
+                  <span className="text-sm shrink-0" style={{ color: theme.textMuted }}>
+                    ×{seed.count}
+                  </span>
+                </button>
+              ))}
             </div>
           </div>
         )}

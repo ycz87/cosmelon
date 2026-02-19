@@ -2,6 +2,30 @@
 
 ---
 
+## v0.28.0 — 双元素融合 + 杂交品种系统 Phase 3 Step 3（2026-02-19）
+
+### 背景
+Phase 3 路线图第三步：上线双元素融合与杂交品种系统，打通「跨星系基因融合 → 杂交种子产出 → 杂交图鉴收集」闭环。
+
+### 改动
+
+| 文件 | 变更 |
+|------|------|
+| `src/farm/gene.ts` | 新增 fusionSuccessRate 5 档成功率 + modifier 加成（基因改造液 +20%） |
+| `src/components/GeneLabPage.tsx` | 新增双元素融合 UI 与交互流程 |
+| `src/components/HybridDexPage.tsx` | 新增杂交图鉴页面 |
+| `src/types/farm.ts` | 新增 HYBRID_VARIETIES（30）与 HYBRID_GALAXY_PAIRS（10）定义 |
+| `src/types/slicing.ts` | 新增 HybridSeed 类型 |
+| `src/hooks/useShedStorage.ts` | 新增杂交种子存储与读写 |
+| `src/App.tsx` / `src/components/FarmPage.tsx` | 新增路由入口与农场页面集成 |
+| `src/i18n/locales/*.ts` | 8 种语言补齐双元素融合与杂交图鉴文案 |
+| `e2e/hybrid-fusion.spec.ts` | 新增 33 个测试用例，覆盖融合与图鉴主流程 |
+
+### 审查
+- Claude Code review（pending result）
+
+---
+
 ## v0.27.0 — 基因注入系统 Phase 3 Step 2（2026-02-19）
 
 ### 背景

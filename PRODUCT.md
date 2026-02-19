@@ -9,7 +9,7 @@
 - **GitHub：** https://github.com/ycz87/cosmelon
 
 ## 技术架构
-- **前端：** React 19 + Vite 7 + Tailwind CSS 4 + TypeScript（当前 v0.27.0）
+- **前端：** React 19 + Vite 7 + Tailwind CSS 4 + TypeScript（当前 v0.28.0）
 - **后端：** Cloudflare Workers（Hono）+ D1 数据库
 - **认证：** auth.cosmelon.app（邮箱验证码 + Google/Microsoft OAuth）
 - **API：** api.clock.cosmelon.app
@@ -42,6 +42,8 @@
 - 收获 Overlay 区分新品种/重复品种反馈
 - 基因片段系统：收获品种获得基因片段，实验室 tab 按星系分组查看背包
 - 基因注入系统：将基因片段+种子注入，定向培育目标星系品种，种植弹窗支持注入种子选项
+- 双元素融合系统：不同星系基因融合产出杂交种子，5档成功率表，基因改造液+20%加成
+- 杂交图鉴页面：30个杂交品种按10个星系组合分组展示
 - 外星人到访、瓜贼防御（后续）
 - 28 个品种图鉴
 
@@ -74,4 +76,4 @@
 - 角色权限控制
 
 ## 当前版本
-v0.26.0（2026-02-18）
+v0.28.0（2026-02-19）

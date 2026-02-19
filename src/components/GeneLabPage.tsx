@@ -6,15 +6,19 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTheme } from '../hooks/useTheme';
 import { useI18n } from '../i18n';
+import { fusionSuccessRate } from '../farm/gene';
 import type { GeneInventory } from '../types/gene';
 import { GALAXIES, VARIETY_DEFS, RARITY_COLOR, RARITY_STARS } from '../types/farm';
-import type { GalaxyId } from '../types/farm';
-import type { SeedCounts, SeedQuality } from '../types/slicing';
+import type { GalaxyId, Rarity } from '../types/farm';
+import type { SeedCounts, SeedQuality, ItemId, HybridSeed } from '../types/slicing';
 
 interface GeneLabPageProps {
   geneInventory: GeneInventory;
   seeds: SeedCounts;
+  items: Record<ItemId, number>;
+  hybridSeeds: HybridSeed[];
   onInject: (galaxyId: GalaxyId, quality: SeedQuality) => void;
+  onFusion: (fragment1Id: string, fragment2Id: string, useModifier: boolean) => { success: boolean; galaxyPair: string } | null;
 }
 
 type GeneFragmentItem = GeneInventory['fragments'][number];
@@ -31,14 +35,46 @@ const SEED_QUALITY_OPTIONS: Array<{ quality: SeedQuality; color: string }> = [
   { quality: 'legendary', color: '#fbbf24' },
 ];
 
-export function GeneLabPage({ geneInventory, seeds, onInject }: GeneLabPageProps) {
+const RARITY_PRIORITY: Record<Rarity, number> = {
+  common: 0,
+  rare: 1,
+  epic: 2,
+  legendary: 3,
+};
+
+const FUSION_GALAXY_SET = new Set<GalaxyId>(['thick-earth', 'fire', 'water', 'wood', 'metal']);
+
+function pickBestFragment(fragments: GeneFragmentItem[]): GeneFragmentItem | null {
+  if (fragments.length === 0) return null;
+  return fragments.reduce((best, current) => {
+    const rarityDiff = RARITY_PRIORITY[current.rarity] - RARITY_PRIORITY[best.rarity];
+    if (rarityDiff !== 0) return rarityDiff > 0 ? current : best;
+    return current.obtainedAt > best.obtainedAt ? current : best;
+  });
+}
+
+export function GeneLabPage({
+  geneInventory,
+  seeds,
+  items,
+  hybridSeeds,
+  onInject,
+  onFusion,
+}: GeneLabPageProps) {
   const theme = useTheme();
   const t = useI18n();
   const [expandedGalaxyIds, setExpandedGalaxyIds] = useState<Set<GalaxyId>>(() => new Set());
   const [selectedGalaxyId, setSelectedGalaxyId] = useState<GalaxyId | null>(null);
   const [selectedQuality, setSelectedQuality] = useState<SeedQuality | null>(null);
+  const [selectedFusionGalaxy1, setSelectedFusionGalaxy1] = useState<GalaxyId | null>(null);
+  const [selectedFusionGalaxy2, setSelectedFusionGalaxy2] = useState<GalaxyId | null>(null);
+  const [useModifier, setUseModifier] = useState(false);
   const [showInjectToast, setShowInjectToast] = useState(false);
-  const toastTimerRef = useRef<number | null>(null);
+  const [fusionToastType, setFusionToastType] = useState<'success' | 'fail' | null>(null);
+  const [fusionAnimType, setFusionAnimType] = useState<'success' | 'fail' | null>(null);
+  const injectToastTimerRef = useRef<number | null>(null);
+  const fusionToastTimerRef = useRef<number | null>(null);
+  const fusionAnimTimerRef = useRef<number | null>(null);
 
   const totalFragments = geneInventory.fragments.length;
   const totalSeeds = seeds.normal + seeds.epic + seeds.legendary;
@@ -67,6 +103,21 @@ export function GeneLabPage({ geneInventory, seeds, onInject }: GeneLabPageProps
       }];
     });
   }, [geneInventory.fragments]);
+
+  const fusionGalaxyGroups = useMemo<GalaxyFragmentGroup[]>(() => {
+    return galaxyGroups.filter((group) => FUSION_GALAXY_SET.has(group.galaxyId));
+  }, [galaxyGroups]);
+
+  const bestFragmentByGalaxy = useMemo(() => {
+    const result = new Map<GalaxyId, GeneFragmentItem>();
+    fusionGalaxyGroups.forEach((group) => {
+      const bestFragment = pickBestFragment(group.fragments);
+      if (bestFragment) {
+        result.set(group.galaxyId, bestFragment);
+      }
+    });
+    return result;
+  }, [fusionGalaxyGroups]);
 
   const handleToggleGalaxy = (galaxyId: GalaxyId) => {
     setExpandedGalaxyIds((prev) => {
@@ -100,32 +151,88 @@ export function GeneLabPage({ geneInventory, seeds, onInject }: GeneLabPageProps
 
   useEffect(() => {
     return () => {
-      if (toastTimerRef.current !== null) {
-        window.clearTimeout(toastTimerRef.current);
-      }
+      if (injectToastTimerRef.current !== null) window.clearTimeout(injectToastTimerRef.current);
+      if (fusionToastTimerRef.current !== null) window.clearTimeout(fusionToastTimerRef.current);
+      if (fusionAnimTimerRef.current !== null) window.clearTimeout(fusionAnimTimerRef.current);
     };
   }, []);
+
+  useEffect(() => {
+    if (selectedFusionGalaxy1 === null) return;
+    if (bestFragmentByGalaxy.has(selectedFusionGalaxy1)) return;
+    setSelectedFusionGalaxy1(null);
+  }, [bestFragmentByGalaxy, selectedFusionGalaxy1]);
+
+  useEffect(() => {
+    if (selectedFusionGalaxy2 === null) return;
+    if (!bestFragmentByGalaxy.has(selectedFusionGalaxy2) || selectedFusionGalaxy2 === selectedFusionGalaxy1) {
+      setSelectedFusionGalaxy2(null);
+    }
+  }, [bestFragmentByGalaxy, selectedFusionGalaxy1, selectedFusionGalaxy2]);
 
   const selectedGalaxyFragments = selectedGalaxyId ? (fragmentCounts.get(selectedGalaxyId) ?? 0) : 0;
   const selectedQualityCount = selectedQuality ? seeds[selectedQuality] : 0;
   const hasFragments = totalFragments > 0;
   const hasSeeds = totalSeeds > 0;
+  const modifierCount = items['gene-modifier'] ?? 0;
+  const hasModifier = modifierCount > 0;
+  const selectedFusionFragment1 = selectedFusionGalaxy1 ? (bestFragmentByGalaxy.get(selectedFusionGalaxy1) ?? null) : null;
+  const selectedFusionFragment2 = selectedFusionGalaxy2 ? (bestFragmentByGalaxy.get(selectedFusionGalaxy2) ?? null) : null;
+  const baseFusionRate = selectedFusionFragment1 && selectedFusionFragment2
+    ? fusionSuccessRate(selectedFusionFragment1.rarity, selectedFusionFragment2.rarity)
+    : null;
+  const fusionRate = baseFusionRate === null ? null : Math.min(1, baseFusionRate + (useModifier ? 0.2 : 0));
+  const canFusion = selectedFusionFragment1 !== null && selectedFusionFragment2 !== null;
   const canInject = selectedGalaxyId !== null
     && selectedQuality !== null
     && selectedGalaxyFragments > 0
     && selectedQualityCount > 0;
 
+  useEffect(() => {
+    if (hasModifier) return;
+    setUseModifier(false);
+  }, [hasModifier]);
+
   const handleInject = () => {
     if (!canInject || selectedGalaxyId === null || selectedQuality === null) return;
     onInject(selectedGalaxyId, selectedQuality);
     setShowInjectToast(true);
-    if (toastTimerRef.current !== null) {
-      window.clearTimeout(toastTimerRef.current);
+    if (injectToastTimerRef.current !== null) {
+      window.clearTimeout(injectToastTimerRef.current);
     }
-    toastTimerRef.current = window.setTimeout(() => {
+    injectToastTimerRef.current = window.setTimeout(() => {
       setShowInjectToast(false);
-      toastTimerRef.current = null;
+      injectToastTimerRef.current = null;
     }, 2000);
+  };
+
+  const triggerFusionFeedback = (type: 'success' | 'fail') => {
+    setFusionToastType(type);
+    setFusionAnimType(type);
+    if (fusionToastTimerRef.current !== null) {
+      window.clearTimeout(fusionToastTimerRef.current);
+    }
+    if (fusionAnimTimerRef.current !== null) {
+      window.clearTimeout(fusionAnimTimerRef.current);
+    }
+    fusionToastTimerRef.current = window.setTimeout(() => {
+      setFusionToastType(null);
+      fusionToastTimerRef.current = null;
+    }, 2000);
+    fusionAnimTimerRef.current = window.setTimeout(() => {
+      setFusionAnimType(null);
+      fusionAnimTimerRef.current = null;
+    }, 600);
+  };
+
+  const handleFusion = () => {
+    if (!canFusion || !selectedFusionFragment1 || !selectedFusionFragment2) return;
+    const result = onFusion(selectedFusionFragment1.id, selectedFusionFragment2.id, useModifier);
+    if (!result) return;
+    setSelectedFusionGalaxy1(null);
+    setSelectedFusionGalaxy2(null);
+    setUseModifier(false);
+    triggerFusionFeedback(result.success ? 'success' : 'fail');
   };
 
   return (
@@ -344,12 +451,205 @@ export function GeneLabPage({ geneInventory, seeds, onInject }: GeneLabPageProps
         )}
       </section>
 
+      <section
+        className="mt-4 rounded-2xl border px-4 py-4"
+        style={{ backgroundColor: theme.surface, borderColor: theme.border }}
+      >
+        <h3 className="text-sm sm:text-base font-semibold mb-1" style={{ color: theme.text }}>
+          {t.geneFusionTitle}
+        </h3>
+        <p className="text-xs leading-relaxed mb-4" style={{ color: theme.textMuted }}>
+          {t.geneFusionDesc}
+        </p>
+
+        <div className="mb-4">
+          <p className="text-xs font-semibold mb-2" style={{ color: theme.text }}>
+            {`1. ${t.geneFusionSelectFirst}`}
+          </p>
+          {fusionGalaxyGroups.length === 0 ? (
+            <p className="text-xs" style={{ color: theme.textFaint }}>
+              {t.geneFusionNoFragments}
+            </p>
+          ) : (
+            <div className="flex flex-wrap gap-2">
+              {fusionGalaxyGroups.map((group) => {
+                const isSelected = selectedFusionGalaxy1 === group.galaxyId;
+                return (
+                  <button
+                    key={`fusion-first-${group.galaxyId}`}
+                    type="button"
+                    onClick={() => setSelectedFusionGalaxy1(group.galaxyId)}
+                    className="rounded-xl border px-3 py-2 text-left transition-colors"
+                    style={{
+                      backgroundColor: isSelected ? `${theme.accent}22` : theme.inputBg,
+                      borderColor: isSelected ? `${theme.accent}66` : theme.border,
+                    }}
+                  >
+                    <div className="flex items-center gap-2">
+                      <span className="text-base">{group.galaxyEmoji}</span>
+                      <span className="text-sm font-medium" style={{ color: theme.text }}>
+                        {t.galaxyName(group.galaxyId)}
+                      </span>
+                    </div>
+                    <p className="text-xs mt-1" style={{ color: theme.textMuted }}>
+                      {t.geneLabFragmentCount(group.fragments.length)}
+                    </p>
+                  </button>
+                );
+              })}
+            </div>
+          )}
+          {selectedFusionFragment1 && (
+            <p className="text-xs mt-2" style={{ color: theme.textMuted }}>
+              {`${t.geneLabVarietySource}: ${t.varietyName(selectedFusionFragment1.varietyId)} · ${'⭐'.repeat(RARITY_STARS[selectedFusionFragment1.rarity])}`}
+            </p>
+          )}
+        </div>
+
+        <div className="mb-4">
+          <p className="text-xs font-semibold mb-2" style={{ color: theme.text }}>
+            {`2. ${t.geneFusionSelectSecond}`}
+          </p>
+          {fusionGalaxyGroups.length < 2 ? (
+            <p className="text-xs" style={{ color: theme.textFaint }}>
+              {t.geneFusionNoFragments}
+            </p>
+          ) : (
+            <div className="flex flex-wrap gap-2">
+              {fusionGalaxyGroups.map((group) => {
+                const disabled = selectedFusionGalaxy1 === group.galaxyId;
+                const isSelected = selectedFusionGalaxy2 === group.galaxyId;
+                return (
+                  <button
+                    key={`fusion-second-${group.galaxyId}`}
+                    type="button"
+                    disabled={disabled}
+                    onClick={() => setSelectedFusionGalaxy2(group.galaxyId)}
+                    className="rounded-xl border px-3 py-2 text-left transition-colors"
+                    style={{
+                      opacity: disabled ? 0.45 : 1,
+                      cursor: disabled ? 'not-allowed' : 'pointer',
+                      backgroundColor: isSelected ? `${theme.accent}22` : theme.inputBg,
+                      borderColor: isSelected ? `${theme.accent}66` : theme.border,
+                    }}
+                  >
+                    <div className="flex items-center gap-2">
+                      <span className="text-base">{group.galaxyEmoji}</span>
+                      <span className="text-sm font-medium" style={{ color: theme.text }}>
+                        {t.galaxyName(group.galaxyId)}
+                      </span>
+                    </div>
+                    <p className="text-xs mt-1" style={{ color: theme.textMuted }}>
+                      {t.geneLabFragmentCount(group.fragments.length)}
+                    </p>
+                  </button>
+                );
+              })}
+            </div>
+          )}
+          {selectedFusionFragment2 && (
+            <p className="text-xs mt-2" style={{ color: theme.textMuted }}>
+              {`${t.geneLabVarietySource}: ${t.varietyName(selectedFusionFragment2.varietyId)} · ${'⭐'.repeat(RARITY_STARS[selectedFusionFragment2.rarity])}`}
+            </p>
+          )}
+        </div>
+
+        {fusionRate !== null && (
+          <p className="text-xs font-semibold mb-3" style={{ color: theme.text }}>
+            {t.geneFusionRate(fusionRate)}
+          </p>
+        )}
+
+        <label className="mb-3 flex items-center gap-2">
+          <input
+            type="checkbox"
+            checked={useModifier}
+            disabled={!hasModifier}
+            onChange={(event) => setUseModifier(event.target.checked)}
+            className="h-4 w-4"
+          />
+          <span className="text-xs" style={{ color: hasModifier ? theme.text : theme.textFaint }}>
+            {`${t.itemName('gene-modifier')} (+20%) · ×${modifierCount}`}
+          </span>
+        </label>
+
+        <div
+          className={`relative ${fusionAnimType === 'success' ? 'gene-fusion-success' : ''}${fusionAnimType === 'fail' ? ' gene-fusion-fail' : ''}`}
+        >
+          <button
+            type="button"
+            onClick={handleFusion}
+            disabled={!canFusion}
+            className="w-full rounded-xl px-4 py-2.5 text-sm font-semibold transition-colors"
+            style={{
+              backgroundColor: canFusion ? `${theme.accent}22` : theme.inputBg,
+              border: `1px solid ${canFusion ? `${theme.accent}66` : theme.border}`,
+              color: canFusion ? theme.accent : theme.textFaint,
+              cursor: canFusion ? 'pointer' : 'not-allowed',
+            }}
+          >
+            {t.geneFusionButton}
+          </button>
+          {fusionAnimType && (
+            <span className="gene-fusion-burst absolute -top-2 -right-1 text-lg pointer-events-none" aria-hidden>
+              {fusionAnimType === 'success' ? '✨' : '💥'}
+            </span>
+          )}
+        </div>
+
+        <p className="text-xs mt-3 text-center" style={{ color: theme.textFaint }}>
+          {t.hybridSeedLabel(`×${hybridSeeds.length}`)}
+        </p>
+      </section>
+
+      <style>{`
+        @keyframes geneFusionPulse {
+          0% { transform: scale(1); box-shadow: 0 0 0 rgba(34,197,94,0); }
+          45% { transform: scale(1.015); box-shadow: 0 0 0 8px rgba(34,197,94,0.12); }
+          100% { transform: scale(1); box-shadow: 0 0 0 rgba(34,197,94,0); }
+        }
+        @keyframes geneFusionShake {
+          0% { transform: translateX(0); }
+          20% { transform: translateX(-4px); }
+          40% { transform: translateX(4px); }
+          60% { transform: translateX(-3px); }
+          80% { transform: translateX(3px); }
+          100% { transform: translateX(0); }
+        }
+        @keyframes geneFusionBurst {
+          0% { opacity: 0; transform: scale(0.5); }
+          40% { opacity: 1; transform: scale(1.1); }
+          100% { opacity: 0; transform: scale(1.4); }
+        }
+        .gene-fusion-success {
+          animation: geneFusionPulse 620ms ease-out;
+        }
+        .gene-fusion-fail {
+          animation: geneFusionShake 420ms ease-in-out;
+        }
+        .gene-fusion-burst {
+          animation: geneFusionBurst 620ms ease-out;
+        }
+      `}</style>
+
       {showInjectToast && (
         <div
           className="fixed left-1/2 bottom-20 z-[90] -translate-x-1/2 rounded-xl border px-4 py-2 text-sm"
           style={{ backgroundColor: theme.surface, borderColor: `${theme.accent}66`, color: theme.text }}
         >
           {t.geneInjectSuccess}
+        </div>
+      )}
+      {fusionToastType && (
+        <div
+          className="fixed left-1/2 bottom-8 z-[90] -translate-x-1/2 rounded-xl border px-4 py-2 text-sm"
+          style={{
+            backgroundColor: theme.surface,
+            borderColor: fusionToastType === 'success' ? '#22c55e66' : '#ef444466',
+            color: fusionToastType === 'success' ? '#22c55e' : '#ef4444',
+          }}
+        >
+          {fusionToastType === 'success' ? t.geneFusionSuccess : t.geneFusionFail}
         </div>
       )}
     </div>

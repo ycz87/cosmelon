@@ -70,7 +70,7 @@ import {
   witherPlots,
 } from './farm/growth';
 import { getUnlockedGalaxies } from './farm/galaxy';
-import { rollInjectedVariety, createInjectedSeedId } from './farm/gene';
+import { rollInjectedVariety, createInjectedSeedId, attemptFusion, rollHybridVariety } from './farm/gene';
 import { I18nProvider, getMessages } from './i18n';
 import type { PomodoroRecord, PomodoroSettings } from './types';
 import { DEFAULT_SETTINGS, migrateSettings, THEMES, getGrowthStage, GROWTH_EMOJI, rollLegendary } from './types';
@@ -110,11 +110,23 @@ function App() {
   const { warehouse, setWarehouse, addItem, addItems, updatePity, consumeMelon, synthesize, synthesizeAll, getHighestStage, resetWarehouse } = useWarehouse(syncWarehouse);
 
   // Shed storage (seeds + items from slicing)
-  const { shed, addSeeds, addItem: addShedItem, incrementSliced, updatePityCounter, consumeSeed, addInjectedSeed, consumeInjectedSeed } = useShedStorage();
+  const {
+    shed,
+    addSeeds,
+    addItem: addShedItem,
+    incrementSliced,
+    updatePityCounter,
+    consumeSeed,
+    consumeItem,
+    addInjectedSeed,
+    consumeInjectedSeed,
+    addHybridSeed,
+    consumeHybridSeed,
+  } = useShedStorage();
 
   // Farm storage
   const { farm, setFarm, plantSeed, plantSeedWithVariety, harvestPlot, clearPlot, updatePlots, updateActiveDate } = useFarmStorage();
-  const { geneInventory, addFragment, removeFragmentsByGalaxy } = useGeneStorage();
+  const { geneInventory, addFragment, removeFragment, removeFragmentsByGalaxy } = useGeneStorage();
   const farmPlotsRef = useRef(farm.plots);
   const updatePlotsRef = useRef(updatePlots);
 
@@ -286,6 +298,52 @@ function App() {
     });
   }, [removeFragmentsByGalaxy, consumeSeed, addInjectedSeed]);
 
+  // ─── Gene fusion handler ───
+  const handleGeneFusion = useCallback((fragment1Id: string, fragment2Id: string, useModifier: boolean) => {
+    if (fragment1Id === fragment2Id) return null;
+
+    const fragment1 = geneInventory.fragments.find((fragment) => fragment.id === fragment1Id);
+    const fragment2 = geneInventory.fragments.find((fragment) => fragment.id === fragment2Id);
+    if (!fragment1 || !fragment2) return null;
+
+    const isSupportedGalaxy = (galaxyId: string): boolean => (
+      galaxyId === 'thick-earth'
+      || galaxyId === 'fire'
+      || galaxyId === 'water'
+      || galaxyId === 'wood'
+      || galaxyId === 'metal'
+    );
+    if (!isSupportedGalaxy(fragment1.galaxyId) || !isSupportedGalaxy(fragment2.galaxyId)) {
+      return null;
+    }
+
+    let fusionResult = attemptFusion(fragment1, fragment2, useModifier ? 0.20 : 0);
+    if (!fusionResult) return null;
+
+    if (useModifier) {
+      const consumedModifier = consumeItem('gene-modifier');
+      if (!consumedModifier) {
+        fusionResult = attemptFusion(fragment1, fragment2, 0);
+        if (!fusionResult) return null;
+      }
+    }
+
+    removeFragment(fragment1Id);
+    removeFragment(fragment2Id);
+
+    if (fusionResult.success) {
+      addHybridSeed({
+        id: createInjectedSeedId(),
+        galaxyPair: fusionResult.galaxyPair,
+      });
+    }
+
+    return {
+      success: fusionResult.success,
+      galaxyPair: fusionResult.galaxyPair,
+    };
+  }, [geneInventory.fragments, consumeItem, removeFragment, addHybridSeed]);
+
   // ─── Plant injected seed handler ───
   const handleFarmPlantInjected = useCallback((plotId: number, seedId: string) => {
     const seed = shed.injectedSeeds.find(s => s.id === seedId);
@@ -297,6 +355,18 @@ function App() {
       consumeInjectedSeed(seedId);
     }
   }, [shed.injectedSeeds, farm.collection, plantSeedWithVariety, consumeInjectedSeed, todayKey]);
+
+  // ─── Plant hybrid seed handler ───
+  const handleFarmPlantHybrid = useCallback((plotId: number, seedId: string) => {
+    const seed = shed.hybridSeeds.find((hybridSeed) => hybridSeed.id === seedId);
+    if (!seed) return;
+
+    const varietyId = rollHybridVariety(seed.galaxyPair);
+    const success = plantSeedWithVariety(plotId, varietyId, 'normal', todayKey);
+    if (success) {
+      consumeHybridSeed(seedId);
+    }
+  }, [shed.hybridSeeds, plantSeedWithVariety, consumeHybridSeed, todayKey]);
 
   // ─── Debug mode ───
   const activateDebugMode = useCallback(() => {
@@ -968,14 +1038,18 @@ function App() {
             farm={farm}
             geneInventory={geneInventory}
             seeds={shed.seeds}
+            items={shed.items}
             injectedSeeds={shed.injectedSeeds}
+            hybridSeeds={shed.hybridSeeds}
             todayFocusMinutes={todayFocusMinutes}
             addSeeds={addSeeds}
             onPlant={handleFarmPlant}
             onPlantInjected={handleFarmPlantInjected}
+            onPlantHybrid={handleFarmPlantHybrid}
             onHarvest={handleFarmHarvest}
             onClear={clearPlot}
             onInject={handleGeneInject}
+            onFusion={handleGeneFusion}
             onGoWarehouse={() => setActiveTab('warehouse')}
           />
         )}
