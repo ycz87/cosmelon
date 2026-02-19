@@ -2,6 +2,71 @@
 
 ---
 
+## v0.34.0 — Phase 6 Step 2: 暗物质星融合系统
+日期：2026-02-20
+
+### 新增
+- **暗物质星 3 个品种**
+  - void-melon（虚空瓜）：epic 品质，售价 1000 瓜币
+  - blackhole-melon（黑洞瓜）：legendary 品质，售价 5000 瓜币
+  - cosmic-heart（宇宙之心）：legendary 品质，不可出售（售价 0）
+
+- **虚空瓜融合系统**
+  - 条件：5 个不同幻彩品种的基因（prism/bubble/nebula/aurora-cascade/dream）
+  - 成功率：100%
+  - 消耗：5 个基因片段
+  - 产出：虚空瓜暗物质种子
+
+- **黑洞瓜融合系统**
+  - 条件：10 种双元素组合的基因（earth-fire/earth-water/earth-wood/earth-metal/fire-water/fire-wood/fire-metal/water-wood/water-metal/wood-metal）
+  - 成功率：100%
+  - 消耗：10 个基因片段
+  - 产出：黑洞瓜暗物质种子
+
+- **宇宙之心自动触发**
+  - 条件：收集全部 78 个非变异品种（5星系×8 + 5幻彩 + 3暗物质 + 10组×3杂交）
+  - 触发时机：打开应用时自动检测
+  - 效果：弹出终极庆祝动画 + 自动添加宇宙之心到图鉴和背包
+  - 防重复：cosmicHeartUnlockingRef + collection 检查
+
+- **终极庆祝动画**
+  - 宇宙之心觉醒弹窗（cosmicHeartPop keyframe 动画）
+  - 显示恭喜文案 + 宇宙之心 emoji
+  - 点击任意位置关闭
+
+- **图鉴内获取指引 UI**
+  - 暗物质品种剪影可点击（即使未收集）
+  - 弹窗显示获取条件：
+    * 虚空瓜：融合 5 个不同幻彩基因
+    * 黑洞瓜：融合 10 种双元素基因
+    * 宇宙之心：收集全部 78 个品种（显示当前进度）
+
+- **基因实验室暗物质融合区**
+  - 新增第四个操作区（暗物质融合）
+  - 两个融合按钮：虚空瓜 + 黑洞瓜
+  - 实时显示进度（已收集/总需求）
+  - 条件未达成时按钮锁定
+
+- **i18n 8 语言翻译**
+  - 新增 11 个 i18n key（geneDarkMatter*/darkMatterGuide*/cosmicHeartUnlock*）
+  - 覆盖 zh/en/ja/ko/es/fr/de/ru
+
+- **E2E 测试**
+  - 新增 `e2e/phase6-step2-darkmatter.spec.ts`，8 个测试用例全部通过
+  - 覆盖：虚空瓜/黑洞瓜锁定/解锁/融合成功、宇宙之心自动触发、暗物质种子种植
+
+### 修复
+- 修复 consumeDarkMatterSeed 缺少 mutex 保护导致的并发消费风险（改用 ref + try/finally 模式）
+- 修复 reachedCosmicHeartLegacyCondition 使用 collection.length 在有变异品种时误判（改为 collectedNormalVarietySet.size）
+
+### 技术细节
+- 新增类型：DarkMatterVarietyId、DarkMatterSeed、DarkMatterFusion、DarkMatterFusionType
+- 新增函数：getVoidMelonFusionFragments、getBlackHoleMelonFusionFragments、handleDarkMatterFusion
+- 新增 useShedStorage 方法：addDarkMatterSeed、consumeDarkMatterSeed（带 mutex 保护）
+- 新增 App.tsx effect：宇宙之心自动触发检测（useEffect 监听 collectedNormalVarietySet.size）
+
+---
+
 ## v0.33.0 — Phase 6 Step 1: 五行融合 + 幻彩星
 日期：2026-02-20
 
