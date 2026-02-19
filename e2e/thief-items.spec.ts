@@ -364,11 +364,12 @@ test.describe('Thief & Items', () => {
     await bootWithSeed(page, seed, { forceRandomZero: true });
     await goToFarm(page);
 
-    const barrierButton = page.locator('button').filter({ hasText: zh.itemName('guardian-barrier') }).first();
+    const barrierButton = page.locator('button').filter({ hasText: '🎪' }).first();
     await expect(barrierButton).toBeVisible();
     await barrierButton.click();
 
-    await expect(page.locator('button').filter({ hasText: zh.itemGuardianBarrierActive }).first()).toBeVisible();
+    // The text changes to itemGuardianBarrierActive ("结界保护中") after activation
+    await expect(barrierButton).toContainText(zh.itemGuardianBarrierActive);
 
     await setDebugMultiplier10000x(page);
     await page.waitForTimeout(6000);

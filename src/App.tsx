@@ -538,18 +538,21 @@ function App() {
   }, [consumeShopItem, addPlotTracker, addShedItem]);
 
   const handleUseGuardianBarrier = useCallback(() => {
-    const alreadyCovered = farm.guardianBarrierDate === todayKey && farm.plots.every((plot) => !plot.thief);
-    if (alreadyCovered) return;
+    const isAlreadyActive = farm.guardianBarrierDate === todayKey;
+    const hasThiefToScare = farm.plots.some((p) => p.thief);
+    
+    if (isAlreadyActive && !hasThiefToScare) return;
 
-    const consumed = consumeShopItem('guardian-barrier');
-    if (!consumed) return;
+    const barrierCount = (shed.items as Record<string, number>)['guardian-barrier'] ?? 0;
+    if (barrierCount <= 0) return;
 
     activateGuardianBarrier(todayKey);
+    consumeShopItem('guardian-barrier');
     enqueueRecoveryToast(t.itemGuardianBarrierActive);
-  }, [farm.guardianBarrierDate, farm.plots, todayKey, consumeShopItem, activateGuardianBarrier, enqueueRecoveryToast, t]);
+  }, [farm.guardianBarrierDate, farm.plots, shed.items, todayKey, consumeShopItem, activateGuardianBarrier, enqueueRecoveryToast, t]);
 
   const handleUseTrapNet = useCallback((plotId: number) => {
-    const targetPlot = farm.plots.find((plot) => plot.id === plotId);
+    const targetPlot = farm.plots.find((p) => p.id === plotId);
     if (!targetPlot?.thief) return;
 
     const consumed = consumeShopItem('trap-net');
@@ -557,10 +560,10 @@ function App() {
 
     setFarm((prev) => ({
       ...prev,
-      plots: prev.plots.map((plot) => (
-        plot.id === plotId
-          ? { ...plot, thief: undefined }
-          : plot
+      plots: prev.plots.map((p) => (
+        p.id === plotId
+          ? { ...p, thief: undefined }
+          : p
       )),
     }));
     addCoins(100);

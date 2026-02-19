@@ -383,18 +383,13 @@ export function useFarmStorage() {
   /** 激活防护结界（当天有效） */
   const activateGuardianBarrier = useCallback((todayKey: string): boolean => {
     if (!todayKey) return false;
-    const hasThief = farm.plots.some((plot) => Boolean(plot.thief));
-    if (farm.guardianBarrierDate === todayKey && !hasThief) {
-      return false;
-    }
-
     setFarm((prev) => ({
       ...prev,
       guardianBarrierDate: todayKey,
       plots: prev.plots.map((plot) => (plot.thief ? { ...plot, thief: undefined } : plot)),
     }));
     return true;
-  }, [farm.guardianBarrierDate, farm.plots, setFarm]);
+  }, [setFarm]);
 
   /** 为地块安装星际追踪器 */
   const addPlotTracker = useCallback((plotId: number): boolean => {

@@ -293,6 +293,21 @@ export function FarmPage({
             <span>{barrierActiveToday ? t.itemGuardianBarrierActive : `${t.itemName('guardian-barrier')} · ${guardianBarrierCount}`}</span>
           </button>
         )}
+        {trapNetCount > 0 && (
+          <div
+            className="shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-medium"
+            style={{
+              backgroundColor: `${theme.surface}cc`,
+              borderColor: theme.border,
+              color: theme.text,
+            }}
+            title={t.itemName('trap-net')}
+            data-testid="trap-net-inventory"
+          >
+            <span>🪤</span>
+            <span>{trapNetCount}</span>
+          </div>
+        )}
       </div>
 
       {/* 3×3 俯视网格 */}
