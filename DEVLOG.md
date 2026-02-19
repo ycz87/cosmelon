@@ -2,6 +2,17 @@
 
 ---
 
+## v0.32.1 — Phase 5 Step 2 Bug Fix: 结界激活 UI 响应修复
+日期：2026-02-19
+
+### 修复
+- 修复 `handleUseGuardianBarrier` 函数中结界激活后 UI 不立即响应的问题
+- 根因：React 19 的 setState 批处理导致 `consumeShopItem` 返回值不可靠，`activateGuardianBarrier` 可能不被调用
+- 解决方案：从 render snapshot 直接读取 `shed.items` 状态，调整调用顺序为先激活再消耗
+- E2E 测试 `e2e/thief-items.spec.ts` 18/18 全部通过
+
+---
+
 ## v0.32.0 — Phase 5 Step 2: 星际大盗偷瓜 + 追回与防护道具
 日期：2026-02-19
 
