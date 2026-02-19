@@ -1,28 +1,32 @@
 /**
- * MarketPage — 商城页面（买入 / 卖出）
+ * MarketPage — 商城页面（买入 / 卖出 / 每周特惠）
  *
- * 买入 Tab 支持常驻道具购买与地块扩展，卖出 Tab 支持西瓜售卖。
+ * 买入 Tab 支持常驻道具购买与地块扩展，卖出 Tab 支持西瓜售卖，
+ * 每周特惠 Tab 支持限时商品购买。
  */
 import { useMemo, useState } from 'react';
 import { useTheme } from '../hooks/useTheme';
 import type { Messages } from '../i18n/types';
 import { VARIETY_DEFS } from '../types/farm';
 import type { CollectedVariety, VarietyId } from '../types/farm';
-import type { ShopItemDef, ShopItemId } from '../types/market';
+import type { ShopItemDef, ShopItemId, WeeklyShop } from '../types/market';
 import { SHOP_ITEMS, PLOT_PRICES } from '../types/market';
 import { ConfirmModal } from './ConfirmModal';
+import { WeeklyTab } from './Market/WeeklyTab';
 
 interface MarketPageProps {
   balance: number;
   collection: CollectedVariety[];
   onSellVariety: (varietyId: VarietyId, isMutant: boolean) => void;
   onBuyItem: (itemId: ShopItemId) => void;
+  onBuyWeeklyItem: (itemId: string) => void;
   onBuyPlot: (plotIndex: number) => void;
   unlockedPlotCount: number;
+  weeklyShop: WeeklyShop;
   messages: Messages;
 }
 
-type MarketTab = 'buy' | 'sell';
+type MarketTab = 'buy' | 'sell' | 'weekly';
 
 interface SellableVariety {
   key: string;
@@ -40,11 +44,22 @@ type PendingPurchase =
 
 export function MarketPage(props: MarketPageProps) {
   const theme = useTheme();
-  const { balance, collection, onSellVariety, onBuyItem, onBuyPlot, unlockedPlotCount, messages } = props;
+  const {
+    balance,
+    collection,
+    onSellVariety,
+    onBuyItem,
+    onBuyWeeklyItem,
+    onBuyPlot,
+    unlockedPlotCount,
+    weeklyShop,
+    messages,
+  } = props;
   const [activeTab, setActiveTab] = useState<MarketTab>('buy');
   const [pendingSellKey, setPendingSellKey] = useState<string | null>(null);
   const [pendingPurchase, setPendingPurchase] = useState<PendingPurchase | null>(null);
   const [recentBoughtItemId, setRecentBoughtItemId] = useState<ShopItemId | null>(null);
+  const marketTabIndex: Record<MarketTab, number> = { buy: 0, sell: 1, weekly: 2 };
 
   const sellableVarieties = useMemo<SellableVariety[]>(() => {
     return collection.flatMap((entry) => {
@@ -135,8 +150,9 @@ export function MarketPage(props: MarketPageProps) {
             className="absolute top-[3px] bottom-[3px] rounded-full transition-all duration-200 ease-out"
             style={{
               backgroundColor: theme.border,
-              width: 'calc(50% - 3px)',
-              left: activeTab === 'buy' ? '3px' : 'calc(50%)',
+              width: 'calc((100% - 6px) / 3)',
+              left: '3px',
+              transform: `translateX(${marketTabIndex[activeTab] * 100}%)`,
             }}
           />
           <button
@@ -152,6 +168,13 @@ export function MarketPage(props: MarketPageProps) {
             style={{ color: activeTab === 'sell' ? theme.text : theme.textMuted }}
           >
             {messages.marketTabSell}
+          </button>
+          <button
+            onClick={() => setActiveTab('weekly')}
+            className="relative z-10 px-3.5 py-1.5 rounded-full text-xs font-medium transition-colors duration-200 cursor-pointer flex-1"
+            style={{ color: activeTab === 'weekly' ? theme.text : theme.textMuted }}
+          >
+            {messages.marketTabWeekly}
           </button>
         </div>
 
@@ -280,6 +303,15 @@ export function MarketPage(props: MarketPageProps) {
               </div>
             )}
           </>
+        )}
+
+        {activeTab === 'weekly' && (
+          <WeeklyTab
+            balance={balance}
+            shop={weeklyShop}
+            messages={messages}
+            onBuyItem={onBuyWeeklyItem}
+          />
         )}
       </div>
 

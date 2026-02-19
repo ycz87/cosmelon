@@ -336,6 +336,7 @@ export interface Messages {
   marketBalance: string;
   marketTabBuy: string;
   marketTabSell: string;
+  marketTabWeekly: string;
   marketBuyComingSoon: string;
   marketBuyConfirmTitle: string;
   marketBuyConfirmMessage: (name: string, price: number, balance: number) => string;
@@ -353,6 +354,17 @@ export interface Messages {
   marketSellConfirmMessage: (name: string, price: number) => string;
   marketSellConfirmButton: string;
   marketSellCancelButton: string;
+  marketWeeklyTitle: string;
+  marketWeeklyRefreshIn: (days: number, hours: number) => string;
+  marketWeeklyStock: (stock: number) => string;
+  marketWeeklyBuyButton: string;
+  marketWeeklySoldOut: string;
+  marketWeeklyTypeRareGene: string;
+  marketWeeklyTypeLegendarySeed: string;
+  marketWeeklyTypeDecoration: string;
+  marketWeeklyGeneName: (varietyName: string, stars: number) => string;
+  marketWeeklySeedName: (varietyName: string) => string;
+  marketWeeklyDecorationName: (decorationId: string) => string;
 
   // ─── Farm ───
   farmPlotsTab: string;

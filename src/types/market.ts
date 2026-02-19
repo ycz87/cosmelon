@@ -1,3 +1,5 @@
+import type { Rarity, VarietyId } from './farm';
+
 export type ShopItemId =
   | 'star-dew' | 'trap-net' | 'lullaby' | 'crystal-ball' | 'guardian-barrier'
   | 'mutation-gun' | 'mystery-seed' | 'moon-dew' | 'drift-bottle'
@@ -40,3 +42,56 @@ export interface MelonCoinState {
 }
 
 export const DEFAULT_MELON_COIN: MelonCoinState = { balance: 0 };
+
+export type WeeklyItemType = 'rare-gene-fragment' | 'legendary-seed' | 'limited-decoration';
+
+export type WeeklyDecorationId =
+  | 'star-lamp'
+  | 'melon-scarecrow'
+  | 'nebula-banner'
+  | 'mini-windmill'
+  | 'meteor-stone';
+
+export interface WeeklyRareGeneData {
+  varietyId: VarietyId;
+  rarity: Extract<Rarity, 'epic' | 'legendary'>;
+  emoji: string;
+}
+
+export interface WeeklyLegendarySeedData {
+  varietyId: VarietyId;
+  emoji: string;
+}
+
+export interface WeeklyDecorationData {
+  decorationId: WeeklyDecorationId;
+  emoji: string;
+}
+
+export interface WeeklyItemDataMap {
+  'rare-gene-fragment': WeeklyRareGeneData;
+  'legendary-seed': WeeklyLegendarySeedData;
+  'limited-decoration': WeeklyDecorationData;
+}
+
+interface WeeklyItemBase {
+  id: string;
+  name: string;
+  price: number;
+  stock: number;
+}
+
+export type WeeklyItemByType<T extends WeeklyItemType> = WeeklyItemBase & {
+  type: T;
+  data: WeeklyItemDataMap[T];
+};
+
+export type WeeklyItem = {
+  [K in WeeklyItemType]: WeeklyItemByType<K>;
+}[WeeklyItemType];
+
+export interface WeeklyShop {
+  items: WeeklyItem[];
+  refreshAt: string; // ISO timestamp (UTC Monday 00:00)
+  lastRefreshAt: string; // ISO timestamp
+}
