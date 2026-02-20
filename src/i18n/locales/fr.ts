@@ -564,6 +564,7 @@ export const fr: Messages = {
 
   farmPlotsTab: 'Parcelles',
   farmCollectionTab: 'Collection',
+  farmTabLab: 'Labo',
   hybridDexTab: 'Hybride',
   hybridDexTitle: 'Encyclopédie des variétés hybrides',
   farmTodayFocus: (m) => `Aujourd'hui : ${m} min de focus`,
@@ -626,6 +627,10 @@ export const fr: Messages = {
   itemMoonDewFail: '🌙 Rareté déjà maximale. La Rosée Lunaire n\'a pas été consommée',
   itemTrapNetSuccess: '🪤 Filet Piège Alien efficace ! Le voleur interstellaire a été capturé',
 
+  collectionTabPure: 'Pur',
+  collectionTabHybrid: 'Hybride',
+  collectionTabPrismatic: 'Prismatique',
+  collectionTabDarkMatter: 'Matière noire',
   starJourneyTitle: '🚀 Voyage stellaire',
   collectionProgress: (c, t) => `${c}/${t} collectées`,
   collectionLocked: 'Verrouillé',
@@ -786,7 +791,7 @@ export const fr: Messages = {
   darkMatterGuideCosmicHeart: 'Collecter les 78 variétés',
   darkMatterGuideProgress: (collected, total) => `Progression de collection : ${collected}/${total}`,
   varietyDetailClose: 'Fermer',
-  geneLabTab: '🧬 Labo',
+  geneLabTab: 'Labo',
   geneLabTitle: 'Inventaire génétique',
   geneLabEmpty: 'Pas encore de fragments génétiques. Récoltez des variétés pour en obtenir.',
   geneLabFragments: 'Fragments génétiques',

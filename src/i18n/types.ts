@@ -370,6 +370,7 @@ export interface Messages {
   // ─── Farm ───
   farmPlotsTab: string;
   farmCollectionTab: string;
+  farmTabLab: string;
   hybridDexTab?: string;
   hybridDexTitle?: string;
   farmTodayFocus: (minutes: number) => string;
@@ -428,6 +429,10 @@ export interface Messages {
   itemTrapNetSuccess: string;
 
   // ─── Collection ───
+  collectionTabPure: string;
+  collectionTabHybrid: string;
+  collectionTabPrismatic: string;
+  collectionTabDarkMatter: string;
   starJourneyTitle: string;
   collectionProgress: (collected: number, total: number) => string;
   collectionLocked: string;

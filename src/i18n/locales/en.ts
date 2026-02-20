@@ -564,6 +564,7 @@ export const en: Messages = {
 
   farmPlotsTab: 'Plots',
   farmCollectionTab: 'Collection',
+  farmTabLab: 'Lab',
   hybridDexTab: 'Hybrid',
   hybridDexTitle: 'Hybrid Variety Encyclopedia',
   farmTodayFocus: (m) => `Today: ${m} min focused`,
@@ -626,6 +627,10 @@ export const en: Messages = {
   itemMoonDewFail: '🌙 Already at max rarity. Moon Goddess Dew was not consumed',
   itemTrapNetSuccess: '🪤 Trap Net worked! The interstellar thief was captured',
 
+  collectionTabPure: 'Pure',
+  collectionTabHybrid: 'Hybrid',
+  collectionTabPrismatic: 'Prismatic',
+  collectionTabDarkMatter: 'Dark Matter',
   starJourneyTitle: '🚀 Star Journey',
   collectionProgress: (c, t) => `Collected ${c}/${t}`,
   collectionLocked: 'Locked',
@@ -786,7 +791,7 @@ export const en: Messages = {
   darkMatterGuideCosmicHeart: 'Collect all 78 varieties',
   darkMatterGuideProgress: (collected, total) => `Collection progress: ${collected}/${total}`,
   varietyDetailClose: 'Close',
-  geneLabTab: '🧬 Lab',
+  geneLabTab: 'Lab',
   geneLabTitle: 'Gene Inventory',
   geneLabEmpty: 'No gene fragments yet. Harvest varieties to collect them.',
   geneLabFragments: 'Gene Fragments',

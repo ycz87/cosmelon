@@ -34,7 +34,6 @@ import type {
 import { VARIETY_DEFS, RARITY_COLOR, RARITY_STARS, PLOT_MILESTONES } from '../types/farm';
 import { getGrowthStage, getStageEmoji, isVarietyRevealed } from '../farm/growth';
 import { CollectionPage } from './CollectionPage';
-import { HybridDexPage } from './HybridDexPage';
 import { GeneLabPage } from './GeneLabPage';
 
 interface FarmPageProps {
@@ -79,7 +78,7 @@ interface FarmPageProps {
   onGoWarehouse: () => void;
 }
 
-type SubTab = 'plots' | 'collection' | 'hybrid' | 'lab';
+type SubTab = 'plots' | 'collection' | 'lab';
 
 // ─── 动画 overlay 类型 ───
 interface RevealAnim { varietyId: VarietyId; plotId: number }
@@ -324,18 +323,6 @@ export function FarmPage({
     );
   }
 
-  if (subTab === 'hybrid') {
-    return (
-      <div className="flex-1 flex flex-col w-full pt-4 pb-6 gap-4">
-        {/* Sub-tab header */}
-        <div className="px-4">
-          <SubTabHeader subTab={subTab} setSubTab={setSubTab} theme={theme} t={t} />
-        </div>
-        <HybridDexPage collection={farm.collection} />
-      </div>
-    );
-  }
-
   return (
     <div className="flex-1 flex flex-col w-full px-4 pt-4 pb-6 gap-4">
       {/* Sub-tab header */}
@@ -405,59 +392,61 @@ export function FarmPage({
         )}
       </div>
 
-      {/* 3×3 俯视网格 */}
+      {/* 天空 + 3×3 俯视网格 */}
       <div className="relative overflow-visible">
         <div className="relative mx-auto w-full max-w-[90%] sm:max-w-[760px]">
-          {weather !== null && <WeatherLayer weather={weather} theme={theme} t={t} />}
-          <div
-            className="pointer-events-none absolute inset-0 rounded-[20px] z-[1]"
-            style={{
-              background: `radial-gradient(circle at 50% 16%, ${theme.surface}66 0%, ${theme.surface}00 72%)`,
-            }}
-          />
-          <div
-            className="farm-grid-perspective relative z-[5] grid grid-cols-3 gap-1 sm:gap-2"
-            style={{ filter: weather === null ? 'none' : getWeatherGridFilter(weather) }}
-            onClick={() => setActiveTooltipPlotId(null)}
-          >
-            {plotSlots.map((slot, index) => (
-              <div key={slot.kind === 'plot' ? `plot-${slot.plot.id}` : `locked-${index}`}>
-                {slot.kind === 'plot' ? (
-                  <PlotCard
-                    plot={slot.plot}
-                    stolenRecord={latestStolenRecordByPlotId.get(slot.plot.id)}
-                    nowTimestamp={nowTimestamp}
-                    theme={theme}
-                    t={t}
-                    isTooltipOpen={activeTooltipPlotId === slot.plot.id}
-                    onTooltipToggle={() => {
-                      setActiveTooltipPlotId((prev) => (prev === slot.plot.id ? null : slot.plot.id));
-                    }}
-                    onPlantClick={() => {
-                      if (totalPlantableSeeds > 0) setPlantingPlotId(slot.plot.id);
-                      else onGoWarehouse();
-                    }}
-                    onHarvestClick={() => handleHarvest(slot.plot.id)}
-                    onClearClick={() => onClear(slot.plot.id)}
-                    mutationGunCount={mutationGunCount}
-                    onUseMutationGun={() => onUseMutationGun(slot.plot.id)}
-                    moonDewCount={moonDewCount}
-                    onUseMoonDew={() => onUseMoonDew(slot.plot.id)}
-                    nectarCount={nectarCount}
-                    onUseNectar={() => onUseNectar(slot.plot.id)}
-                    starTrackerCount={starTrackerCount}
-                    onUseStarTracker={() => onUseStarTracker(slot.plot.id)}
-                    trapNetCount={trapNetCount}
-                    onUseTrapNet={() => onUseTrapNet(slot.plot.id)}
-                  />
-                ) : (
-                  <LockedPlotCard requiredVarieties={slot.requiredVarieties} theme={theme} t={t} />
-                )}
-              </div>
-            ))}
+          <SkyWeatherLayer weather={weather} theme={theme} t={t} />
+          <div className="relative mt-2">
+            <div
+              className="pointer-events-none absolute inset-0 rounded-[20px] z-[1]"
+              style={{
+                background: `radial-gradient(circle at 50% 16%, ${theme.surface}66 0%, ${theme.surface}00 72%)`,
+              }}
+            />
+            <div
+              className="farm-grid-perspective relative z-[5] grid grid-cols-3 gap-1 sm:gap-2"
+              style={{ filter: weather === null ? 'none' : getWeatherGridFilter(weather) }}
+              onClick={() => setActiveTooltipPlotId(null)}
+            >
+              {plotSlots.map((slot, index) => (
+                <div key={slot.kind === 'plot' ? `plot-${slot.plot.id}` : `locked-${index}`}>
+                  {slot.kind === 'plot' ? (
+                    <PlotCard
+                      plot={slot.plot}
+                      stolenRecord={latestStolenRecordByPlotId.get(slot.plot.id)}
+                      nowTimestamp={nowTimestamp}
+                      theme={theme}
+                      t={t}
+                      isTooltipOpen={activeTooltipPlotId === slot.plot.id}
+                      onTooltipToggle={() => {
+                        setActiveTooltipPlotId((prev) => (prev === slot.plot.id ? null : slot.plot.id));
+                      }}
+                      onPlantClick={() => {
+                        if (totalPlantableSeeds > 0) setPlantingPlotId(slot.plot.id);
+                        else onGoWarehouse();
+                      }}
+                      onHarvestClick={() => handleHarvest(slot.plot.id)}
+                      onClearClick={() => onClear(slot.plot.id)}
+                      mutationGunCount={mutationGunCount}
+                      onUseMutationGun={() => onUseMutationGun(slot.plot.id)}
+                      moonDewCount={moonDewCount}
+                      onUseMoonDew={() => onUseMoonDew(slot.plot.id)}
+                      nectarCount={nectarCount}
+                      onUseNectar={() => onUseNectar(slot.plot.id)}
+                      starTrackerCount={starTrackerCount}
+                      onUseStarTracker={() => onUseStarTracker(slot.plot.id)}
+                      trapNetCount={trapNetCount}
+                      onUseTrapNet={() => onUseTrapNet(slot.plot.id)}
+                    />
+                  ) : (
+                    <LockedPlotCard requiredVarieties={slot.requiredVarieties} theme={theme} t={t} />
+                  )}
+                </div>
+              ))}
+            </div>
+            <CreatureLayer creatures={creatures} />
+            <AlienLayer alien={alienVisit.current} theme={theme} t={t} />
           </div>
-          <CreatureLayer creatures={creatures} />
-          <AlienLayer alien={alienVisit.current} theme={theme} t={t} />
         </div>
       </div>
       <style>{`
@@ -466,14 +455,33 @@ export function FarmPage({
           transform-origin: center top;
           transform-style: flat;
         }
-        @keyframes weatherDrift {
-          0%, 100% { transform: translateY(0px); opacity: 0.7; }
-          50% { transform: translateY(-8px); opacity: 1; }
+        @keyframes skyCloudFloat {
+          0%, 100% { transform: translateX(0px) translateY(0px); }
+          50% { transform: translateX(6px) translateY(-2px); }
         }
-        @keyframes weatherRainDrop {
-          0% { transform: translateY(-18px); opacity: 0; }
-          30% { opacity: 0.9; }
-          100% { transform: translateY(16px); opacity: 0; }
+        @keyframes skyRainFall {
+          0% { transform: translateY(-10px); opacity: 0; }
+          20% { opacity: 0.95; }
+          100% { transform: translateY(34px); opacity: 0; }
+        }
+        @keyframes skySnowFall {
+          0% { transform: translate3d(0px, -6px, 0px); opacity: 0; }
+          20% { opacity: 0.95; }
+          100% { transform: translate3d(8px, 34px, 0px); opacity: 0; }
+        }
+        @keyframes skyStarTwinkle {
+          0%, 100% { transform: scale(0.9); opacity: 0.25; }
+          50% { transform: scale(1.25); opacity: 1; }
+        }
+        @keyframes skySunPulse {
+          0%, 100% { transform: scale(1); opacity: 0.95; }
+          50% { transform: scale(1.08); opacity: 1; }
+        }
+        @keyframes skyLightningFlash {
+          0%, 76%, 100% { opacity: 0; transform: translateY(0px) scale(0.95); }
+          78%, 82% { opacity: 1; transform: translateY(2px) scale(1.06); }
+          84% { opacity: 0.2; }
+          87% { opacity: 1; transform: translateY(0px) scale(1); }
         }
         @keyframes creatureHover {
           0%, 100% { transform: translateY(0px) scale(1); }
@@ -564,43 +572,40 @@ function getWeatherGridFilter(weather: Weather): string {
   return 'saturate(1.18) brightness(1.04)';
 }
 
-function getWeatherLayerBackground(weather: Weather, theme: ReturnType<typeof useTheme>): string {
+function getSkyBackground(weather: Weather | null, theme: ReturnType<typeof useTheme>): string {
+  if (weather === null) {
+    return `linear-gradient(180deg, ${theme.inputBg} 0%, ${theme.surface} 100%)`;
+  }
   if (weather === 'sunny') {
-    return `linear-gradient(180deg, #fde68a22 0%, ${theme.surface}20 55%, transparent 100%)`;
+    return 'linear-gradient(180deg, #dbeafe 0%, #bfdbfe 54%, #93c5fd 100%)';
   }
   if (weather === 'cloudy') {
-    return `linear-gradient(180deg, #94a3b81f 0%, ${theme.surface}15 50%, transparent 100%)`;
+    return 'linear-gradient(180deg, #cbd5e1 0%, #94a3b8 60%, #64748b 100%)';
   }
   if (weather === 'rainy') {
-    return `linear-gradient(180deg, #38bdf822 0%, #1d4ed814 45%, transparent 100%)`;
+    return 'linear-gradient(180deg, #93c5fd 0%, #60a5fa 58%, #3b82f6 100%)';
   }
   if (weather === 'night') {
-    return `linear-gradient(180deg, #0f172a4d 0%, #1e293b33 46%, transparent 100%)`;
+    return 'linear-gradient(180deg, #0b1f4a 0%, #1e3a8a 60%, #1d4ed8 100%)';
   }
   if (weather === 'snowy') {
-    return 'linear-gradient(180deg, rgba(226,232,240,0.28) 0%, rgba(186,230,253,0.18) 45%, transparent 100%)';
+    return 'linear-gradient(180deg, #e2e8f0 0%, #dbeafe 58%, #cbd5e1 100%)';
   }
   if (weather === 'stormy') {
-    return 'linear-gradient(180deg, rgba(30,41,59,0.42) 0%, rgba(71,85,105,0.24) 45%, transparent 100%)';
+    return 'linear-gradient(180deg, #334155 0%, #1e293b 58%, #0f172a 100%)';
   }
-  return 'linear-gradient(180deg, rgba(244,114,182,0.18) 0%, rgba(59,130,246,0.16) 45%, transparent 100%)';
+  return 'linear-gradient(180deg, #bfdbfe 0%, #a5b4fc 36%, #f9a8d4 68%, #fcd34d 100%)';
 }
 
-const WEATHER_DECOR: Record<Weather, string[]> = {
-  sunny: ['☀️', '✨', '🌤️', '✨'],
-  cloudy: ['☁️', '☁️', '🌥️', '☁️'],
-  rainy: ['🌧️', '💧', '🌧️', '💧'],
-  night: ['🌙', '✨', '⭐', '✨'],
-  rainbow: ['🌈', '✨', '🌈', '✨'],
-  snowy: ['❄️', '❄️', '🌨️', '❄️'],
-  stormy: ['⛈️', '⚡', '🌩️', '💨'],
-};
-
-const WEATHER_DECOR_POSITIONS: ReadonlyArray<{ x: number; y: number }> = [
-  { x: 8, y: 8 },
-  { x: 32, y: 14 },
-  { x: 68, y: 10 },
-  { x: 84, y: 18 },
+const SKY_RAIN_COLUMNS = [8, 14, 21, 29, 38, 46, 55, 63, 72, 80, 88];
+const SKY_SNOW_COLUMNS = [10, 18, 27, 35, 44, 52, 60, 68, 77, 85, 92];
+const SKY_STAR_POINTS: ReadonlyArray<{ x: number; y: number; size: number }> = [
+  { x: 10, y: 10, size: 12 },
+  { x: 24, y: 20, size: 10 },
+  { x: 42, y: 12, size: 13 },
+  { x: 58, y: 23, size: 11 },
+  { x: 74, y: 10, size: 12 },
+  { x: 88, y: 18, size: 10 },
 ];
 
 const CREATURE_EMOJI: Record<Creature['type'], string> = {
@@ -610,44 +615,160 @@ const CREATURE_EMOJI: Record<Creature['type'], string> = {
   bird: '🐦',
 };
 
-function WeatherLayer({ weather, theme, t }: {
-  weather: Weather;
+function SkyWeatherLayer({ weather, theme, t }: {
+  weather: Weather | null;
   theme: ReturnType<typeof useTheme>;
   t: ReturnType<typeof useI18n>;
 }) {
-  const isRainy = weather === 'rainy' || weather === 'stormy';
+  const cloudColor = weather === 'stormy' ? '#1f2937' : weather === 'cloudy' ? '#9ca3af' : '#ffffff';
+  const weatherLabel = weather === null ? '⛅ --' : `${WEATHER_ICON[weather]} ${t.farmWeatherName(weather)}`;
 
   return (
-    <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden rounded-[20px]">
+    <div
+      className="relative h-20 overflow-hidden rounded-[20px] border shadow-[var(--shadow-card)]"
+      style={{ background: getSkyBackground(weather, theme), borderColor: theme.border }}
+    >
       <div
         className="absolute inset-0"
         style={{
-          background: getWeatherLayerBackground(weather, theme),
-          filter: getWeatherGridFilter(weather),
+          background: 'linear-gradient(180deg, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0) 62%)',
         }}
       />
-      {WEATHER_DECOR[weather].map((emoji, index) => {
-        const position = WEATHER_DECOR_POSITIONS[index];
-        if (!position) return null;
-        const baseDuration = isRainy ? 1.5 : 3.6;
-        return (
+      {(weather === null || weather === 'sunny') && (
+        <>
           <span
-            key={`${weather}-${index}`}
-            className="absolute text-base sm:text-xl"
-            style={{
-              left: `${position.x}%`,
-              top: `${position.y}%`,
-              animation: isRainy
-                ? `weatherRainDrop ${baseDuration + (index * 0.2)}s linear infinite`
-                : `weatherDrift ${baseDuration + (index * 0.35)}s ease-in-out infinite`,
-              animationDelay: `${index * 0.18}s`,
-              filter: 'drop-shadow(0 0 8px rgba(255,255,255,0.35))',
-            }}
+            className="absolute left-[10%] top-[6px] text-[28px]"
+            style={{ animation: 'skySunPulse 3.2s ease-in-out infinite' }}
           >
-            {emoji}
+            ☀️
           </span>
-        );
-      })}
+          <span
+            className="absolute left-[40%] top-[8px] text-[20px]"
+            style={{ color: cloudColor, animation: 'skyCloudFloat 4.8s ease-in-out infinite' }}
+          >
+            ☁️
+          </span>
+          <span
+            className="absolute left-[68%] top-[14px] text-[24px]"
+            style={{ color: cloudColor, animation: 'skyCloudFloat 5.6s ease-in-out infinite', animationDelay: '0.8s' }}
+          >
+            ☁️
+          </span>
+        </>
+      )}
+
+      {weather === 'rainbow' && (
+        <>
+          <span
+            className="absolute left-[8%] top-[6px] text-[26px]"
+            style={{ animation: 'skySunPulse 3.2s ease-in-out infinite' }}
+          >
+            ☀️
+          </span>
+          <span
+            className="absolute left-[36%] top-[8px] text-[36px]"
+            style={{ animation: 'skyCloudFloat 5.4s ease-in-out infinite' }}
+          >
+            🌈
+          </span>
+        </>
+      )}
+
+      {weather === 'cloudy' && (
+        <>
+          <span className="absolute left-[12%] top-[9px] text-[24px]" style={{ color: cloudColor, animation: 'skyCloudFloat 4.5s ease-in-out infinite' }}>☁️</span>
+          <span className="absolute left-[38%] top-[14px] text-[28px]" style={{ color: cloudColor, animation: 'skyCloudFloat 5.8s ease-in-out infinite', animationDelay: '0.3s' }}>☁️</span>
+          <span className="absolute left-[70%] top-[8px] text-[26px]" style={{ color: cloudColor, animation: 'skyCloudFloat 5.1s ease-in-out infinite', animationDelay: '0.9s' }}>☁️</span>
+        </>
+      )}
+
+      {weather === 'rainy' && (
+        <>
+          <span className="absolute left-[20%] top-[8px] text-[26px]" style={{ color: cloudColor, animation: 'skyCloudFloat 4.5s ease-in-out infinite' }}>☁️</span>
+          <span className="absolute left-[52%] top-[10px] text-[30px]" style={{ color: cloudColor, animation: 'skyCloudFloat 5.3s ease-in-out infinite', animationDelay: '0.5s' }}>☁️</span>
+          {SKY_RAIN_COLUMNS.map((column, index) => (
+            <span
+              key={`rain-${column}`}
+              className="absolute block h-[12px] w-[2px] rounded-full"
+              style={{
+                left: `${column}%`,
+                top: '32px',
+                backgroundColor: '#dbeafe',
+                animation: `skyRainFall ${1 + (index * 0.06)}s linear infinite`,
+                animationDelay: `${index * 0.1}s`,
+              }}
+            />
+          ))}
+        </>
+      )}
+
+      {weather === 'snowy' && (
+        <>
+          <span className="absolute left-[26%] top-[8px] text-[26px]" style={{ color: cloudColor, animation: 'skyCloudFloat 5.2s ease-in-out infinite' }}>☁️</span>
+          <span className="absolute left-[60%] top-[10px] text-[24px]" style={{ color: cloudColor, animation: 'skyCloudFloat 4.8s ease-in-out infinite', animationDelay: '0.6s' }}>☁️</span>
+          {SKY_SNOW_COLUMNS.map((column, index) => (
+            <span
+              key={`snow-${column}`}
+              className="absolute block rounded-full"
+              style={{
+                left: `${column}%`,
+                top: '30px',
+                width: '4px',
+                height: '4px',
+                backgroundColor: '#ffffff',
+                animation: `skySnowFall ${1.8 + (index * 0.08)}s linear infinite`,
+                animationDelay: `${index * 0.15}s`,
+              }}
+            />
+          ))}
+        </>
+      )}
+
+      {weather === 'night' && (
+        <>
+          <span className="absolute left-[12%] top-[8px] text-[28px]" style={{ animation: 'skyCloudFloat 5.4s ease-in-out infinite' }}>🌙</span>
+          {SKY_STAR_POINTS.map((point, index) => (
+            <span
+              key={`star-${point.x}`}
+              className="absolute"
+              style={{
+                left: `${point.x}%`,
+                top: `${point.y}%`,
+                fontSize: point.size,
+                color: '#f8fafc',
+                animation: `skyStarTwinkle ${1.6 + (index * 0.25)}s ease-in-out infinite`,
+                animationDelay: `${index * 0.18}s`,
+              }}
+            >
+              ✦
+            </span>
+          ))}
+        </>
+      )}
+
+      {weather === 'stormy' && (
+        <>
+          <span className="absolute left-[18%] top-[8px] text-[28px]" style={{ color: cloudColor, animation: 'skyCloudFloat 4.8s ease-in-out infinite' }}>☁️</span>
+          <span className="absolute left-[50%] top-[6px] text-[34px]" style={{ color: cloudColor, animation: 'skyCloudFloat 5.2s ease-in-out infinite', animationDelay: '0.5s' }}>☁️</span>
+          <span className="absolute left-[70%] top-[10px] text-[24px]" style={{ color: cloudColor, animation: 'skyCloudFloat 4.4s ease-in-out infinite', animationDelay: '0.8s' }}>☁️</span>
+          <span className="absolute left-[44%] top-[20px] text-[20px]" style={{ animation: 'skyLightningFlash 2.8s ease-in-out infinite' }}>⚡</span>
+          <span className="absolute left-[66%] top-[22px] text-[18px]" style={{ animation: 'skyLightningFlash 3.4s ease-in-out infinite', animationDelay: '1.1s' }}>⚡</span>
+          {SKY_RAIN_COLUMNS.map((column, index) => (
+            <span
+              key={`storm-rain-${column}`}
+              className="absolute block h-[12px] w-[2px] rounded-full"
+              style={{
+                left: `${column}%`,
+                top: '34px',
+                backgroundColor: '#bfdbfe',
+                animation: `skyRainFall ${0.9 + (index * 0.05)}s linear infinite`,
+                animationDelay: `${index * 0.08}s`,
+              }}
+            />
+          ))}
+        </>
+      )}
+
       <div
         className="absolute left-2 top-2 rounded-full px-2 py-1 text-[10px] font-medium"
         style={{
@@ -656,7 +777,7 @@ function WeatherLayer({ weather, theme, t }: {
           border: `1px solid ${theme.border}`,
         }}
       >
-        {`${WEATHER_ICON[weather]} ${t.farmWeatherName(weather)}`}
+        {weatherLabel}
       </div>
     </div>
   );
@@ -744,8 +865,7 @@ function SubTabHeader({ subTab, setSubTab, theme, t }: {
   const subTabIndex: Record<SubTab, number> = {
     plots: 0,
     collection: 1,
-    hybrid: 2,
-    lab: 3,
+    lab: 2,
   };
 
   return (
@@ -756,7 +876,7 @@ function SubTabHeader({ subTab, setSubTab, theme, t }: {
           style={{
             backgroundColor: theme.accent,
             opacity: 0.16,
-            width: 'calc((100% - 6px) / 4)',
+            width: 'calc((100% - 6px) / 3)',
             left: '3px',
             transform: `translateX(${subTabIndex[subTab] * 100}%)`,
           }}
@@ -780,22 +900,13 @@ function SubTabHeader({ subTab, setSubTab, theme, t }: {
           📖 {t.farmCollectionTab}
         </button>
         <button
-          onClick={() => setSubTab('hybrid')}
-          className="relative z-10 px-4 py-2 rounded-full text-xs font-medium transition-all duration-200 ease-in-out cursor-pointer flex-1"
-          style={{
-            color: subTab === 'hybrid' ? theme.text : theme.textMuted,
-          }}
-        >
-          🧬 {t.hybridDexTab || '杂交'}
-        </button>
-        <button
           onClick={() => setSubTab('lab')}
           className="relative z-10 px-4 py-2 rounded-full text-xs font-medium transition-all duration-200 ease-in-out cursor-pointer flex-1"
           style={{
             color: subTab === 'lab' ? theme.text : theme.textMuted,
           }}
         >
-          {t.geneLabTab}
+          🧪 {t.farmTabLab}
         </button>
       </div>
     </div>
