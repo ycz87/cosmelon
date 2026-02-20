@@ -1617,8 +1617,8 @@ function App() {
             const projWorkMinutes = project.state.tasks[project.state.currentTaskIndex]?.estimatedMinutes || 25;
             const projGrowthStage: GrowthStage | null = null;
             return (
-              <>
-                <div className="flex-1 flex flex-col items-center w-full px-4 pt-8">
+              <div className="flex-1 w-full px-4 pt-4 pb-6 flex flex-col gap-4">
+                <div className="flex flex-col items-center">
                   <ProjectTaskBar
                     projectName={project.state.name}
                     view={pv}
@@ -1644,25 +1644,26 @@ function App() {
                     />
                   </div>
                 </div>
-                <div className="w-full max-w-xs sm:max-w-sm px-4 pt-4 pb-6">
-                  <div className="rounded-2xl p-5 border" style={{ backgroundColor: theme.surface, borderColor: theme.border }}>
+                <div className="w-full max-w-xs sm:max-w-sm mx-auto">
+                  <div
+                    className="rounded-[var(--radius-card)] p-4 border shadow-[var(--shadow-card)]"
+                    style={{ backgroundColor: theme.surface, borderColor: theme.border }}
+                  >
                     <div className="flex flex-col items-center gap-5">
                       <EncouragementBanner todayRecords={todayRecords} allRecords={records} />
                       <TodayStats records={todayRecords} hideTitle />
                     </div>
                   </div>
                 </div>
-              </>
+              </div>
             );
           }
 
           if (mode === 'pomodoro') {
             return (
-              <>
-                <div className="flex-1 flex flex-col items-center w-full px-4 pt-4">
-                  <div className="mb-4">
-                    <ModeSwitch mode={mode} onChange={setMode} disabled={isAnyTimerActive} />
-                  </div>
+              <div className="flex-1 w-full px-4 pt-4 pb-6 flex flex-col gap-4">
+                <div className="flex flex-col items-center">
+                  <ModeSwitch mode={mode} onChange={setMode} disabled={isAnyTimerActive} />
                   <Timer
                     timeLeft={timer.timeLeft} totalDuration={totalDuration}
                     phase={timer.phase} status={timer.status}
@@ -1681,8 +1682,11 @@ function App() {
                     <TaskInput value={currentTask} onChange={setCurrentTask} disabled={timer.status !== 'idle'} />
                   </div>
                 </div>
-                <div className="w-full max-w-xs sm:max-w-sm px-4 pt-4 pb-6">
-                  <div className="rounded-2xl p-5 border" style={{ backgroundColor: theme.surface, borderColor: theme.border }}>
+                <div className="w-full max-w-xs sm:max-w-sm mx-auto">
+                  <div
+                    className="rounded-[var(--radius-card)] p-4 border shadow-[var(--shadow-card)]"
+                    style={{ backgroundColor: theme.surface, borderColor: theme.border }}
+                  >
                     <div className="flex flex-col items-center gap-5">
                       <EncouragementBanner todayRecords={todayRecords} allRecords={records} />
                       <TodayStats records={todayRecords} idle={timer.status === 'idle'} hideTitle />
@@ -1690,21 +1694,21 @@ function App() {
                     </div>
                   </div>
                 </div>
-              </>
+              </div>
             );
           }
 
           // Project mode: setup, summary, or exited
           return (
-            <>
-              <div className="flex justify-center pt-4 mb-2">
+            <div className="flex-1 w-full px-4 pt-4 pb-6 flex flex-col gap-4">
+              <div className="flex justify-center">
                 <ModeSwitch mode={mode} onChange={setMode} disabled={isAnyTimerActive} />
               </div>
               <ProjectMode
                 project={project}
                 onSwitchToPomodoro={() => setMode('pomodoro')}
               />
-            </>
+            </div>
           );
         })()}
 

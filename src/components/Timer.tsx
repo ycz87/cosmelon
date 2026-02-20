@@ -325,8 +325,10 @@ export function Timer({ timeLeft, totalDuration, phase, status, celebrating, cel
 
         {/* Quick duration picker */}
         {showQuickPicker && status === 'idle' && isWork && (
-          <div className="absolute -bottom-2 translate-y-full flex flex-wrap justify-center gap-2 px-4 py-3 rounded-[var(--radius-panel)] border animate-fade-up z-10"
-            style={{ backgroundColor: `${theme.surface}f0`, borderColor: theme.border, boxShadow: 'var(--shadow-elevated)' }}>
+          <div
+            className="absolute -bottom-2 translate-y-full flex flex-wrap justify-center gap-2 p-3 rounded-[var(--radius-card)] border shadow-[var(--shadow-card)] animate-fade-up z-10"
+            style={{ backgroundColor: `${theme.surface}f0`, borderColor: theme.border }}
+          >
             {QUICK_DURATIONS.map((m) => (
               <button key={m}
                 onClick={() => {
@@ -335,7 +337,7 @@ export function Timer({ timeLeft, totalDuration, phase, status, celebrating, cel
                   if (m > 25) setHealthToast(true);
                   else setHealthToast(false);
                 }}
-                className="px-3 py-1 rounded-[var(--radius-sm)] text-xs transition-all duration-200 ease-in-out hover:-translate-y-0.5 cursor-pointer"
+                className="px-3 py-1 rounded-[var(--radius-sm)] text-xs transition-all duration-200 ease-in-out hover:-translate-y-0.5 cursor-pointer ui-hover-card"
                 style={{
                   backgroundColor: workMinutes === m ? `${theme.accent}30` : theme.inputBg,
                   color: workMinutes === m ? theme.accent : theme.textMuted,

@@ -263,85 +263,94 @@ export function AchievementsPage({ data, onClose, onMarkSeen, language }: Achiev
       </header>
 
       {/* Content */}
-      <div className="flex-1 overflow-y-auto px-4 py-4 settings-scrollbar">
-        {/* Total progress */}
-        <div className="mb-6">
-          <div className="text-xs mb-2 text-center" style={{ color: theme.textMuted }}>
-            {i18n.achievementsProgress(totalUnlocked, totalAchievements)}
-          </div>
-          <ProgressBar
-            value={totalUnlocked}
-            max={totalAchievements}
-            color={theme.accent}
-          />
-        </div>
-
-        {/* Series sections */}
-        {SERIES_ORDER.map(seriesKey => {
-          const config = SERIES_CONFIG[seriesKey];
-          const achievements = ACHIEVEMENTS_BY_SERIES[seriesKey] || [];
-          const seriesUnlocked = achievements.filter(a => a.id in data.unlocked).length;
-
-          return (
-            <div key={seriesKey} className="mb-6">
-              {/* Series header */}
-              <div className="flex items-center justify-between mb-3">
-                <div className="flex items-center gap-2">
-                  <span className="text-sm font-semibold" style={{ color: config.color }}>
-                    {seriesNames[seriesKey]}
-                  </span>
-                  {config.comingSoon && (
-                    <span
-                      className="text-[10px] px-2 py-1 rounded-full"
-                      style={{ backgroundColor: 'rgba(128,128,128,0.2)', color: theme.textFaint }}
-                    >
-                      {i18n.achievementsComingSoon}
-                    </span>
-                  )}
-                </div>
-                <span className="text-xs" style={{ color: theme.textFaint }}>
-                  {i18n.achievementsSeriesProgress(seriesUnlocked, config.count)}
-                </span>
-              </div>
-
-              {/* Series progress bar */}
-              <div className="mb-3">
-                <ProgressBar value={seriesUnlocked} max={config.count} color={config.color} />
-              </div>
-
-              {/* Badge grid */}
-              <div className="grid grid-cols-5 gap-2">
-                {achievements.map(def => {
-                  const unlocked = def.id in data.unlocked;
-                  const isHidden = seriesKey === 'hidden';
-                  const name = isHidden && !unlocked
-                    ? '???'
-                    : (isZh ? def.nameZh : def.nameEn);
-
-                  return (
-                    <button
-                      key={def.id}
-                      className={`flex flex-col items-center gap-1 p-2 rounded-[var(--radius-card)] transition-all duration-200 ease-in-out hover:-translate-y-0.5 ${
-                        config.comingSoon ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer active:scale-95'
-                      }`}
-                      onClick={() => !config.comingSoon && setSelectedBadge(def)}
-                      disabled={config.comingSoon}
-                      style={{ boxShadow: 'var(--shadow-card)' }}
-                    >
-                      <BadgeIcon def={def} unlocked={unlocked} series={seriesKey} size={48} />
-                      <span
-                        className="text-[10px] leading-tight text-center line-clamp-2"
-                        style={{ color: unlocked ? theme.text : theme.textFaint }}
-                      >
-                        {name}
-                      </span>
-                    </button>
-                  );
-                })}
-              </div>
+      <div className="flex-1 overflow-y-auto px-4 pt-4 pb-6 settings-scrollbar">
+        <div className="flex flex-col gap-4">
+          {/* Total progress */}
+          <div
+            className="p-4 rounded-[var(--radius-card)] border shadow-[var(--shadow-card)]"
+            style={{ backgroundColor: theme.inputBg, borderColor: theme.border }}
+          >
+            <div className="text-xs mb-2 text-center" style={{ color: theme.textMuted }}>
+              {i18n.achievementsProgress(totalUnlocked, totalAchievements)}
             </div>
-          );
-        })}
+            <ProgressBar
+              value={totalUnlocked}
+              max={totalAchievements}
+              color={theme.accent}
+            />
+          </div>
+
+          {/* Series sections */}
+          {SERIES_ORDER.map(seriesKey => {
+            const config = SERIES_CONFIG[seriesKey];
+            const achievements = ACHIEVEMENTS_BY_SERIES[seriesKey] || [];
+            const seriesUnlocked = achievements.filter(a => a.id in data.unlocked).length;
+
+            return (
+              <div
+                key={seriesKey}
+                className="p-4 rounded-[var(--radius-card)] border shadow-[var(--shadow-card)]"
+                style={{ backgroundColor: theme.inputBg, borderColor: theme.border }}
+              >
+                {/* Series header */}
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-semibold" style={{ color: config.color }}>
+                      {seriesNames[seriesKey]}
+                    </span>
+                    {config.comingSoon && (
+                      <span
+                        className="text-[10px] px-2 py-1 rounded-full"
+                        style={{ backgroundColor: 'rgba(128,128,128,0.2)', color: theme.textFaint }}
+                      >
+                        {i18n.achievementsComingSoon}
+                      </span>
+                    )}
+                  </div>
+                  <span className="text-xs" style={{ color: theme.textFaint }}>
+                    {i18n.achievementsSeriesProgress(seriesUnlocked, config.count)}
+                  </span>
+                </div>
+
+                {/* Series progress bar */}
+                <div className="mb-3">
+                  <ProgressBar value={seriesUnlocked} max={config.count} color={config.color} />
+                </div>
+
+                {/* Badge grid */}
+                <div className="grid grid-cols-4 sm:grid-cols-5 gap-3">
+                  {achievements.map(def => {
+                    const unlocked = def.id in data.unlocked;
+                    const isHidden = seriesKey === 'hidden';
+                    const name = isHidden && !unlocked
+                      ? '???'
+                      : (isZh ? def.nameZh : def.nameEn);
+
+                    return (
+                      <button
+                        key={def.id}
+                        className={`flex flex-col items-center gap-1.5 p-3 rounded-[var(--radius-card)] border shadow-[var(--shadow-card)] transition-all duration-200 ease-in-out ${
+                          config.comingSoon ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer active:scale-95 ui-hover-card'
+                        }`}
+                        onClick={() => !config.comingSoon && setSelectedBadge(def)}
+                        disabled={config.comingSoon}
+                        style={{ backgroundColor: theme.surface, borderColor: theme.border }}
+                      >
+                        <BadgeIcon def={def} unlocked={unlocked} series={seriesKey} size={48} />
+                        <span
+                          className="text-[10px] leading-tight text-center line-clamp-2"
+                          style={{ color: unlocked ? theme.text : theme.textFaint }}
+                        >
+                          {name}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            );
+          })}
+        </div>
       </div>
 
       {/* Badge detail modal */}

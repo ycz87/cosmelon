@@ -76,54 +76,58 @@ export function WarehousePage({ warehouse, shed, onSynthesize, onSynthesizeAll, 
 
   const content = (
     <>
-      {/* Header */}
-      <div className="mb-5">
-        <div className="flex items-center justify-between">
-          <h2 className="text-lg font-semibold" style={{ color: theme.text }}>{t.warehouseTitle}</h2>
-          {!inline && onClose && (
+      <div className="flex flex-col gap-4">
+        {/* Header */}
+        <div>
+          <div className="flex items-center justify-between">
+            <h2 className="text-lg font-semibold" style={{ color: theme.text }}>{t.warehouseTitle}</h2>
+            {!inline && onClose && (
+              <button
+                onClick={onClose}
+                className="w-8 h-8 rounded-full flex items-center justify-center transition-all duration-200 ease-in-out hover:-translate-y-0.5 ui-hover-button cursor-pointer"
+                style={{ color: theme.textMuted, backgroundColor: theme.inputBg }}
+              >✕</button>
+            )}
+          </div>
+          <div className="mt-3 relative flex items-center rounded-full p-[3px]" style={{ backgroundColor: theme.inputBg }}>
+            <div
+              className="absolute top-[3px] bottom-[3px] rounded-full transition-all duration-200 ease-in-out"
+              style={{
+                backgroundColor: theme.accent,
+                opacity: 0.16,
+                width: 'calc(50% - 3px)',
+                left: activeTab === 'shed' ? '3px' : 'calc(50%)',
+              }}
+            />
             <button
-              onClick={onClose}
-              className="w-8 h-8 rounded-full flex items-center justify-center transition-all duration-200 ease-in-out hover:-translate-y-0.5 ui-hover-button cursor-pointer"
-              style={{ color: theme.textMuted, backgroundColor: theme.inputBg }}
-            >✕</button>
-          )}
+              onClick={() => { setActiveTab('shed'); setFlavorTooltip(null); }}
+              className="relative z-10 px-4 py-2 rounded-full text-xs font-medium transition-all duration-200 ease-in-out cursor-pointer flex-1"
+              style={{ color: activeTab === 'shed' ? theme.text : theme.textMuted }}
+            >
+              {t.warehouseTabShed}
+            </button>
+            <button
+              onClick={() => { setActiveTab('backpack'); setFlavorTooltip(null); }}
+              className="relative z-10 px-4 py-2 rounded-full text-xs font-medium transition-all duration-200 ease-in-out cursor-pointer flex-1"
+              style={{ color: activeTab === 'backpack' ? theme.text : theme.textMuted }}
+            >
+              {t.warehouseTabBackpack}
+            </button>
+          </div>
         </div>
-        <div className="mt-3 relative flex items-center rounded-full p-[3px]" style={{ backgroundColor: theme.inputBg }}>
-          <div
-            className="absolute top-[3px] bottom-[3px] rounded-full transition-all duration-200 ease-in-out"
-            style={{
-              backgroundColor: theme.accent,
-              opacity: 0.16,
-              width: 'calc(50% - 3px)',
-              left: activeTab === 'shed' ? '3px' : 'calc(50%)',
-            }}
-          />
-          <button
-            onClick={() => { setActiveTab('shed'); setFlavorTooltip(null); }}
-            className="relative z-10 px-4 py-2 rounded-full text-xs font-medium transition-all duration-200 ease-in-out cursor-pointer flex-1"
-            style={{ color: activeTab === 'shed' ? theme.text : theme.textMuted }}
-          >
-            {t.warehouseTabShed}
-          </button>
-          <button
-            onClick={() => { setActiveTab('backpack'); setFlavorTooltip(null); }}
-            className="relative z-10 px-4 py-2 rounded-full text-xs font-medium transition-all duration-200 ease-in-out cursor-pointer flex-1"
-            style={{ color: activeTab === 'backpack' ? theme.text : theme.textMuted }}
-          >
-            {t.warehouseTabBackpack}
-          </button>
-        </div>
-      </div>
 
       {activeTab === 'shed' ? (
         <>
         {/* Items grid */}
         {warehouse.totalCollected === 0 ? (
-          <div className="text-center py-8 text-sm" style={{ color: theme.textMuted }}>
+          <div
+            className="text-center p-4 text-sm rounded-[var(--radius-card)] border shadow-[var(--shadow-card)]"
+            style={{ color: theme.textMuted, backgroundColor: theme.inputBg, borderColor: theme.border }}
+          >
             {t.warehouseEmpty}
           </div>
         ) : (
-          <div className="grid grid-cols-3 gap-3 mb-5">
+          <div className="grid grid-cols-3 gap-3">
             {DISPLAY_ORDER.map((stage) => {
               const isLegendary = stage === 'legendary';
               const locked = isLegendary && !legendaryUnlocked;
@@ -157,7 +161,7 @@ export function WarehousePage({ warehouse, shed, onSynthesize, onSynthesizeAll, 
         )}
 
         {/* Synthesis */}
-        <div className="mb-5">
+        <div>
           <h3 className="text-sm font-semibold mb-3" style={{ color: theme.text }}>{t.synthesisTitle}</h3>
           <div className="flex flex-col gap-3">
             {SYNTHESIS_RECIPES.map((recipe) => {
@@ -215,7 +219,7 @@ export function WarehousePage({ warehouse, shed, onSynthesize, onSynthesizeAll, 
 
         {/* ─── Slice Section ─── */}
         {(canSliceRipe || canSliceLegendary) && (
-          <div className="mb-5">
+          <div>
             <h3 className="text-sm font-semibold mb-3" style={{ color: theme.text }}>{t.shedSliceSection}</h3>
             <div className="flex flex-col gap-2">
               {canSliceRipe && (
@@ -266,7 +270,7 @@ export function WarehousePage({ warehouse, shed, onSynthesize, onSynthesizeAll, 
         <>
           {/* ─── Seeds Section ─── */}
           {(shed.seeds.normal > 0 || shed.seeds.epic > 0 || shed.seeds.legendary > 0) && (
-            <div className="mb-5">
+            <div>
               <h3 className="text-sm font-semibold mb-3" style={{ color: theme.text }}>{t.shedSeedsTitle}</h3>
               <div className="flex flex-col gap-2">
                 {shed.seeds.normal > 0 && (
@@ -317,10 +321,15 @@ export function WarehousePage({ warehouse, shed, onSynthesize, onSynthesizeAll, 
           )}
 
           {/* ─── Items Section ─── */}
-          <div className="mb-5">
+          <div>
             <h3 className="text-sm font-semibold mb-3" style={{ color: theme.text }}>{t.shedItemsTitle}</h3>
             {!hasItems ? (
-              <p className="text-xs py-3 text-center" style={{ color: theme.textFaint }}>{t.shedNoItems}</p>
+              <p
+                className="text-xs p-4 text-center rounded-[var(--radius-card)] border shadow-[var(--shadow-card)]"
+                style={{ color: theme.textFaint, backgroundColor: theme.inputBg, borderColor: theme.border }}
+              >
+                {t.shedNoItems}
+              </p>
             ) : (
               <div className="grid grid-cols-3 gap-2">
                 {ALL_ITEM_IDS.filter(id => shed.items[id] > 0).map((id) => {
@@ -363,7 +372,10 @@ export function WarehousePage({ warehouse, shed, onSynthesize, onSynthesizeAll, 
       )}
 
       {/* Stats */}
-      <div className="flex items-center justify-between px-2 py-3 mb-5 rounded-[var(--radius-card)] flex-wrap gap-2" style={{ backgroundColor: theme.inputBg, boxShadow: 'var(--shadow-card)' }}>
+      <div
+        className="flex items-center justify-between p-4 rounded-[var(--radius-card)] border shadow-[var(--shadow-card)] flex-wrap gap-2"
+        style={{ backgroundColor: theme.inputBg, borderColor: theme.border }}
+      >
         <div className="text-xs" style={{ color: theme.textMuted }}>
           {t.warehouseTotal}: <span style={{ color: theme.text, fontWeight: 600 }}>{warehouse.totalCollected}</span>
         </div>
@@ -383,6 +395,7 @@ export function WarehousePage({ warehouse, shed, onSynthesize, onSynthesizeAll, 
           </div>
         )}
       </div>
+      </div>
 
       {/* Toast */}
       {toast && (
@@ -398,7 +411,7 @@ export function WarehousePage({ warehouse, shed, onSynthesize, onSynthesizeAll, 
 
   if (inline) {
     return (
-      <div className="flex-1 w-full max-w-md mx-auto px-4 pt-6 pb-6 overflow-y-auto">
+      <div className="flex-1 w-full px-4 pt-4 pb-6 overflow-y-auto">
         {content}
       </div>
     );

@@ -84,7 +84,7 @@ export function HistoryPanel({ records, projectRecords = [], onClose }: HistoryP
         </div>
 
         {/* Tabs */}
-        <div className="flex gap-1 px-5 mb-4">
+        <div className="flex gap-1 px-4 mb-4">
           {(['history', 'stats'] as Tab[]).map((tabKey) => (
             <button
               key={tabKey}
@@ -100,16 +100,18 @@ export function HistoryPanel({ records, projectRecords = [], onClose }: HistoryP
           ))}
         </div>
 
-        <div className="px-5 pb-8">
+        <div className="px-4 pt-4 pb-6">
           {tab === 'history' ? (
-            <div className="space-y-5">
+            <div className="space-y-4">
               {/* Week trend chart */}
               <WeekTrendChart records={records} />
 
               {/* Streak banner */}
               {streak.current > 0 && (
-                <div className="flex items-center justify-center gap-2 py-2 rounded-xl text-sm"
-                  style={{ backgroundColor: `${theme.accent}10`, color: theme.accent }}>
+                <div
+                  className="flex items-center justify-center gap-2 p-3 rounded-[var(--radius-card)] border shadow-[var(--shadow-card)] text-sm"
+                  style={{ backgroundColor: `${theme.accent}10`, color: theme.accent, borderColor: `${theme.accent}35` }}
+                >
                   {t.streakBanner(streak.current)}
                 </div>
               )}
@@ -135,19 +137,25 @@ export function HistoryPanel({ records, projectRecords = [], onClose }: HistoryP
                 </div>
 
                 {selectedRecords.length === 0 ? (
-                  <div className="text-center py-6 text-sm" style={{ color: theme.textMuted }}>
+                  <div
+                    className="text-center p-4 text-sm rounded-[var(--radius-card)] border shadow-[var(--shadow-card)]"
+                    style={{ color: theme.textMuted, backgroundColor: theme.inputBg, borderColor: theme.border }}
+                  >
                     {t.noRecords}
                   </div>
                 ) : (
-                  <div className="space-y-0.5">
+                  <div className="space-y-2">
                     {selectedRecords.map((record) => {
                       const time = new Date(record.completedAt);
                       const timeStr = `${time.getHours().toString().padStart(2, '0')}:${time.getMinutes().toString().padStart(2, '0')}`;
                       const duration = record.durationMinutes || 25;
                       const stage = getGrowthStage(duration);
                       return (
-                        <div key={record.id} className="flex items-center gap-2.5 px-3 py-2 rounded-xl"
-                          style={{ backgroundColor: theme.inputBg }}>
+                        <div
+                          key={record.id}
+                          className="flex items-center gap-2.5 p-3 rounded-[var(--radius-card)] border shadow-[var(--shadow-card)]"
+                          style={{ backgroundColor: theme.inputBg, borderColor: theme.border }}
+                        >
                           <GrowthIcon stage={stage} size={18} />
                           <span className="flex-1 text-sm truncate" style={{ color: theme.textMuted }}>
                             {record.task || t.unnamed}
@@ -170,13 +178,16 @@ export function HistoryPanel({ records, projectRecords = [], onClose }: HistoryP
                         style={{ color: theme.textMuted }}>
                         📋 {t.projectHistory}
                       </div>
-                      <div className="space-y-1">
+                      <div className="space-y-2">
                         {dayProjects.map((proj) => {
                           const estMin = Math.round(proj.totalEstimatedSeconds / 60);
                           const actMin = Math.round(proj.totalActualSeconds / 60);
                           return (
-                            <div key={proj.id} className="px-3 py-2 rounded-xl"
-                              style={{ backgroundColor: theme.inputBg }}>
+                            <div
+                              key={proj.id}
+                              className="p-3 rounded-[var(--radius-card)] border shadow-[var(--shadow-card)]"
+                              style={{ backgroundColor: theme.inputBg, borderColor: theme.border }}
+                            >
                               <div className="flex items-center gap-2">
                                 <span className="text-sm truncate flex-1" style={{ color: theme.textMuted }}>
                                   {proj.name}
@@ -202,13 +213,19 @@ export function HistoryPanel({ records, projectRecords = [], onClose }: HistoryP
             <div className="space-y-6">
               {/* Streak */}
               <div className="flex gap-3">
-                <div className="flex-1 rounded-xl p-3 text-center" style={{ backgroundColor: theme.inputBg }}>
+                <div
+                  className="flex-1 rounded-[var(--radius-card)] border shadow-[var(--shadow-card)] p-3 text-center"
+                  style={{ backgroundColor: theme.inputBg, borderColor: theme.border }}
+                >
                   <div className="text-2xl font-semibold" style={{ color: theme.accent }}>
                     {streak.current}
                   </div>
                   <div className="text-[10px] mt-0.5" style={{ color: theme.textMuted }}>{t.currentStreak}</div>
                 </div>
-                <div className="flex-1 rounded-xl p-3 text-center" style={{ backgroundColor: theme.inputBg }}>
+                <div
+                  className="flex-1 rounded-[var(--radius-card)] border shadow-[var(--shadow-card)] p-3 text-center"
+                  style={{ backgroundColor: theme.inputBg, borderColor: theme.border }}
+                >
                   <div className="text-2xl font-semibold" style={{ color: theme.text }}>
                     {streak.longest}
                   </div>
@@ -240,7 +257,7 @@ export function HistoryPanel({ records, projectRecords = [], onClose }: HistoryP
               </div>
 
               {/* Summary cards */}
-              <div className="grid grid-cols-2 gap-2.5">
+              <div className="grid grid-cols-2 gap-4">
                 <SummaryCard label={t.thisWeek} value={t.formatMinutes(summary.weekMinutes)} theme={theme} />
                 <SummaryCard label={t.thisMonth} value={t.formatMinutes(summary.monthMinutes)} theme={theme} />
                 <SummaryCard label={t.totalTime} value={t.formatMinutes(summary.totalMinutes)} theme={theme} />
@@ -254,9 +271,12 @@ export function HistoryPanel({ records, projectRecords = [], onClose }: HistoryP
   );
 }
 
-function SummaryCard({ label, value, theme }: { label: string; value: string; theme: { inputBg: string; text: string; textMuted: string } }) {
+function SummaryCard({ label, value, theme }: { label: string; value: string; theme: { inputBg: string; border: string; text: string; textMuted: string } }) {
   return (
-    <div className="rounded-xl p-3" style={{ backgroundColor: theme.inputBg }}>
+    <div
+      className="rounded-[var(--radius-card)] border shadow-[var(--shadow-card)] p-3"
+      style={{ backgroundColor: theme.inputBg, borderColor: theme.border }}
+    >
       <div className="text-sm font-medium" style={{ color: theme.text }}>{value}</div>
       <div className="text-[10px] mt-0.5" style={{ color: theme.textMuted }}>{label}</div>
     </div>
