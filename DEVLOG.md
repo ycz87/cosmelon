@@ -2,6 +2,88 @@
 
 ---
 
+## v0.38.0 — UI 全面优化 Step 1: 基础设计系统
+日期：2026-02-20
+
+### 设计系统
+- **圆角系统**
+  - 小元素（按钮、标签）：8px (--radius-sm)
+  - 卡片（成就卡、品种卡、地块卡）：12px (--radius-card)
+  - 面板（设置面板、模态框内容区）：16px (--radius-panel)
+  - 容器（页面主容器、大型弹窗）：20px (--radius-container)
+
+- **间距系统**（基于 4px 网格）
+  - 统一使用 Tailwind 的间距 utilities：gap-2(8px), gap-3(12px), gap-4(16px)
+  - 统一 padding：px-3/px-4, py-2/py-3
+  - 统一 margin：基于 4px 网格
+
+- **阴影系统**
+  - 卡片阴影：0 2px 8px rgba(0,0,0,0.1) (--shadow-card)
+  - 悬浮层阴影：0 4px 12px rgba(0,0,0,0.15) (--shadow-elevated)
+
+- **过渡动画**
+  - 所有交互元素：transition-all duration-200 ease-in-out
+  - 悬停效果：hover:-translate-y-0.5
+
+### 优化组件
+- **Timer.tsx**（番茄钟主界面）
+  - 快速时长选择器：圆角 16px，阴影 elevated
+  - 所有按钮：圆角 8px，悬停效果
+  - 间距统一为 4px 网格
+
+- **Settings.tsx**（设置面板）
+  - 面板圆角：16px
+  - 所有按钮：圆角 8px，悬停效果
+  - 主题选择网格：gap-2
+  - 数字输入框：圆角 8px
+
+- **FarmPage.tsx**（农场页面）
+  - 地块卡片：圆角 12px，阴影 card
+  - Tooltip：圆角 12px，阴影 card
+  - 所有按钮：圆角 8px，悬停效果
+  - 间距统一为 4px 网格
+
+- **MarketPage.tsx**（商城页面）
+  - 主容器：圆角 20px，阴影 card
+  - 商品卡片：圆角 12px，阴影 card，悬停效果
+  - Tab 切换：过渡动画优化
+  - 所有按钮：圆角 8px，悬停效果
+
+- **WarehousePage.tsx**（瓜棚页面）
+  - 模态框：圆角 20px，阴影 elevated
+  - 所有卡片：圆角 12px，阴影 card，悬停效果
+  - 合成卡片：间距优化为 gap-3
+  - 所有按钮：圆角 8px，悬停效果
+
+- **AchievementsPage.tsx**（成就页面）
+  - 徽章卡片：圆角 12px，阴影 card，悬停效果
+  - 间距统一为 4px 网格
+
+- **DebugToolbar.tsx**（调试工具栏）
+  - 主容器：圆角 20px，阴影 elevated
+  - 所有按钮：圆角 8px，悬停效果
+
+### 技术实现
+- 在 `src/index.css` 新增全局 CSS 变量：
+  ```css
+  :root {
+    --radius-sm: 8px;
+    --radius-card: 12px;
+    --radius-panel: 16px;
+    --radius-container: 20px;
+    --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.1);
+    --shadow-elevated: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+  ```
+- 使用 Tailwind 的 `rounded-[var(--radius-*)]` 语法引用 CSS 变量
+- 所有改动仅优化视觉，不改变功能逻辑
+- 保持现有的主题系统（theme.surface, theme.border 等）
+
+### 验证
+- 构建通过，无报错
+- 在所有 5 种主题下测试通过
+- 移动端适配良好
+
 ## v0.37.0 — 完善测试面板（DebugToolbar）
 日期：2026-02-20
 
