@@ -289,9 +289,11 @@ export function FarmPage({
 
   if (subTab === 'collection') {
     return (
-      <div className="flex-1 flex flex-col w-full">
+      <div className="flex-1 flex flex-col w-full pt-4 pb-6 gap-4">
         {/* Sub-tab header */}
-        <SubTabHeader subTab={subTab} setSubTab={setSubTab} theme={theme} t={t} />
+        <div className="px-4">
+          <SubTabHeader subTab={subTab} setSubTab={setSubTab} theme={theme} t={t} />
+        </div>
         <CollectionPage collection={farm.collection} />
       </div>
     );
@@ -299,9 +301,11 @@ export function FarmPage({
 
   if (subTab === 'lab') {
     return (
-      <div className="flex-1 flex flex-col w-full">
+      <div className="flex-1 flex flex-col w-full pt-4 pb-6 gap-4">
         {/* Sub-tab header */}
-        <SubTabHeader subTab={subTab} setSubTab={setSubTab} theme={theme} t={t} />
+        <div className="px-4">
+          <SubTabHeader subTab={subTab} setSubTab={setSubTab} theme={theme} t={t} />
+        </div>
         <GeneLabPage
           geneInventory={geneInventory}
           seeds={seeds}
@@ -322,21 +326,26 @@ export function FarmPage({
 
   if (subTab === 'hybrid') {
     return (
-      <div className="flex-1 flex flex-col w-full">
+      <div className="flex-1 flex flex-col w-full pt-4 pb-6 gap-4">
         {/* Sub-tab header */}
-        <SubTabHeader subTab={subTab} setSubTab={setSubTab} theme={theme} t={t} />
+        <div className="px-4">
+          <SubTabHeader subTab={subTab} setSubTab={setSubTab} theme={theme} t={t} />
+        </div>
         <HybridDexPage collection={farm.collection} />
       </div>
     );
   }
 
   return (
-    <div className="flex-1 flex flex-col w-full px-4 pb-2 sm:pb-4">
+    <div className="flex-1 flex flex-col w-full px-4 pt-4 pb-6 gap-4">
       {/* Sub-tab header */}
       <SubTabHeader subTab={subTab} setSubTab={setSubTab} theme={theme} t={t} />
 
       {/* 今日专注信息 */}
-      <div className="flex items-center justify-between mb-2 sm:mb-3 px-1">
+      <div
+        className="flex flex-wrap items-center justify-between gap-2 p-3 rounded-[var(--radius-card)] border shadow-[var(--shadow-card)]"
+        style={{ backgroundColor: theme.inputBg, borderColor: theme.border }}
+      >
         <div className="flex items-center gap-2">
           <span className="text-xs" style={{ color: theme.textFaint }}>
             {t.farmTodayFocus(todayFocusMinutes)}
@@ -355,13 +364,13 @@ export function FarmPage({
             ℹ️
           </button>
         </div>
-        <span className="text-xs whitespace-nowrap" style={{ color: theme.textFaint }}>
+        <span className="text-xs sm:whitespace-nowrap" style={{ color: theme.textFaint }}>
           {`${weatherSummary} · 🌰 ${totalBaseSeeds} · 🧬 ${injectedSeeds.length} · 🌈 ${prismaticSeeds.length} · 🌑 ${darkMatterSeeds.length}`}
         </span>
       </div>
 
       {/* 道具快捷栏 */}
-      <div className="flex items-center gap-2 mb-3 overflow-x-auto no-scrollbar pb-1">
+      <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1">
         {(guardianBarrierCount > 0 || barrierActiveToday) && (
           <button
             onClick={onUseGuardianBarrier}
@@ -397,7 +406,7 @@ export function FarmPage({
       </div>
 
       {/* 3×3 俯视网格 */}
-      <div className="relative mb-3 sm:mb-5 overflow-visible">
+      <div className="relative overflow-visible">
         <div className="relative mx-auto w-full max-w-[90%] sm:max-w-[760px]">
           {weather !== null && <WeatherLayer weather={weather} theme={theme} t={t} />}
           <div
@@ -483,7 +492,10 @@ export function FarmPage({
 
       {/* 没有种子提示 */}
       {totalPlantableSeeds === 0 && farm.plots.every(p => p.state === 'empty') && (
-        <div className="text-center py-4">
+        <div
+          className="text-center p-4 rounded-[var(--radius-card)] border shadow-[var(--shadow-card)]"
+          style={{ backgroundColor: theme.inputBg, borderColor: theme.border }}
+        >
           <p className="text-sm mb-2" style={{ color: theme.textMuted }}>{t.farmNoSeeds}</p>
           <button
             onClick={onGoWarehouse}
@@ -737,7 +749,7 @@ function SubTabHeader({ subTab, setSubTab, theme, t }: {
   };
 
   return (
-    <div className="px-1 py-3">
+    <div className="w-full">
       <div className="relative flex items-center rounded-full p-[3px]" style={{ backgroundColor: theme.inputBg }}>
         <div
           className="absolute top-[3px] bottom-[3px] rounded-full transition-all duration-200 ease-in-out"
@@ -876,7 +888,7 @@ function PlotCard({ plot, stolenRecord, nowTimestamp, theme, t, isTooltipOpen, o
     ? '0 14px 26px rgba(251,191,36,0.26), 0 0 16px rgba(251,191,36,0.22)'
     : plot.state === 'stolen'
       ? '0 14px 26px rgba(239,68,68,0.28), 0 0 16px rgba(239,68,68,0.18)'
-    : '0 10px 20px rgba(0,0,0,0.2), inset 0 -10px 16px rgba(0,0,0,0.14)';
+      : 'var(--shadow-card)';
 
   return (
     <div className={`group relative aspect-square sm:aspect-[3/4] w-full select-none${isTooltipOpen ? ' z-[100]' : ''}`}>
@@ -1360,7 +1372,7 @@ function LockedPlotCard({ requiredVarieties, theme, t }: {
           background: `linear-gradient(145deg, ${theme.surface} 0%, ${theme.inputBg} 100%)`,
           borderColor: theme.border,
           opacity: 0.8,
-          boxShadow: '0 8px 16px rgba(0,0,0,0.16), inset 0 -10px 14px rgba(0,0,0,0.14)',
+          boxShadow: 'var(--shadow-card)',
         }}
       />
       <div

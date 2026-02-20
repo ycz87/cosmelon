@@ -186,7 +186,7 @@ export function Settings({ settings, onChange, disabled, isWorkRunning, onExport
   const optBtn = (active: boolean) =>
     `px-3 py-1 rounded-[var(--radius-sm)] text-xs transition-all duration-200 ease-in-out hover:-translate-y-0.5 ui-hover-button cursor-pointer ${active ? 'font-medium' : ''}`;
   const optStyle = (active: boolean) => ({
-    backgroundColor: active ? `${theme.accent}30` : theme.inputBg,
+    backgroundColor: active ? `${theme.accent}30` : theme.surface,
     color: active ? theme.accent : theme.textMuted,
   });
 
@@ -225,9 +225,9 @@ export function Settings({ settings, onChange, disabled, isWorkRunning, onExport
         </button>
 
         {isOpen && (
-          <div className="absolute right-0 top-12 w-[calc(100vw-1.5rem)] sm:w-80 p-4 sm:p-5 rounded-[var(--radius-panel)] border shadow-[var(--shadow-elevated)] z-50 animate-fade-up max-h-[75vh] overflow-y-auto settings-scrollbar"
+          <div className="absolute right-0 top-12 w-[calc(100vw-1.5rem)] sm:w-80 p-4 rounded-[var(--radius-panel)] border shadow-[var(--shadow-elevated)] z-50 animate-fade-up max-h-[75vh] overflow-y-auto settings-scrollbar"
             style={{ backgroundColor: theme.surface, borderColor: theme.border }}>
-            <div className="flex flex-col">
+            <div className="flex flex-col gap-4">
               {/* ── 👤 Account ── */}
               {auth && (
                 <>
@@ -238,43 +238,55 @@ export function Settings({ settings, onChange, disabled, isWorkRunning, onExport
                     onLogout={auth.logout}
                     onUpdateProfile={auth.updateProfile}
                   />
-                  <div className="border-t mt-4 pt-4" style={{ borderColor: theme.border }} />
                 </>
               )}
 
               {disabled && (
-                <div className="text-xs mb-4" style={{ color: '#fbbf24' }}>{i18n.timerRunningHint}</div>
+                <div
+                  className="text-xs p-3 rounded-[var(--radius-card)] border shadow-[var(--shadow-card)]"
+                  style={{ color: '#fbbf24', backgroundColor: `${theme.accent}14`, borderColor: `${theme.accent}30` }}
+                >
+                  {i18n.timerRunningHint}
+                </div>
               )}
 
               {/* ── ⏱ 计时 ── */}
-              <SectionHeader title={i18n.sectionTimer} />
-              <div className="flex flex-col gap-4 mt-3">
-                <NumberStepper label={i18n.workDuration} value={settings.workMinutes}
-                  onChange={(v) => update({ workMinutes: v })} min={1} max={120} disabled={disabled} unit={i18n.minutes} />
-                {settings.workMinutes > 25 && (
-                  <div
-                    className="-mt-1 rounded-xl border px-3 py-2 text-[11px] leading-relaxed"
-                    style={{
-                      color: theme.textMuted,
-                      borderColor: `${theme.accent}40`,
-                      backgroundColor: `${theme.accent}14`,
-                    }}
-                    role="note"
-                    aria-live="polite"
-                  >
-                    {i18n.healthReminder}
-                  </div>
-                )}
-                <NumberStepper label={i18n.shortBreak} value={settings.shortBreakMinutes}
-                  onChange={(v) => update({ shortBreakMinutes: v })} min={1} max={30} disabled={disabled} unit={i18n.minutes} />
-                <Toggle label={i18n.autoStartBreak} checked={settings.autoStartBreak}
-                  onChange={(v) => update({ autoStartBreak: v })} disabled={settings.workMinutes > 25} />
-                <Toggle label={i18n.autoStartWork} checked={settings.autoStartWork}
-                  onChange={(v) => update({ autoStartWork: v })} />
+              <div
+                className="rounded-[var(--radius-card)] border p-4 shadow-[var(--shadow-card)]"
+                style={{ backgroundColor: theme.inputBg, borderColor: theme.border }}
+              >
+                <SectionHeader title={i18n.sectionTimer} />
+                <div className="flex flex-col gap-4 mt-3">
+                  <NumberStepper label={i18n.workDuration} value={settings.workMinutes}
+                    onChange={(v) => update({ workMinutes: v })} min={1} max={120} disabled={disabled} unit={i18n.minutes} />
+                  {settings.workMinutes > 25 && (
+                    <div
+                      className="rounded-[var(--radius-card)] border px-3 py-2 text-[11px] leading-relaxed"
+                      style={{
+                        color: theme.textMuted,
+                        borderColor: `${theme.accent}40`,
+                        backgroundColor: `${theme.accent}14`,
+                      }}
+                      role="note"
+                      aria-live="polite"
+                    >
+                      {i18n.healthReminder}
+                    </div>
+                  )}
+                  <NumberStepper label={i18n.shortBreak} value={settings.shortBreakMinutes}
+                    onChange={(v) => update({ shortBreakMinutes: v })} min={1} max={30} disabled={disabled} unit={i18n.minutes} />
+                  <Toggle label={i18n.autoStartBreak} checked={settings.autoStartBreak}
+                    onChange={(v) => update({ autoStartBreak: v })} disabled={settings.workMinutes > 25} />
+                  <Toggle label={i18n.autoStartWork} checked={settings.autoStartWork}
+                    onChange={(v) => update({ autoStartWork: v })} />
+                </div>
               </div>
 
               {/* ── 🔔 提醒 ── */}
-              <div className="border-t mt-6 pt-6" style={{ borderColor: theme.border }}>
+              <div
+                className="rounded-[var(--radius-card)] border p-4 shadow-[var(--shadow-card)]"
+                style={{ backgroundColor: theme.inputBg, borderColor: theme.border }}
+              >
                 <SectionHeader title={i18n.sectionAlerts} />
                 <div className="flex flex-col gap-4 mt-3">
                   <div className="flex items-center justify-between gap-3">
@@ -332,7 +344,10 @@ export function Settings({ settings, onChange, disabled, isWorkRunning, onExport
               </div>
 
               {/* ── 🎨 外观 ── */}
-              <div className="border-t mt-6 pt-6" style={{ borderColor: theme.border }}>
+              <div
+                className="rounded-[var(--radius-card)] border p-4 shadow-[var(--shadow-card)]"
+                style={{ backgroundColor: theme.inputBg, borderColor: theme.border }}
+              >
                 <SectionHeader title={i18n.sectionAppearance} />
                 <div className="flex flex-col gap-4 mt-3">
                   {/* 主题选择 — 3 列网格 */}
@@ -341,7 +356,7 @@ export function Settings({ settings, onChange, disabled, isWorkRunning, onExport
                       <button key={id} onClick={() => update({ theme: id })}
                         className="flex items-center gap-2 px-3 py-2 rounded-[var(--radius-sm)] text-xs transition-all duration-200 ease-in-out hover:-translate-y-0.5 ui-hover-button cursor-pointer"
                         style={{
-                          backgroundColor: settings.theme === id ? `${THEMES[id].colors.accent}30` : theme.inputBg,
+                          backgroundColor: settings.theme === id ? `${THEMES[id].colors.accent}30` : theme.surface,
                           color: settings.theme === id ? THEMES[id].colors.accent : theme.textMuted,
                         }}>
                         <span className="w-3 h-3 rounded-full shrink-0" style={{ backgroundColor: THEMES[id].colors.accent }} />
@@ -365,13 +380,16 @@ export function Settings({ settings, onChange, disabled, isWorkRunning, onExport
               </div>
 
               {/* ── ⚙ 通用 ── */}
-              <div className="border-t mt-6 pt-6" style={{ borderColor: theme.border }}>
+              <div
+                className="rounded-[var(--radius-card)] border p-4 shadow-[var(--shadow-card)]"
+                style={{ backgroundColor: theme.inputBg, borderColor: theme.border }}
+              >
                 <SectionHeader title={i18n.sectionGeneral} />
                 <div className="flex flex-col gap-3 mt-3">
                   <button
                     onClick={onExport}
                     className="w-full py-2 rounded-[var(--radius-sm)] text-xs transition-all duration-200 ease-in-out hover:-translate-y-0.5 ui-hover-button cursor-pointer"
-                    style={{ backgroundColor: theme.inputBg, color: theme.textMuted }}
+                    style={{ backgroundColor: theme.surface, color: theme.textMuted }}
                   >
                     {i18n.exportData}
                   </button>
@@ -380,7 +398,7 @@ export function Settings({ settings, onChange, disabled, isWorkRunning, onExport
                     <button
                       onClick={() => { onShowGuide(); setIsOpen(false); }}
                       className="w-full py-2 rounded-[var(--radius-sm)] text-xs transition-all duration-200 ease-in-out hover:-translate-y-0.5 ui-hover-button cursor-pointer"
-                      style={{ backgroundColor: theme.inputBg, color: theme.textMuted }}
+                      style={{ backgroundColor: theme.surface, color: theme.textMuted }}
                     >
                       {i18n.settingsGuide}
                     </button>
