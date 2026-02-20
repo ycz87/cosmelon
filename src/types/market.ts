@@ -13,20 +13,20 @@ export interface ShopItemDef {
 }
 
 export const SHOP_ITEMS: ShopItemDef[] = [
-  { id: 'star-dew', emoji: '⚡', price: 20, category: 'boost' },
-  { id: 'trap-net', emoji: '🪤', price: 30, category: 'defense' },
+  { id: 'star-dew', emoji: '✨', price: 20, category: 'boost' },
+  { id: 'trap-net', emoji: '🕸️', price: 30, category: 'defense' },
   { id: 'lullaby', emoji: '🎵', price: 40, category: 'boost' },
   { id: 'crystal-ball', emoji: '🔮', price: 50, category: 'special' },
-  { id: 'guardian-barrier', emoji: '🎪', price: 60, category: 'defense' },
-  { id: 'mutation-gun', emoji: '🔦', price: 80, category: 'special' },
+  { id: 'guardian-barrier', emoji: '🛡️', price: 60, category: 'defense' },
+  { id: 'mutation-gun', emoji: '🔫', price: 80, category: 'special' },
   { id: 'mystery-seed', emoji: '🌰', price: 80, category: 'seed' },
   { id: 'moon-dew', emoji: '🌙', price: 80, category: 'special' },
-  { id: 'drift-bottle', emoji: '🛸', price: 100, category: 'special' },
+  { id: 'drift-bottle', emoji: '🍾', price: 100, category: 'special' },
   { id: 'gene-modifier', emoji: '🧬', price: 120, category: 'special' },
-  { id: 'supernova-bottle', emoji: '☀️', price: 150, category: 'boost' },
-  { id: 'star-tracker', emoji: '📡', price: 150, category: 'defense' },
+  { id: 'supernova-bottle', emoji: '💥', price: 150, category: 'boost' },
+  { id: 'star-tracker', emoji: '🛰️', price: 150, category: 'defense' },
   { id: 'premium-seed', emoji: '💎', price: 200, category: 'seed' },
-  { id: 'nectar', emoji: '💧', price: 300, category: 'special' },
+  { id: 'nectar', emoji: '⭐', price: 300, category: 'special' },
 ];
 
 export const PLOT_PRICES: Record<number, number> = {
