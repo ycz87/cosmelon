@@ -2,6 +2,56 @@
 
 ---
 
+## v0.37.0 — 完善测试面板（DebugToolbar）
+日期：2026-02-20
+
+### 新增
+- **瓜币控制**
+  - 新增 +100/+1000/+10000 按钮
+  - 新增清零按钮
+  - 显示当前瓜币余额
+  - 通过 `useMelonCoin` 的 `addCoins` 和 `setBalance` 操作
+  - 自动同步到 localStorage
+
+- **成就控制**
+  - 新增「解锁全部成就」按钮（遍历所有成就 ID，设置 unlocked=true, unlockedAt=当前时间）
+  - 新增「重置成就」按钮（清空 achievements state）
+  - 显示当前已解锁成就数量
+  - `useAchievements` 新增 `unlockAll` / `resetAll` 接口
+  - 状态通过 `useLocalStorage` 同步
+
+- **变异射线枪**
+  - 新增 +1/+5/+10 按钮
+  - 射线枪 item ID: 'mutation-gun'
+  - 存储在 `shed.items`
+
+- **防护道具**
+  - 新增结界 +1/+5 按钮（item ID: 'guardian-barrier'）
+  - 新增月神甘露 +1/+5 按钮（item ID: 'moon-dew'）
+  - 存储在 `shed.items`
+
+- **天气控制**
+  - 新增「切换天气」按钮（循环切换 sunny/cloudy/rainy/night/rainbow/snowy/stormy）
+  - 新增「清除天气」按钮（设置为 null）
+  - 显示当前天气状态
+  - 天气存储在 `weatherState.current`
+
+- **天气类型扩展**
+  - 新增 snowy（雪天）和 stormy（暴风雨）天气类型
+  - 补充 8 语言 i18n 翻译（zh/en/ja/ko/de/fr/es/ru）
+  - `Weather` 类型支持 null（清除天气状态）
+  - `FarmPage` 在 weather === null 时正确隐藏天气层
+  - 新增 snowy/stormy 的天气滤镜和装饰效果
+
+### 修复
+- 修复 `DEBUG_WEATHER_ORDER` 只包含 4 种天气的问题，现包含全部 7 种
+- 修复 `DebugToolbar` 的 `WEATHER_ICON` 类型声明（从 `Partial<Record<...>>` 改为 `Record<Weather, string>`）
+
+### 技术细节
+- 所有调试操作通过 `App.tsx` 的 handler 接入对应 hook（`useMelonCoin`/`useAchievements`/`useShedStorage`/`useWeather`）
+- 状态修改自动触发 localStorage 同步
+- 布局新增「农场资源」「成就/天气」分组，保持紧凑不拥挤
+
 ## v0.36.0 — Phase 6 Step 4: 每周刷新商城
 日期：2026-02-20
 
