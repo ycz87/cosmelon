@@ -310,6 +310,7 @@ export interface Messages {
   sliceContinue: string;
   sliceButton: string;
   itemName: (id: string) => string;
+  itemDescription: (id: string) => string;
   itemFlavor: (id: string) => string;
   seedQualityLabel: (quality: string) => string;
   comboExpert: string;

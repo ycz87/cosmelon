@@ -12,6 +12,7 @@ import type { CollectedVariety, VarietyId } from '../types/farm';
 import type { ShopItemDef, ShopItemId, WeeklyShop } from '../types/market';
 import { SHOP_ITEMS, PLOT_PRICES } from '../types/market';
 import { ConfirmModal } from './ConfirmModal';
+import { MarketItemCard } from './Market/MarketItemCard';
 import { WeeklyTab } from './Market/WeeklyTab';
 
 interface MarketPageProps {
@@ -130,7 +131,7 @@ export function MarketPage(props: MarketPageProps) {
   };
 
   return (
-    <div className="w-full max-w-xs sm:max-w-sm px-4 pt-4 pb-6">
+    <div className={`w-full px-4 pt-4 pb-6 ${activeTab === 'buy' ? 'max-w-xs sm:max-w-sm md:max-w-3xl' : 'max-w-xs sm:max-w-sm'}`}>
       <div
         className="rounded-[var(--radius-container)] p-5 border"
         style={{ backgroundColor: theme.surface, borderColor: theme.border, boxShadow: 'var(--shadow-card)' }}
@@ -180,43 +181,23 @@ export function MarketPage(props: MarketPageProps) {
 
         {activeTab === 'buy' && (
           <div className="flex flex-col gap-4">
-            <div className="flex flex-col gap-2">
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
               {SHOP_ITEMS.map((item) => {
                 const affordable = balance >= item.price;
                 const itemName = messages.itemName(item.id);
+                const justBought = recentBoughtItemId === item.id;
                 return (
-                  <button
+                  <MarketItemCard
                     key={item.id}
-                    onClick={() => setPendingPurchase({ type: 'item', item })}
+                    icon={item.emoji}
+                    name={itemName}
+                    description={messages.itemDescription(item.id)}
+                    priceText={`${item.price} 💰`}
+                    actionText={justBought ? `✅ ${messages.marketBuySuccess}` : messages.marketBuyConfirmButton}
                     disabled={!affordable}
-                    className="w-full p-3 rounded-[var(--radius-card)] border transition-all duration-200 ease-in-out hover:-translate-y-0.5 text-left disabled:cursor-not-allowed cursor-pointer"
-                    style={{
-                      backgroundColor: theme.inputBg,
-                      borderColor: theme.border,
-                      opacity: affordable ? 1 : 0.55,
-                      boxShadow: 'var(--shadow-card)',
-                    }}
-                  >
-                    <div className="flex items-center justify-between gap-3">
-                      <div className="flex items-center gap-2 min-w-0">
-                        <span className="text-xl">{item.emoji}</span>
-                        <div className="text-sm font-medium truncate" style={{ color: theme.text }}>
-                          {itemName}
-                        </div>
-                      </div>
-                      <div className="shrink-0 flex items-center gap-2">
-                        {recentBoughtItemId === item.id && (
-                          <span className="text-sm animate-bounce" style={{ color: '#10b981' }}>✅</span>
-                        )}
-                        <span
-                          className="text-sm font-semibold"
-                          style={{ color: affordable ? '#fbbf24' : '#ef4444' }}
-                        >
-                          {item.price} 💰
-                        </span>
-                      </div>
-                    </div>
-                  </button>
+                    onAction={() => setPendingPurchase({ type: 'item', item })}
+                    theme={theme}
+                  />
                 );
               })}
             </div>
@@ -225,40 +206,23 @@ export function MarketPage(props: MarketPageProps) {
               <h3 className="text-sm font-semibold mb-2" style={{ color: theme.text }}>
                 {messages.marketPlotSection}
               </h3>
-              <div className="flex flex-col gap-2">
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                 {buyablePlots.map((plot) => {
                   const unlocked = unlockedPlotCount > plot.plotIndex;
                   const affordable = balance >= plot.price;
                   const disabled = unlocked || !affordable;
                   return (
-                    <button
+                    <MarketItemCard
                       key={plot.plotIndex}
-                      onClick={() => setPendingPurchase({ type: 'plot', plotIndex: plot.plotIndex, price: plot.price })}
+                      icon="🧱"
+                      name={messages.marketPlotName(plot.plotIndex)}
+                      description={unlocked ? messages.marketPlotUnlocked : messages.marketPlotSection}
+                      priceText={unlocked ? messages.marketPlotUnlocked : `${plot.price} 💰`}
+                      actionText={unlocked ? messages.marketPlotUnlocked : messages.marketBuyConfirmButton}
                       disabled={disabled}
-                      className="w-full p-3 rounded-[var(--radius-card)] border transition-all duration-200 ease-in-out hover:-translate-y-0.5 text-left disabled:cursor-not-allowed cursor-pointer"
-                      style={{
-                        backgroundColor: theme.inputBg,
-                        borderColor: theme.border,
-                        opacity: disabled ? 0.6 : 1,
-                        boxShadow: 'var(--shadow-card)',
-                      }}
-                    >
-                      <div className="flex items-center justify-between gap-3">
-                        <div className="text-sm font-medium" style={{ color: theme.text }}>
-                          {messages.marketPlotName(plot.plotIndex)}
-                        </div>
-                        {unlocked ? (
-                          <div className="text-sm font-medium" style={{ color: '#10b981' }}>{messages.marketPlotUnlocked}</div>
-                        ) : (
-                          <div
-                            className="text-sm font-semibold"
-                            style={{ color: affordable ? '#fbbf24' : '#ef4444' }}
-                          >
-                            {plot.price} 💰
-                          </div>
-                        )}
-                      </div>
-                    </button>
+                      onAction={() => setPendingPurchase({ type: 'plot', plotIndex: plot.plotIndex, price: plot.price })}
+                      theme={theme}
+                    />
                   );
                 })}
               </div>
