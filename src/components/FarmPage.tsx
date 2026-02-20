@@ -324,7 +324,10 @@ export function FarmPage({
   }
 
   return (
-    <div className="flex-1 flex flex-col w-full px-4 pt-4 pb-6 gap-4">
+    <div
+      className="flex-1 flex flex-col w-full px-4 pt-4 pb-6 gap-4 rounded-[var(--radius-panel)] transition-[background] duration-300 ease-out"
+      style={{ background: getFarmAtmosphereBackground(weather, theme) }}
+    >
       {/* Sub-tab header */}
       <SubTabHeader subTab={subTab} setSubTab={setSubTab} theme={theme} t={t} />
 
@@ -398,14 +401,37 @@ export function FarmPage({
           <SkyWeatherLayer weather={weather} theme={theme} t={t} />
           <div className="relative mt-2">
             <div
-              className="pointer-events-none absolute inset-0 rounded-[20px] z-[1]"
+              className="pointer-events-none absolute inset-0 rounded-[var(--radius-card)] z-[1]"
               style={{
                 background: `radial-gradient(circle at 50% 16%, ${theme.surface}66 0%, ${theme.surface}00 72%)`,
               }}
             />
+            {weather === 'rainy' && (
+              <div className="pointer-events-none absolute inset-0 z-[7] overflow-hidden rounded-[var(--radius-card)]">
+                {GRID_RAIN_DROPS.map((drop, index) => (
+                  <span
+                    key={`grid-rain-${index}`}
+                    className="absolute block rounded-full"
+                    style={{
+                      left: `${drop.left}%`,
+                      top: `${drop.top}%`,
+                      width: `${drop.size}px`,
+                      height: `${drop.size}px`,
+                      backgroundColor: 'rgba(219,234,254,0.72)',
+                      animation: `farmRainDropSlide ${drop.duration}s linear infinite`,
+                      animationDelay: `${drop.delay}s`,
+                    }}
+                  />
+                ))}
+              </div>
+            )}
             <div
               className="farm-grid-perspective relative z-[5] grid grid-cols-3 gap-1 sm:gap-2"
-              style={{ filter: weather === null ? 'none' : getWeatherGridFilter(weather) }}
+              style={{
+                filter: weather === null ? 'none' : getWeatherGridFilter(weather),
+                transition: 'filter 260ms ease-out',
+                willChange: 'filter',
+              }}
               onClick={() => setActiveTooltipPlotId(null)}
             >
               {plotSlots.map((slot, index) => (
@@ -449,54 +475,6 @@ export function FarmPage({
           </div>
         </div>
       </div>
-      <style>{`
-        .farm-grid-perspective {
-          transform: perspective(600px) rotateX(12deg);
-          transform-origin: center top;
-          transform-style: flat;
-        }
-        @keyframes skyCloudFloat {
-          0%, 100% { transform: translateX(0px) translateY(0px); }
-          50% { transform: translateX(6px) translateY(-2px); }
-        }
-        @keyframes skyRainFall {
-          0% { transform: translateY(-10px); opacity: 0; }
-          20% { opacity: 0.95; }
-          100% { transform: translateY(34px); opacity: 0; }
-        }
-        @keyframes skySnowFall {
-          0% { transform: translate3d(0px, -6px, 0px); opacity: 0; }
-          20% { opacity: 0.95; }
-          100% { transform: translate3d(8px, 34px, 0px); opacity: 0; }
-        }
-        @keyframes skyStarTwinkle {
-          0%, 100% { transform: scale(0.9); opacity: 0.25; }
-          50% { transform: scale(1.25); opacity: 1; }
-        }
-        @keyframes skySunPulse {
-          0%, 100% { transform: scale(1); opacity: 0.95; }
-          50% { transform: scale(1.08); opacity: 1; }
-        }
-        @keyframes skyLightningFlash {
-          0%, 76%, 100% { opacity: 0; transform: translateY(0px) scale(0.95); }
-          78%, 82% { opacity: 1; transform: translateY(2px) scale(1.06); }
-          84% { opacity: 0.2; }
-          87% { opacity: 1; transform: translateY(0px) scale(1); }
-        }
-        @keyframes creatureHover {
-          0%, 100% { transform: translateY(0px) scale(1); }
-          50% { transform: translateY(-8px) scale(1.06); }
-        }
-        @keyframes alienPop {
-          0% { transform: translateY(8px) scale(0.94); opacity: 0; }
-          100% { transform: translateY(0px) scale(1); opacity: 1; }
-        }
-        @media (min-width: 640px) {
-          .farm-grid-perspective {
-            transform: perspective(800px) rotateX(18deg);
-          }
-        }
-      `}</style>
 
       {/* 没有种子提示 */}
       {totalPlantableSeeds === 0 && farm.plots.every(p => p.state === 'empty') && (
@@ -563,50 +541,148 @@ export function FarmPage({
 }
 
 function getWeatherGridFilter(weather: Weather): string {
-  if (weather === 'sunny') return 'saturate(1.05) brightness(1.02)';
-  if (weather === 'cloudy') return 'saturate(0.95) brightness(0.98)';
-  if (weather === 'rainy') return 'saturate(0.9) brightness(0.94)';
-  if (weather === 'night') return 'saturate(0.85) brightness(0.88)';
-  if (weather === 'snowy') return 'saturate(0.92) brightness(1.05)';
-  if (weather === 'stormy') return 'saturate(0.82) brightness(0.84)';
-  return 'saturate(1.18) brightness(1.04)';
+  if (weather === 'sunny') return 'brightness(1.05) saturate(1.08)';
+  if (weather === 'cloudy') return 'brightness(0.9) saturate(0.8)';
+  if (weather === 'rainy') return 'brightness(0.92) saturate(1.1)';
+  if (weather === 'night') return 'brightness(0.85) hue-rotate(10deg)';
+  if (weather === 'snowy') return 'brightness(1.02) saturate(0.95)';
+  if (weather === 'stormy') return 'brightness(0.82) saturate(0.75)';
+  return 'brightness(1.06) saturate(1.18)';
 }
 
 function getSkyBackground(weather: Weather | null, theme: ReturnType<typeof useTheme>): string {
   if (weather === null) {
-    return `linear-gradient(180deg, ${theme.inputBg} 0%, ${theme.surface} 100%)`;
+    return `radial-gradient(circle at 50% -18%, rgba(255,255,255,0.46) 0%, rgba(255,255,255,0) 62%), linear-gradient(180deg, ${theme.inputBg} 0%, ${theme.surface} 100%)`;
   }
   if (weather === 'sunny') {
-    return 'linear-gradient(180deg, #dbeafe 0%, #bfdbfe 54%, #93c5fd 100%)';
+    return 'radial-gradient(circle at 22% 8%, rgba(255,255,255,0.52) 0%, rgba(255,255,255,0) 46%), linear-gradient(180deg, #dbeafe 0%, #f0f9ff 48%, #e0f2fe 100%)';
   }
   if (weather === 'cloudy') {
-    return 'linear-gradient(180deg, #cbd5e1 0%, #94a3b8 60%, #64748b 100%)';
+    return 'radial-gradient(circle at 30% 10%, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0) 54%), linear-gradient(180deg, #cbd5e1 0%, #94a3b8 56%, #64748b 100%)';
   }
   if (weather === 'rainy') {
-    return 'linear-gradient(180deg, #93c5fd 0%, #60a5fa 58%, #3b82f6 100%)';
+    return 'radial-gradient(circle at 28% 5%, rgba(219,234,254,0.36) 0%, rgba(219,234,254,0) 52%), linear-gradient(180deg, #93c5fd 0%, #60a5fa 56%, #3b82f6 100%)';
   }
   if (weather === 'night') {
-    return 'linear-gradient(180deg, #0b1f4a 0%, #1e3a8a 60%, #1d4ed8 100%)';
+    return 'radial-gradient(circle at 68% -8%, rgba(147,197,253,0.14) 0%, rgba(147,197,253,0) 46%), linear-gradient(180deg, #0b1f4a 0%, #1e3a8a 54%, #312e81 100%)';
   }
   if (weather === 'snowy') {
-    return 'linear-gradient(180deg, #e2e8f0 0%, #dbeafe 58%, #cbd5e1 100%)';
+    return 'radial-gradient(circle at 24% 7%, rgba(255,255,255,0.55) 0%, rgba(255,255,255,0) 50%), linear-gradient(180deg, #e2e8f0 0%, #dbeafe 52%, #cbd5e1 100%)';
   }
   if (weather === 'stormy') {
-    return 'linear-gradient(180deg, #334155 0%, #1e293b 58%, #0f172a 100%)';
+    return 'radial-gradient(circle at 32% 8%, rgba(148,163,184,0.2) 0%, rgba(148,163,184,0) 50%), linear-gradient(180deg, #334155 0%, #1e293b 54%, #0f172a 100%)';
   }
-  return 'linear-gradient(180deg, #bfdbfe 0%, #a5b4fc 36%, #f9a8d4 68%, #fcd34d 100%)';
+  return 'radial-gradient(circle at 24% 8%, rgba(255,255,255,0.38) 0%, rgba(255,255,255,0) 46%), linear-gradient(180deg, #bfdbfe 0%, #a5b4fc 34%, #f9a8d4 66%, #fcd34d 100%)';
 }
 
-const SKY_RAIN_COLUMNS = [8, 14, 21, 29, 38, 46, 55, 63, 72, 80, 88];
-const SKY_SNOW_COLUMNS = [10, 18, 27, 35, 44, 52, 60, 68, 77, 85, 92];
-const SKY_STAR_POINTS: ReadonlyArray<{ x: number; y: number; size: number }> = [
-  { x: 10, y: 10, size: 12 },
-  { x: 24, y: 20, size: 10 },
-  { x: 42, y: 12, size: 13 },
-  { x: 58, y: 23, size: 11 },
-  { x: 74, y: 10, size: 12 },
-  { x: 88, y: 18, size: 10 },
+function getFarmAtmosphereBackground(weather: Weather | null, theme: ReturnType<typeof useTheme>): string {
+  if (weather === 'sunny') {
+    return 'linear-gradient(180deg, #dbeafe 0%, #f0f9ff 30%, #e0f2fe 52%, #d9f99d 74%, #bef264 100%)';
+  }
+  if (weather === 'night') {
+    return 'linear-gradient(180deg, #0b1f4a 0%, #1e3a8a 30%, #312e81 54%, #1f2937 78%, #0f172a 100%)';
+  }
+  if (weather === 'cloudy') {
+    return 'linear-gradient(180deg, #cbd5e1 0%, #94a3b8 34%, #64748b 56%, #647b5f 78%, #4b5f45 100%)';
+  }
+  if (weather === 'rainy') {
+    return 'linear-gradient(180deg, #93c5fd 0%, #60a5fa 32%, #3b82f6 56%, #3f5f6f 78%, #334155 100%)';
+  }
+  if (weather === 'snowy') {
+    return 'linear-gradient(180deg, #e2e8f0 0%, #dbeafe 34%, #cbd5e1 56%, #d4dbe5 78%, #a8b4c9 100%)';
+  }
+  if (weather === 'stormy') {
+    return 'linear-gradient(180deg, #334155 0%, #1e293b 32%, #0f172a 58%, #1f2937 80%, #111827 100%)';
+  }
+  if (weather === 'rainbow') {
+    return 'linear-gradient(180deg, #bfdbfe 0%, #a5b4fc 30%, #f9a8d4 52%, #fcd34d 74%, #bef264 100%)';
+  }
+  return `linear-gradient(180deg, ${theme.inputBg} 0%, ${theme.surface} 46%, ${theme.border} 72%, ${theme.inputBg} 100%)`;
+}
+
+interface SkyRainParticle {
+  left: number;
+  duration: number;
+  delay: number;
+  length: number;
+}
+
+interface SkySnowParticle {
+  left: number;
+  duration: number;
+  delay: number;
+  size: number;
+}
+
+interface SkyStarPoint {
+  x: number;
+  y: number;
+  size: number;
+  duration: number;
+  delay: number;
+}
+
+interface GridRainDrop {
+  left: number;
+  top: number;
+  size: number;
+  duration: number;
+  delay: number;
+}
+
+const SKY_PARTICLE_DESKTOP_COUNT = 40;
+const SKY_PARTICLE_MOBILE_COUNT = 20;
+const SKY_FOREGROUND_CLOUDS = [
+  { left: 11, top: 8, size: 26, delay: 0 },
+  { left: 42, top: 12, size: 29, delay: 0.3 },
+  { left: 70, top: 9, size: 24, delay: 0.7 },
 ];
+const SKY_BACKGROUND_CLOUDS = [
+  { left: 5, top: 4, size: 22, delay: 0.15 },
+  { left: 56, top: 6, size: 21, delay: 0.55 },
+];
+
+const SKY_RAIN_PARTICLES: ReadonlyArray<SkyRainParticle> = Array.from(
+  { length: SKY_PARTICLE_DESKTOP_COUNT },
+  (_, index) => ({
+    left: 1 + ((index * 11.7) % 96),
+    duration: 1 + (index % 11) * 0.02,
+    delay: (index % 10) * 0.08,
+    length: 10 + (index % 4) * 2,
+  }),
+);
+
+const SKY_SNOW_PARTICLES: ReadonlyArray<SkySnowParticle> = Array.from(
+  { length: SKY_PARTICLE_DESKTOP_COUNT },
+  (_, index) => ({
+    left: 2 + ((index * 9.1 + 6) % 94),
+    duration: 2 + (index % 10) * 0.11,
+    delay: (index % 12) * 0.14,
+    size: 3 + (index % 4),
+  }),
+);
+
+const SKY_STAR_POINTS: ReadonlyArray<SkyStarPoint> = Array.from(
+  { length: 14 },
+  (_, index) => ({
+    x: 4 + ((index * 7.3) % 92),
+    y: 8 + ((index * 4.5) % 26),
+    size: 8 + (index % 4) * 2,
+    duration: 1.6 + ((index * 0.11) % 0.8),
+    delay: (index % 8) * 0.12,
+  }),
+);
+
+const GRID_RAIN_DROPS: ReadonlyArray<GridRainDrop> = Array.from(
+  { length: 18 },
+  (_, index) => ({
+    left: 4 + ((index * 5.9 + 3) % 90),
+    top: 8 + ((index * 3.8) % 48),
+    size: 2 + (index % 3),
+    duration: 1.9 + (index % 6) * 0.18,
+    delay: (index % 7) * 0.22,
+  }),
+);
 
 const CREATURE_EMOJI: Record<Creature['type'], string> = {
   bee: '🐝',
@@ -620,82 +696,99 @@ function SkyWeatherLayer({ weather, theme, t }: {
   theme: ReturnType<typeof useTheme>;
   t: ReturnType<typeof useI18n>;
 }) {
-  const cloudColor = weather === 'stormy' ? '#1f2937' : weather === 'cloudy' ? '#9ca3af' : '#ffffff';
+  const cloudColor = weather === 'stormy' ? '#1f2937' : weather === 'cloudy' ? '#94a3b8' : '#ffffff';
   const weatherLabel = weather === null ? '⛅ --' : `${WEATHER_ICON[weather]} ${t.farmWeatherName(weather)}`;
+  const showSun = weather === null || weather === 'sunny' || weather === 'rainbow';
+  const showClouds = weather !== 'night';
+  const showRain = weather === 'rainy' || weather === 'stormy';
 
   return (
     <div
-      className="relative h-20 overflow-hidden rounded-[20px] border shadow-[var(--shadow-card)]"
+      className="relative h-24 overflow-hidden rounded-[var(--radius-card)] border shadow-[var(--shadow-card)] transition-[background] duration-300 ease-out"
       style={{ background: getSkyBackground(weather, theme), borderColor: theme.border }}
     >
       <div
         className="absolute inset-0"
         style={{
-          background: 'linear-gradient(180deg, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0) 62%)',
+          background: 'linear-gradient(180deg, rgba(255,255,255,0.32) 0%, rgba(255,255,255,0) 58%)',
         }}
       />
-      {(weather === null || weather === 'sunny') && (
+
+      {showSun && (
+        <div
+          className="absolute left-[9%] top-[8px] h-8 w-8 rounded-full"
+          style={{
+            background: 'radial-gradient(circle, rgba(254,243,199,0.95) 0%, rgba(251,191,36,0.72) 44%, rgba(251,191,36,0) 72%)',
+            boxShadow: '0 0 30px rgba(251, 191, 36, 0.8), 0 0 60px rgba(251, 191, 36, 0.5)',
+            animation: 'skySunPulse 3.2s ease-in-out infinite',
+          }}
+        >
+          <span className="absolute inset-0 flex items-center justify-center text-[22px]">☀️</span>
+        </div>
+      )}
+
+      {showClouds && (
         <>
-          <span
-            className="absolute left-[10%] top-[6px] text-[28px]"
-            style={{ animation: 'skySunPulse 3.2s ease-in-out infinite' }}
-          >
-            ☀️
-          </span>
-          <span
-            className="absolute left-[40%] top-[8px] text-[20px]"
-            style={{ color: cloudColor, animation: 'skyCloudFloat 4.8s ease-in-out infinite' }}
-          >
-            ☁️
-          </span>
-          <span
-            className="absolute left-[68%] top-[14px] text-[24px]"
-            style={{ color: cloudColor, animation: 'skyCloudFloat 5.6s ease-in-out infinite', animationDelay: '0.8s' }}
-          >
-            ☁️
-          </span>
+          {SKY_BACKGROUND_CLOUDS.map((cloud) => (
+            <span
+              key={`cloud-bg-${cloud.left}`}
+              className="absolute"
+              style={{
+                left: `${cloud.left}%`,
+                top: `${cloud.top}px`,
+                fontSize: `${cloud.size}px`,
+                color: cloudColor,
+                opacity: 0.6,
+                animation: 'skyCloudFloat 6.5s ease-in-out infinite',
+                animationDelay: `${cloud.delay}s`,
+              }}
+            >
+              ☁️
+            </span>
+          ))}
+          {SKY_FOREGROUND_CLOUDS.map((cloud) => (
+            <span
+              key={`cloud-fg-${cloud.left}`}
+              className="absolute"
+              style={{
+                left: `${cloud.left}%`,
+                top: `${cloud.top}px`,
+                fontSize: `${cloud.size}px`,
+                color: cloudColor,
+                animation: 'skyCloudFloat 4.5s ease-in-out infinite',
+                animationDelay: `${cloud.delay}s`,
+              }}
+            >
+              ☁️
+            </span>
+          ))}
         </>
       )}
 
       {weather === 'rainbow' && (
-        <>
-          <span
-            className="absolute left-[8%] top-[6px] text-[26px]"
-            style={{ animation: 'skySunPulse 3.2s ease-in-out infinite' }}
-          >
-            ☀️
-          </span>
-          <span
-            className="absolute left-[36%] top-[8px] text-[36px]"
-            style={{ animation: 'skyCloudFloat 5.4s ease-in-out infinite' }}
-          >
-            🌈
-          </span>
-        </>
+        <span
+          className="absolute left-[38%] top-[10px] text-[34px]"
+          style={{ animation: 'skyCloudFloat 5.2s ease-in-out infinite' }}
+        >
+          🌈
+        </span>
       )}
 
-      {weather === 'cloudy' && (
+      {showRain && (
         <>
-          <span className="absolute left-[12%] top-[9px] text-[24px]" style={{ color: cloudColor, animation: 'skyCloudFloat 4.5s ease-in-out infinite' }}>☁️</span>
-          <span className="absolute left-[38%] top-[14px] text-[28px]" style={{ color: cloudColor, animation: 'skyCloudFloat 5.8s ease-in-out infinite', animationDelay: '0.3s' }}>☁️</span>
-          <span className="absolute left-[70%] top-[8px] text-[26px]" style={{ color: cloudColor, animation: 'skyCloudFloat 5.1s ease-in-out infinite', animationDelay: '0.9s' }}>☁️</span>
-        </>
-      )}
-
-      {weather === 'rainy' && (
-        <>
-          <span className="absolute left-[20%] top-[8px] text-[26px]" style={{ color: cloudColor, animation: 'skyCloudFloat 4.5s ease-in-out infinite' }}>☁️</span>
-          <span className="absolute left-[52%] top-[10px] text-[30px]" style={{ color: cloudColor, animation: 'skyCloudFloat 5.3s ease-in-out infinite', animationDelay: '0.5s' }}>☁️</span>
-          {SKY_RAIN_COLUMNS.map((column, index) => (
+          {SKY_RAIN_PARTICLES.map((particle, index) => (
             <span
-              key={`rain-${column}`}
-              className="absolute block h-[12px] w-[2px] rounded-full"
+              key={`rain-${index}`}
+              className={`absolute block w-[2px] rounded-full ${index >= SKY_PARTICLE_MOBILE_COUNT ? 'sky-particle-desktop-only' : ''}`}
               style={{
-                left: `${column}%`,
-                top: '32px',
-                backgroundColor: '#dbeafe',
-                animation: `skyRainFall ${1 + (index * 0.06)}s linear infinite`,
-                animationDelay: `${index * 0.1}s`,
+                left: `${particle.left}%`,
+                top: weather === 'stormy' ? '34px' : '32px',
+                height: `${particle.length}px`,
+                background: weather === 'stormy'
+                  ? 'linear-gradient(180deg, rgba(191,219,254,0) 0%, rgba(191,219,254,0.95) 52%, rgba(191,219,254,0) 100%)'
+                  : 'linear-gradient(180deg, rgba(219,234,254,0) 0%, rgba(219,234,254,0.95) 52%, rgba(219,234,254,0) 100%)',
+                animation: `skyRainFall ${weather === 'stormy' ? Math.max(0.86, particle.duration - 0.14) : particle.duration}s linear infinite`,
+                animationDelay: `${particle.delay}s`,
               }}
             />
           ))}
@@ -704,20 +797,19 @@ function SkyWeatherLayer({ weather, theme, t }: {
 
       {weather === 'snowy' && (
         <>
-          <span className="absolute left-[26%] top-[8px] text-[26px]" style={{ color: cloudColor, animation: 'skyCloudFloat 5.2s ease-in-out infinite' }}>☁️</span>
-          <span className="absolute left-[60%] top-[10px] text-[24px]" style={{ color: cloudColor, animation: 'skyCloudFloat 4.8s ease-in-out infinite', animationDelay: '0.6s' }}>☁️</span>
-          {SKY_SNOW_COLUMNS.map((column, index) => (
+          {SKY_SNOW_PARTICLES.map((particle, index) => (
             <span
-              key={`snow-${column}`}
-              className="absolute block rounded-full"
+              key={`snow-${index}`}
+              className={`absolute block rounded-full ${index >= SKY_PARTICLE_MOBILE_COUNT ? 'sky-particle-desktop-only' : ''}`}
               style={{
-                left: `${column}%`,
-                top: '30px',
-                width: '4px',
-                height: '4px',
+                left: `${particle.left}%`,
+                top: '32px',
+                width: `${particle.size}px`,
+                height: `${particle.size}px`,
                 backgroundColor: '#ffffff',
-                animation: `skySnowFall ${1.8 + (index * 0.08)}s linear infinite`,
-                animationDelay: `${index * 0.15}s`,
+                boxShadow: '0 0 5px rgba(255,255,255,0.86)',
+                animation: `skySnowFall ${particle.duration}s linear infinite`,
+                animationDelay: `${particle.delay}s`,
               }}
             />
           ))}
@@ -729,15 +821,16 @@ function SkyWeatherLayer({ weather, theme, t }: {
           <span className="absolute left-[12%] top-[8px] text-[28px]" style={{ animation: 'skyCloudFloat 5.4s ease-in-out infinite' }}>🌙</span>
           {SKY_STAR_POINTS.map((point, index) => (
             <span
-              key={`star-${point.x}`}
+              key={`star-${index}`}
               className="absolute"
               style={{
                 left: `${point.x}%`,
                 top: `${point.y}%`,
-                fontSize: point.size,
+                fontSize: `${point.size}px`,
                 color: '#f8fafc',
-                animation: `skyStarTwinkle ${1.6 + (index * 0.25)}s ease-in-out infinite`,
-                animationDelay: `${index * 0.18}s`,
+                textShadow: '0 0 8px rgba(248,250,252,0.65)',
+                animation: `skyStarTwinkle ${point.duration}s ease-in-out infinite`,
+                animationDelay: `${point.delay}s`,
               }}
             >
               ✦
@@ -748,24 +841,8 @@ function SkyWeatherLayer({ weather, theme, t }: {
 
       {weather === 'stormy' && (
         <>
-          <span className="absolute left-[18%] top-[8px] text-[28px]" style={{ color: cloudColor, animation: 'skyCloudFloat 4.8s ease-in-out infinite' }}>☁️</span>
-          <span className="absolute left-[50%] top-[6px] text-[34px]" style={{ color: cloudColor, animation: 'skyCloudFloat 5.2s ease-in-out infinite', animationDelay: '0.5s' }}>☁️</span>
-          <span className="absolute left-[70%] top-[10px] text-[24px]" style={{ color: cloudColor, animation: 'skyCloudFloat 4.4s ease-in-out infinite', animationDelay: '0.8s' }}>☁️</span>
-          <span className="absolute left-[44%] top-[20px] text-[20px]" style={{ animation: 'skyLightningFlash 2.8s ease-in-out infinite' }}>⚡</span>
+          <span className="absolute left-[42%] top-[20px] text-[20px]" style={{ animation: 'skyLightningFlash 2.8s ease-in-out infinite' }}>⚡</span>
           <span className="absolute left-[66%] top-[22px] text-[18px]" style={{ animation: 'skyLightningFlash 3.4s ease-in-out infinite', animationDelay: '1.1s' }}>⚡</span>
-          {SKY_RAIN_COLUMNS.map((column, index) => (
-            <span
-              key={`storm-rain-${column}`}
-              className="absolute block h-[12px] w-[2px] rounded-full"
-              style={{
-                left: `${column}%`,
-                top: '34px',
-                backgroundColor: '#bfdbfe',
-                animation: `skyRainFall ${0.9 + (index * 0.05)}s linear infinite`,
-                animationDelay: `${index * 0.08}s`,
-              }}
-            />
-          ))}
         </>
       )}
 
