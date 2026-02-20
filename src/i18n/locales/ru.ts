@@ -20,6 +20,11 @@ export const ru: Messages = {
   marketWeeklyTypeDecoration: 'Ограниченный декор',
   marketWeeklyGeneName: (varietyName, stars) => `Ген-фрагмент ${varietyName} (${stars}⭐)`,
   marketWeeklySeedName: (varietyName) => `Семя ${varietyName}`,
+  farmTabLab: 'Лаборатория',
+  collectionTabPure: 'Чистые',
+  collectionTabHybrid: 'Гибриды',
+  collectionTabPrismatic: 'Призматич.',
+  collectionTabDarkMatter: 'Тёмная материя',
   marketWeeklyDecorationName: (decorationId) => ({
     'star-lamp': 'Звёздный фонарь',
     'melon-scarecrow': 'Арбузное пугало',
@@ -83,6 +88,7 @@ export const ru: Messages = {
   darkMatterGuideBlackHole: 'Слейте 10 пар двойных элементных генов',
   darkMatterGuideCosmicHeart: 'Соберите все 78 сортов',
   darkMatterGuideProgress: (collected, total) => `Прогресс коллекции: ${collected}/${total}`,
+  geneLabTab: 'Лаборатория',
   prismaticSeedHint: 'Призматическое семя: выращивает сорт Радуги (созревание 50000 мин)',
   prismaticSeedLabel: (varietyName) => `🌈 Призматическое семя (${varietyName})`,
   prismaticSeedCountLabel: (count) => `🌈 Призматические семена ×${count}`,

@@ -564,6 +564,7 @@ export const de: Messages = {
 
   farmPlotsTab: 'Beete',
   farmCollectionTab: 'Sammlung',
+  farmTabLab: 'Labor',
   hybridDexTab: 'Hybrid',
   hybridDexTitle: 'Hybrid-Sorten-Lexikon',
   farmTodayFocus: (m) => `Heute: ${m} Min. fokussiert`,
@@ -626,6 +627,10 @@ export const de: Messages = {
   itemMoonDewFail: '🌙 Bereits maximale Seltenheit. Mondgöttin-Tau wurde nicht verbraucht',
   itemTrapNetSuccess: '🪤 Alien-Fallennetz wirkt! Der interstellare Dieb wurde gefasst',
 
+  collectionTabPure: 'Rein',
+  collectionTabHybrid: 'Hybrid',
+  collectionTabPrismatic: 'Prisma',
+  collectionTabDarkMatter: 'Dunkle Materie',
   starJourneyTitle: '🚀 Sternenreise',
   collectionProgress: (c, t) => `${c}/${t} gesammelt`,
   collectionLocked: 'Gesperrt',
@@ -786,7 +791,7 @@ export const de: Messages = {
   darkMatterGuideCosmicHeart: 'Alle 78 Sorten sammeln',
   darkMatterGuideProgress: (collected, total) => `Sammlungsfortschritt: ${collected}/${total}`,
   varietyDetailClose: 'Schließen',
-  geneLabTab: '🧬 Labor',
+  geneLabTab: 'Labor',
   geneLabTitle: 'Gen-Inventar',
   geneLabEmpty: 'Noch keine Genfragmente. Ernte Sorten, um sie zu sammeln.',
   geneLabFragments: 'Genfragmente',

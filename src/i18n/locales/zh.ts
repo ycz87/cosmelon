@@ -565,6 +565,7 @@ export const zh: Messages = {
   // Farm
   farmPlotsTab: '地块',
   farmCollectionTab: '图鉴',
+  farmTabLab: '实验室',
   hybridDexTab: '杂交',
   hybridDexTitle: '杂交品种图鉴',
   farmTodayFocus: (m) => `今日专注 ${m} 分钟`,
@@ -631,6 +632,10 @@ export const zh: Messages = {
   itemTrapNetSuccess: '🪤 捕网生效！成功抓获星际大盗',
 
   // Collection
+  collectionTabPure: '纯种',
+  collectionTabHybrid: '杂交',
+  collectionTabPrismatic: '幻彩',
+  collectionTabDarkMatter: '暗物质',
   starJourneyTitle: '🚀 星际旅程',
   collectionProgress: (c, t) => `已收集 ${c}/${t}`,
   collectionLocked: '未解锁',
@@ -791,7 +796,7 @@ export const zh: Messages = {
   darkMatterGuideCosmicHeart: '收集全部 78 个品种',
   darkMatterGuideProgress: (collected, total) => `图鉴进度：${collected}/${total}`,
   varietyDetailClose: '关闭',
-  geneLabTab: '🧬 实验室',
+  geneLabTab: '实验室',
   geneLabTitle: '基因背包',
   geneLabEmpty: '还没有基因片段，收获品种后自动获得',
   geneLabFragments: '基因片段',

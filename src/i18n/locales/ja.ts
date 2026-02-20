@@ -564,6 +564,7 @@ export const ja: Messages = {
 
   farmPlotsTab: '畑',
   farmCollectionTab: '図鑑',
+  farmTabLab: 'ラボ',
   hybridDexTab: '交配',
   hybridDexTitle: '交配品種図鑑',
   farmTodayFocus: (m) => `今日の集中 ${m} 分`,
@@ -626,6 +627,10 @@ export const ja: Messages = {
   itemMoonDewFail: '🌙 すでに最高レア度です。月神の甘露は消費されません',
   itemTrapNetSuccess: '🪤 メロン星人トラップネット発動！宇宙大泥棒の捕獲に成功',
 
+  collectionTabPure: '純種',
+  collectionTabHybrid: '交配',
+  collectionTabPrismatic: 'プリズム',
+  collectionTabDarkMatter: 'ダークマター',
   starJourneyTitle: '🚀 星間の旅',
   collectionProgress: (c, t) => `${c}/${t} 収集済み`,
   collectionLocked: '未解放',
@@ -786,7 +791,7 @@ export const ja: Messages = {
   darkMatterGuideCosmicHeart: '全78品種を収集',
   darkMatterGuideProgress: (collected, total) => `図鑑進捗: ${collected}/${total}`,
   varietyDetailClose: '閉じる',
-  geneLabTab: '🧬 ラボ',
+  geneLabTab: 'ラボ',
   geneLabTitle: '遺伝子インベントリ',
   geneLabEmpty: 'まだ遺伝子フラグメントがありません。品種を収穫して入手しましょう。',
   geneLabFragments: '遺伝子フラグメント',

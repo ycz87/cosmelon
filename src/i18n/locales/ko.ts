@@ -564,6 +564,7 @@ export const ko: Messages = {
 
   farmPlotsTab: '밭',
   farmCollectionTab: '도감',
+  farmTabLab: '연구실',
   hybridDexTab: '잡종',
   hybridDexTitle: '잡종 품종 도감',
   farmTodayFocus: (m) => `오늘 집중 ${m}분`,
@@ -626,6 +627,10 @@ export const ko: Messages = {
   itemMoonDewFail: '🌙 이미 최고 희귀도예요. 달의 감로는 소모되지 않았어요',
   itemTrapNetSuccess: '🪤 멜론 외계인 트랩넷 발동! 우주 대도둑 포획 성공',
 
+  collectionTabPure: '순종',
+  collectionTabHybrid: '잡종',
+  collectionTabPrismatic: '프리즘',
+  collectionTabDarkMatter: '암흑물질',
   starJourneyTitle: '🚀 성간 여정',
   collectionProgress: (c, t) => `${c}/${t} 수집`,
   collectionLocked: '잠김',
@@ -786,7 +791,7 @@ export const ko: Messages = {
   darkMatterGuideCosmicHeart: '78개 품종 전부 수집',
   darkMatterGuideProgress: (collected, total) => `도감 진행도: ${collected}/${total}`,
   varietyDetailClose: '닫기',
-  geneLabTab: '🧬 연구소',
+  geneLabTab: '연구실',
   geneLabTitle: '유전자 인벤토리',
   geneLabEmpty: '아직 유전자 조각이 없습니다. 품종을 수확하면 자동으로 획득됩니다.',
   geneLabFragments: '유전자 조각',
