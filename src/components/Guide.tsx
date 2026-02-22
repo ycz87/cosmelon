@@ -77,11 +77,12 @@ export function GuideButton({ externalShow, onExternalClose }: {
 }) {
   const [showGuide, setShowGuide] = useState(false);
 
-  // 首次访问自动弹出
+  // 首次访问自动弹出 (临时禁用用于截图)
   useEffect(() => {
     const seen = localStorage.getItem('pomodoro-guide-seen');
     if (!seen) {
-      setShowGuide(true);
+      // setShowGuide(true); // 临时注释
+      localStorage.setItem('pomodoro-guide-seen', '1'); // 自动标记为已看过
     }
   }, []);
 

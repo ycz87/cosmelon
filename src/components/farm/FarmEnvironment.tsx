@@ -43,19 +43,19 @@ export function FarmEnvironment({ weather = null }: FarmEnvironmentProps) {
       <div
         className="absolute left-0 top-0 h-1/2 w-full"
         style={{
-          background: 'linear-gradient(to bottom, #87CEEB 0%, #B0E0E6 100%)',
+          background: 'linear-gradient(to bottom, #D4F1F9 0%, #E8F8FC 100%)',
         }}
       />
       <div
         className="absolute bottom-0 left-0 h-1/2 w-full"
         style={{
-          background: 'linear-gradient(to bottom, #9ACD32 0%, #90EE90 100%)',
+          background: 'linear-gradient(to bottom, #DDED92 0%, #C8E66D 100%)',
         }}
       />
       <div
         className="absolute left-0 top-1/2 h-24 w-full -translate-y-1/2"
         style={{
-          background: 'linear-gradient(to bottom, rgba(224,246,255,0) 0%, rgba(224,246,255,0.62) 38%, rgba(187,237,190,0.64) 64%, rgba(187,237,190,0) 100%)',
+          background: 'linear-gradient(to bottom, rgba(212,241,249,0) 0%, rgba(232,248,252,0.62) 38%, rgba(200,230,109,0.64) 64%, rgba(200,230,109,0) 100%)',
         }}
       />
       {weatherOverlay && (

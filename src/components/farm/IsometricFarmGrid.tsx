@@ -44,13 +44,13 @@ const SCENE_SIZE = {
 const PLOT_ISLAND_SIZE = 200;
 
 const PLOT_POSITIONS: PlotPosition[] = [
-  { x: 350, y: 74 },
-  { x: 260, y: 168 },
-  { x: 440, y: 168 },
-  { x: 240, y: 264 },
-  { x: 460, y: 264 },
-  { x: 220, y: 360 },
-  { x: 480, y: 360 },
+  { x: SCENE_SIZE.width / 2, y: 80 },      // 顶部 1块
+  { x: SCENE_SIZE.width / 2 + 110, y: 160 }, // 第2排左
+  { x: SCENE_SIZE.width / 2 - 110, y: 160 }, // 第2排右
+  { x: SCENE_SIZE.width / 2, y: 250 },      // 中间 1块
+  { x: SCENE_SIZE.width / 2 + 110, y: 340 }, // 第4排左
+  { x: SCENE_SIZE.width / 2 - 110, y: 340 }, // 第4排右
+  { x: SCENE_SIZE.width / 2, y: 420 },      // 底部 1块
 ];
 
 export function IsometricFarmGrid({
@@ -103,7 +103,7 @@ export function IsometricFarmGrid({
                 }}
               >
                 <div
-                  className="pointer-events-none absolute inset-[10px] rounded-xl"
+                  className="pointer-events-none absolute inset-[10px] rounded-[28px]"
                   style={{
                     backgroundColor: '#8B4513',
                     boxShadow: '0 8px 16px rgba(0,0,0,0.4)',
@@ -133,7 +133,7 @@ export function IsometricFarmGrid({
               }}
             >
               <div
-                className="pointer-events-none absolute inset-[10px] rounded-xl"
+                className="pointer-events-none absolute inset-[10px] rounded-[28px]"
                 style={{
                   backgroundColor: '#8B4513',
                   boxShadow: '0 8px 16px rgba(0,0,0,0.4)',

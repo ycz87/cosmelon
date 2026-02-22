@@ -137,6 +137,11 @@ function migrateFusionHistory(raw: unknown): FusionHistory {
 }
 
 function App() {
+  // 临时禁用引导弹窗（用于截图）
+  if (!localStorage.getItem('pomodoro-guide-seen')) {
+    localStorage.setItem('pomodoro-guide-seen', '1');
+  }
+  
   const [currentTask, setCurrentTask] = useState('');
   const [records, setRecords] = useLocalStorage<PomodoroRecord[]>('pomodoro-records', []);
   const [projectRecords, setProjectRecords] = useLocalStorage<ProjectRecord[]>('pomodoro-project-records', []);

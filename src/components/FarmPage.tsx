@@ -295,7 +295,7 @@ export function FarmPage({
 
   return (
     <div
-      className="flex-1 flex flex-col w-full px-4 pt-4 pb-6 gap-4 rounded-[var(--radius-panel)] transition-[background] duration-300 ease-out bg-[linear-gradient(to_bottom,#1e3a8a_0%,#2563eb_45%,#4c1d95_45%,#4c1d95_50%,#1c120c_50%,#1c120c_100%)]"
+      className="flex-1 flex flex-col w-full px-4 pt-4 pb-6 gap-4 rounded-[var(--radius-panel)] transition-[background] duration-300 ease-out bg-[linear-gradient(to_bottom,#D4F1F9_0%,#E8F8FC_100%)]"
     >
       {/* Sub-tab header */}
       <SubTabHeader subTab={subTab} setSubTab={setSubTab} theme={theme} t={t} />
@@ -765,9 +765,8 @@ export function PlotCard({ plot, weather, stolenRecord, nowTimestamp, theme, t, 
   const progressGlowColor = `hsla(${progressHue} 85% 58% / 0.5)`;
   const progressRing = `conic-gradient(${progressRingColor} ${progressPercent}%, rgba(255,255,255,0.16) ${progressPercent}% 100%)`;
   const wetSoil = weather === 'rainy' || weather === 'stormy';
-  const warmSoil = weather === 'sunny' || weather === 'rainbow';
-  const soilBaseColor = wetSoil ? '#6B5D4F' : warmSoil ? '#8F785A' : '#8B7355';
-  const soilDeepColor = wetSoil ? '#4F443A' : '#6C5843';
+  const soilBaseColor = '#D4956C';
+  const soilDeepColor = '#B8754A';
   const soilVariance = getPlotSoilVariance(plot.id);
   const variedSoilMid = adjustHexColor(soilBaseColor, soilVariance);
   const variedSoilTop = adjustHexColor(variedSoilMid, 7);
@@ -808,9 +807,7 @@ export function PlotCard({ plot, weather, stolenRecord, nowTimestamp, theme, t, 
     ? '#fbbf24'
     : plot.state === 'stolen'
       ? '#ef4444'
-      : plot.state === 'empty'
-        ? (isHovered ? 'rgba(255,255,255,0.35)' : adjustHexColor(variedSoilBottom, -8))
-        : theme.border;
+      : '#A0643D';
   const plotInsetShadow = 'inset 0 2px 8px rgba(255,255,255,0.14), inset 0 -8px 16px rgba(0,0,0,0.28)';
   const tileShadow = plot.state === 'mature'
     ? (isHovered
@@ -831,7 +828,7 @@ export function PlotCard({ plot, weather, stolenRecord, nowTimestamp, theme, t, 
 
   return (
     <div
-      className={`group relative aspect-square sm:aspect-[3/4] w-full select-none rounded-[12px] bg-[#3f2b1c] shadow-[0_4px_8px_rgba(0,0,0,0.6)]${isTooltipOpen ? ' z-[100]' : ''}`}
+      className={`group relative aspect-square sm:aspect-[3/4] w-full select-none rounded-[24px] bg-[#3f2b1c] shadow-[0_4px_8px_rgba(0,0,0,0.6)]${isTooltipOpen ? ' z-[100]' : ''}`}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       onFocusCapture={() => setIsHovered(true)}
@@ -844,17 +841,17 @@ export function PlotCard({ plot, weather, stolenRecord, nowTimestamp, theme, t, 
         }}
       >
         <div
-          className="absolute inset-0 rounded-[16px] border-2 transition-all duration-200 ease-out"
+          className="absolute inset-0 rounded-[24px] transition-all duration-200 ease-out"
           style={{
             background: tileBackground,
-            borderColor: tileBorderColor,
+            border: `3px solid ${tileBorderColor}`,
             boxShadow: tileShadow,
             opacity: plot.state === 'withered' ? 0.74 : plot.state === 'stolen' ? 0.96 : 1,
             animation: isPlantFxActive ? 'farmSoilShake 260ms ease-in-out' : 'none',
           }}
         />
         <div
-          className="pointer-events-none absolute inset-0 rounded-[16px]"
+          className="pointer-events-none absolute inset-0 rounded-[24px]"
           style={{
             background: wetSoil
               ? `${plotLightOverlay}, linear-gradient(160deg, rgba(255,255,255,0.26) 0%, rgba(255,255,255,0.08) 24%, rgba(255,255,255,0) 56%)`
@@ -898,7 +895,7 @@ export function PlotCard({ plot, weather, stolenRecord, nowTimestamp, theme, t, 
         {plot.state === 'empty' && (
           <button
             onClick={onPlantClick}
-            className="absolute inset-0 rounded-[16px] flex flex-col items-center justify-center gap-1 text-center transition-all duration-200 ease-out hover:-translate-y-0.5"
+            className="absolute inset-0 rounded-[24px] flex flex-col items-center justify-center gap-1 text-center transition-all duration-200 ease-out hover:-translate-y-0.5"
           >
             <span className="text-[clamp(1.7rem,5vw,2.4rem)] font-light leading-none" style={{ color: '#f8eddc' }}>+</span>
             <span className="text-[10px] font-medium tracking-wide leading-none" style={{ color: '#f8eddc' }}>
@@ -910,7 +907,7 @@ export function PlotCard({ plot, weather, stolenRecord, nowTimestamp, theme, t, 
         {/* Growing plot */}
         {plot.state === 'growing' && (
           <div
-            className="absolute inset-0 rounded-[16px] flex flex-col items-center justify-center px-3 py-3 text-center cursor-pointer transition-all duration-200 ease-out hover:-translate-y-0.5"
+            className="absolute inset-0 rounded-[24px] flex flex-col items-center justify-center px-3 py-3 text-center cursor-pointer transition-all duration-200 ease-out hover:-translate-y-0.5"
             onClick={(e) => {
               e.stopPropagation();
               onTooltipToggle();
@@ -1082,7 +1079,7 @@ export function PlotCard({ plot, weather, stolenRecord, nowTimestamp, theme, t, 
               }
               handleHarvestAction();
             }}
-            className="absolute inset-0 rounded-[16px] flex flex-col items-center justify-center px-3 py-3 text-center transition-all duration-200 ease-out hover:-translate-y-0.5"
+            className="absolute inset-0 rounded-[24px] flex flex-col items-center justify-center px-3 py-3 text-center transition-all duration-200 ease-out hover:-translate-y-0.5"
           >
             <span className="text-[clamp(2.2rem,6.8vw,3.1rem)]" style={{
               filter: `drop-shadow(0 0 8px ${rarityColor})`,
@@ -1209,7 +1206,7 @@ export function PlotCard({ plot, weather, stolenRecord, nowTimestamp, theme, t, 
               }
               onClearClick();
             }}
-            className="absolute inset-0 rounded-[16px] flex flex-col items-center justify-center px-3 py-3 text-center transition-all duration-200 ease-out hover:-translate-y-0.5"
+            className="absolute inset-0 rounded-[24px] flex flex-col items-center justify-center px-3 py-3 text-center transition-all duration-200 ease-out hover:-translate-y-0.5"
           >
             <span className="text-[clamp(1.9rem,6vw,2.5rem)] grayscale">💀</span>
             <span className="text-[11px] font-medium" style={{ color: theme.textMuted }}>
@@ -1287,7 +1284,7 @@ export function PlotCard({ plot, weather, stolenRecord, nowTimestamp, theme, t, 
         {plot.state === 'stolen' && (
           <button
             onClick={onClearClick}
-            className="absolute inset-0 rounded-[16px] flex flex-col items-center justify-center px-3 py-3 text-center transition-all duration-200 ease-out hover:-translate-y-0.5"
+            className="absolute inset-0 rounded-[24px] flex flex-col items-center justify-center px-3 py-3 text-center transition-all duration-200 ease-out hover:-translate-y-0.5"
           >
             <span className="text-[clamp(1.8rem,5.8vw,2.4rem)]">📜</span>
             <span className="mt-1 text-[11px] font-semibold leading-tight" style={{ color: '#fee2e2' }}>
