@@ -105,7 +105,8 @@ export function IsometricFarmGrid({
                 <div
                   className="pointer-events-none absolute inset-[10px] rounded-[28px]"
                   style={{
-                    backgroundColor: '#8B4513',
+                    background: 'linear-gradient(135deg, #D4956C 0%, #B8754A 100%)',
+                    border: '3px solid #A0643D',
                     boxShadow: '0 8px 16px rgba(0,0,0,0.4)',
                     transform: 'perspective(960px) rotateX(45deg) rotateZ(45deg)',
                     transformOrigin: 'center center',
@@ -135,7 +136,8 @@ export function IsometricFarmGrid({
               <div
                 className="pointer-events-none absolute inset-[10px] rounded-[28px]"
                 style={{
-                  backgroundColor: '#8B4513',
+                  background: 'linear-gradient(135deg, #D4956C 0%, #B8754A 100%)',
+                  border: '3px solid #A0643D',
                   boxShadow: '0 8px 16px rgba(0,0,0,0.4)',
                   transform: 'perspective(960px) rotateX(45deg) rotateZ(45deg)',
                   transformOrigin: 'center center',
