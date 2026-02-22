@@ -60,20 +60,20 @@ export function FarmEnvironment({ weather = null }: FarmEnvironmentProps) {
   return (
     <div className="pointer-events-none absolute inset-0 z-[-1] overflow-hidden" aria-hidden="true">
       <div
-        className="absolute left-0 top-0 h-[56%] w-full"
+        className="absolute left-0 top-0 h-1/2 w-full"
         style={{
           background: 'linear-gradient(to bottom, #B8E6F5 0%, #E8F8FC 100%)',
         }}
       />
       <div
-        className="absolute bottom-0 left-0 h-[46%] w-full"
+        className="absolute bottom-0 left-0 h-1/2 w-full"
         style={{
           background: 'linear-gradient(to bottom, #D4ED6E 0%, #B8D84E 100%)',
         }}
       />
 
       <svg
-        className="absolute left-0 top-[43%] h-[20%] min-h-[96px] w-full"
+        className="absolute left-0 top-1/2 h-[20%] min-h-[96px] w-full"
         viewBox="0 0 1440 180"
         preserveAspectRatio="none"
       >
