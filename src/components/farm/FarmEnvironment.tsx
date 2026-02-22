@@ -1,7 +1,7 @@
 /**
  * FarmEnvironment - Full-screen farm background.
  *
- * Renders a split sky/ground gradient with a soft horizon blend,
+ * Renders a cartoon sky/grass scene with decorative SVG elements
  * and applies optional weather overlays.
  */
 import type { Weather } from '../../types/farm';
@@ -9,6 +9,25 @@ import type { Weather } from '../../types/farm';
 interface FarmEnvironmentProps {
   weather?: Weather | null;
 }
+
+const SUN_RAY_ANGLES = [0, 36, 72, 108, 144, 180, 216, 252, 288, 324] as const;
+
+const CLOUD_POSITIONS = [
+  { left: '30%', top: '20%' },
+  { left: '60%', top: '15%' },
+  { left: '80%', top: '25%' },
+  { left: '45%', top: '30%' },
+] as const;
+
+const GRASS_BLADE_PATHS = [
+  { left: '8%', top: '68%', d: 'M9 28 Q8 16 3 4' },
+  { left: '18%', top: '74%', d: 'M9 28 Q12 17 15 5' },
+  { left: '34%', top: '71%', d: 'M9 28 Q6 18 4 6' },
+  { left: '49%', top: '78%', d: 'M9 28 Q9 15 13 4' },
+  { left: '63%', top: '73%', d: 'M9 28 Q7 17 5 5' },
+  { left: '78%', top: '76%', d: 'M9 28 Q12 17 14 6' },
+  { left: '90%', top: '70%', d: 'M9 28 Q8 16 6 5' },
+] as const;
 
 function getWeatherOverlay(weather: Weather | null | undefined): string | null {
   if (weather === 'sunny') {
@@ -41,23 +60,91 @@ export function FarmEnvironment({ weather = null }: FarmEnvironmentProps) {
   return (
     <div className="pointer-events-none absolute inset-0 z-[-1] overflow-hidden" aria-hidden="true">
       <div
-        className="absolute left-0 top-0 h-1/2 w-full"
+        className="absolute left-0 top-0 h-[56%] w-full"
         style={{
-          background: 'linear-gradient(to bottom, #D4F1F9 0%, #E8F8FC 100%)',
+          background: 'linear-gradient(to bottom, #B8E6F5 0%, #E8F8FC 100%)',
         }}
       />
       <div
-        className="absolute bottom-0 left-0 h-1/2 w-full"
+        className="absolute bottom-0 left-0 h-[46%] w-full"
         style={{
-          background: 'linear-gradient(to bottom, #DDED92 0%, #C8E66D 100%)',
+          background: 'linear-gradient(to bottom, #D4ED6E 0%, #B8D84E 100%)',
         }}
       />
-      <div
-        className="absolute left-0 top-1/2 h-24 w-full -translate-y-1/2"
-        style={{
-          background: 'linear-gradient(to bottom, rgba(212,241,249,0) 0%, rgba(232,248,252,0.62) 38%, rgba(200,230,109,0.64) 64%, rgba(200,230,109,0) 100%)',
-        }}
-      />
+
+      <svg
+        className="absolute left-0 top-[43%] h-[20%] min-h-[96px] w-full"
+        viewBox="0 0 1440 180"
+        preserveAspectRatio="none"
+      >
+        <path
+          d="M0 136 C180 88 340 90 500 122 C660 154 820 148 980 116 C1140 84 1280 92 1440 128 L1440 180 L0 180 Z"
+          fill="#D4ED6E"
+        />
+      </svg>
+
+      <svg
+        className="absolute h-[70px] w-[70px]"
+        style={{ left: '15%', top: '15%' }}
+        viewBox="0 0 70 70"
+      >
+        {SUN_RAY_ANGLES.map((angle) => {
+          const radian = (angle * Math.PI) / 180;
+          const x1 = 35 + Math.cos(radian) * 23;
+          const y1 = 35 + Math.sin(radian) * 23;
+          const x2 = 35 + Math.cos(radian) * 31;
+          const y2 = 35 + Math.sin(radian) * 31;
+          return (
+            <line
+              key={angle}
+              x1={x1}
+              y1={y1}
+              x2={x2}
+              y2={y2}
+              stroke="#FFA500"
+              strokeWidth="2"
+              strokeLinecap="round"
+            />
+          );
+        })}
+        <circle cx="35" cy="35" r="18" fill="#FFD93D" stroke="#FFA500" strokeWidth="3" />
+        <circle cx="29" cy="31.5" r="2.2" fill="#6B4F00" />
+        <circle cx="41" cy="31.5" r="2.2" fill="#6B4F00" />
+        <path d="M27 40 Q35 47 43 40" stroke="#6B4F00" strokeWidth="2.5" strokeLinecap="round" fill="none" />
+      </svg>
+
+      {CLOUD_POSITIONS.map((cloud, index) => (
+        <svg
+          key={`${cloud.left}-${cloud.top}`}
+          className="absolute h-[32px] w-[50px]"
+          style={{ left: cloud.left, top: cloud.top, opacity: index === 3 ? 0.9 : 1 }}
+          viewBox="0 0 100 64"
+        >
+          <circle cx="30" cy="40" r="16" fill="#FFFFFF" />
+          <circle cx="48" cy="28" r="20" fill="#FFFFFF" />
+          <circle cx="66" cy="37" r="17" fill="#FFFFFF" />
+          <circle cx="82" cy="42" r="12" fill="#FFFFFF" />
+          <path
+            d="M16 45 C14 33 24 24 34 25 C38 16 45 11 54 11 C64 11 72 17 75 26 C84 24 93 30 94 40 C98 42 100 45 100 50 C100 56 94 61 86 61 H22 C12 61 6 55 6 48 C6 46 10 44 16 45 Z"
+            fill="none"
+            stroke="#E0E0E0"
+            strokeWidth="2.5"
+            strokeLinejoin="round"
+          />
+        </svg>
+      ))}
+
+      {GRASS_BLADE_PATHS.map((blade) => (
+        <svg
+          key={`${blade.left}-${blade.top}`}
+          className="absolute h-[30px] w-[18px]"
+          style={{ left: blade.left, top: blade.top }}
+          viewBox="0 0 18 30"
+        >
+          <path d={blade.d} stroke="#7CB342" strokeWidth="2.4" strokeLinecap="round" fill="none" />
+        </svg>
+      ))}
+
       {weatherOverlay && (
         <div
           className="absolute inset-0 transition-opacity duration-300"
