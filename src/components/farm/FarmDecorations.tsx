@@ -4,7 +4,7 @@
  * Places houses/barns in all corners plus side animals with fully
  * SVG-drawn assets. Elements are responsive and stay outside gameplay.
  *
- * TEMPORARY: Testing PNG assets (house-red-roof.png, barn-red.png, fence-segment.png)
+ * TEMPORARY: Testing PNG assets v2 (house-orange-roof-v2.png, barn-red-v2.png, fence-segment-v2.png)
  */
 
 interface HouseIconProps {
@@ -12,11 +12,11 @@ interface HouseIconProps {
 }
 
 function HouseIcon({ roof }: HouseIconProps) {
-  // TEMPORARY: Using PNG for red roof, keeping SVG for blue roof
+  // TEMPORARY: Using PNG for red roof (v2), keeping SVG for blue roof
   if (roof === 'red') {
     return (
       <img
-        src="/assets/farm/house-red-roof.png"
+        src="/assets/farm/house-orange-roof-v2.png"
         alt="House"
         className="h-[66px] w-[82px] sm:h-[82px] sm:w-[100px] md:h-[96px] md:w-[116px] object-contain"
       />
@@ -46,10 +46,10 @@ function HouseIcon({ roof }: HouseIconProps) {
 }
 
 function BarnIcon() {
-  // TEMPORARY: Using PNG
+  // TEMPORARY: Using PNG v2
   return (
     <img
-      src="/assets/farm/barn-red.png"
+      src="/assets/farm/barn-red-v2.png"
       alt="Barn"
       className="h-[68px] w-[84px] sm:h-[84px] sm:w-[102px] md:h-[98px] md:w-[118px] object-contain"
     />
@@ -61,10 +61,10 @@ interface FenceSegmentProps {
 }
 
 function FenceSegment({ mirrored = false }: FenceSegmentProps) {
-  // TEMPORARY: Using PNG
+  // TEMPORARY: Using PNG v2
   return (
     <img
-      src="/assets/farm/fence-segment.png"
+      src="/assets/farm/fence-segment-v2.png"
       alt="Fence"
       className="h-[24px] w-[52px] sm:h-[30px] sm:w-[64px] md:h-[34px] md:w-[72px] object-contain"
       style={{ transform: mirrored ? 'scaleX(-1)' : undefined }}
