@@ -162,16 +162,14 @@ export function IsometricFarmGrid({
                 }}
               >
                 <div
-                  className="pointer-events-none absolute inset-[10px] rounded-[28px]"
+                  className="pointer-events-none absolute inset-[16px] rounded-[24px]"
                   style={{
-                    background: 'linear-gradient(135deg, #D4956C 0%, #B8754A 100%)',
-                    border: '3px solid #A0643D',
-                    boxShadow: '0 8px 16px rgba(0,0,0,0.4)',
-                    transform: 'perspective(960px) rotateX(45deg) rotateZ(45deg)',
-                    transformOrigin: 'center center',
+                    background: 'linear-gradient(180deg, #E1B888 0%, #D4A574 100%)',
+                    border: '4px solid #8B6F47',
+                    boxShadow: '0 8px 0 #65472D, 0 14px 20px rgba(80,52,30,0.28)',
                   }}
                 />
-                <div className="absolute inset-[20px] z-10 flex items-center justify-center rounded-xl border-2 border-dashed" style={{ borderColor: `${theme.border}cc`, backgroundColor: `${theme.surface}dd` }}>
+                <div className="absolute inset-[24px] z-10 flex items-center justify-center rounded-xl border-2 border-dashed" style={{ borderColor: `${theme.border}cc`, backgroundColor: `${theme.surface}dd` }}>
                   <span className="text-xs font-medium" style={{ color: theme.textMuted }}>
                     {t.collectionLocked}
                   </span>
@@ -192,17 +190,7 @@ export function IsometricFarmGrid({
                 transform: 'translate(-50%, -50%)',
               }}
             >
-              <div
-                className="pointer-events-none absolute inset-[10px] rounded-[28px]"
-                style={{
-                  background: 'linear-gradient(135deg, #D4956C 0%, #B8754A 100%)',
-                  border: '3px solid #A0643D',
-                  boxShadow: '0 8px 16px rgba(0,0,0,0.4)',
-                  transform: 'perspective(960px) rotateX(45deg) rotateZ(45deg)',
-                  transformOrigin: 'center center',
-                }}
-              />
-              <div className="absolute inset-[18px] z-10">
+              <div className="absolute inset-[14px] z-10">
                 <PlotCard
                   plot={plot}
                   weather={weather}

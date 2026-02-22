@@ -35,9 +35,9 @@ import { VARIETY_DEFS, RARITY_COLOR, RARITY_STARS } from '../types/farm';
 import { getGrowthStage, getStageEmoji, isVarietyRevealed } from '../farm/growth';
 import { CollectionPage } from './CollectionPage';
 import { GeneLabPage } from './GeneLabPage';
-import { SkyLayer } from './farm/SkyLayer';
 import { FarmEnvironment } from './farm/FarmEnvironment';
 import { IsometricFarmGrid } from './farm/IsometricFarmGrid';
+import { FarmDecorations } from './farm/FarmDecorations';
 
 interface FarmPageProps {
   farm: FarmStorage;
@@ -367,9 +367,7 @@ export function FarmPage({
       {/* 农场场景 */}
       <div className="farm-page relative isolate overflow-hidden min-h-[520px] sm:min-h-[620px] md:min-h-[720px] rounded-[var(--radius-panel)]">
         <FarmEnvironment weather={weather} />
-        <div className="pointer-events-none absolute left-0 top-0 z-[10] h-[45%] w-full overflow-hidden">
-          <SkyLayer weather={weather} currentTime={new Date()} />
-        </div>
+        <FarmDecorations />
         <div className="relative z-[20] pt-3 sm:pt-4">
           <IsometricFarmGrid
             plots={farm.plots}
@@ -765,11 +763,11 @@ export function PlotCard({ plot, weather, stolenRecord, nowTimestamp, theme, t, 
   const progressGlowColor = `hsla(${progressHue} 85% 58% / 0.5)`;
   const progressRing = `conic-gradient(${progressRingColor} ${progressPercent}%, rgba(255,255,255,0.16) ${progressPercent}% 100%)`;
   const wetSoil = weather === 'rainy' || weather === 'stormy';
-  const soilBaseColor = '#D4956C';
-  const soilDeepColor = '#B8754A';
+  const soilBaseColor = '#D4A574';
+  const soilDeepColor = '#B98554';
   const soilVariance = getPlotSoilVariance(plot.id);
   const variedSoilMid = adjustHexColor(soilBaseColor, soilVariance);
-  const variedSoilTop = adjustHexColor(variedSoilMid, 7);
+  const variedSoilTop = adjustHexColor(variedSoilMid, 5);
   const variedSoilBottom = adjustHexColor(soilDeepColor, soilVariance - 2);
   const stageDarknessAdjust = stage === 'seed' || stage === 'sprout'
     ? 3
@@ -780,14 +778,14 @@ export function PlotCard({ plot, weather, stolenRecord, nowTimestamp, theme, t, 
   const matureSoilBottom = adjustHexColor(variedSoilBottom, -7);
   const buildSoilTexture = (topColor: string, bottomColor: string): string => {
     const layers = [
-      'radial-gradient(circle at 50% 32%, rgba(255,255,255,0.16) 0%, rgba(255,255,255,0) 56%)',
-      'radial-gradient(circle at 50% 100%, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0) 52%)',
-      `linear-gradient(180deg, ${adjustHexColor(topColor, 5)} 0%, ${bottomColor} 100%)`,
-      'repeating-linear-gradient(48deg, rgba(255,255,255,0.03) 0px, rgba(255,255,255,0.03) 1px, rgba(0,0,0,0.05) 1px, rgba(0,0,0,0.05) 4px)',
+      'radial-gradient(circle at 50% 22%, rgba(255,255,255,0.25) 0%, rgba(255,255,255,0) 58%)',
+      'radial-gradient(circle at 52% 105%, rgba(107,71,44,0.36) 0%, rgba(107,71,44,0) 52%)',
+      'repeating-linear-gradient(52deg, rgba(255,255,255,0.06) 0px, rgba(255,255,255,0.06) 1px, rgba(122,83,54,0.09) 1px, rgba(122,83,54,0.09) 4px)',
+      `linear-gradient(180deg, ${adjustHexColor(topColor, 8)} 0%, ${bottomColor} 100%)`,
       `linear-gradient(145deg, ${topColor} 0%, ${bottomColor} 100%)`,
     ];
     if (wetSoil) {
-      layers.unshift('linear-gradient(160deg, rgba(255,255,255,0.24) 0%, rgba(255,255,255,0.08) 25%, rgba(255,255,255,0) 55%)');
+      layers.unshift('linear-gradient(160deg, rgba(255,255,255,0.26) 0%, rgba(255,255,255,0.08) 25%, rgba(255,255,255,0) 55%)');
     }
     return layers.join(', ');
   };
@@ -803,32 +801,31 @@ export function PlotCard({ plot, weather, stolenRecord, nowTimestamp, theme, t, 
           : plot.state === 'stolen'
             ? 'linear-gradient(145deg, rgba(185,28,28,0.5) 0%, rgba(127,29,29,0.36) 100%)'
             : `linear-gradient(145deg, ${theme.surface} 0%, ${theme.inputBg} 100%)`;
-  const tileBorderColor = plot.state === 'mature'
-    ? '#fbbf24'
-    : plot.state === 'stolen'
-      ? '#ef4444'
-      : '#A0643D';
-  const plotInsetShadow = 'inset 0 2px 8px rgba(255,255,255,0.14), inset 0 -8px 16px rgba(0,0,0,0.28)';
+  const tileBorderColor = plot.state === 'stolen' ? '#9A3B33' : '#8B6F47';
+  const plotInsetShadow = 'inset 0 2px 6px rgba(255,255,255,0.18), inset 0 -8px 14px rgba(76,50,28,0.32)';
+  const plotDepthShadow = isHovered
+    ? '0 9px 0 #65472D, 0 16px 24px rgba(80,52,30,0.34)'
+    : '0 7px 0 #65472D, 0 12px 18px rgba(80,52,30,0.3)';
   const tileShadow = plot.state === 'mature'
     ? (isHovered
-      ? `${plotInsetShadow}, 0 8px 24px rgba(0,0,0,0.2), 0 0 30px rgba(251,191,36,0.5), 0 0 44px rgba(251,191,36,0.34)`
-      : `${plotInsetShadow}, 0 2px 8px rgba(0,0,0,0.1), 0 4px 16px rgba(0,0,0,0.08), 0 0 20px rgba(251,191,36,0.6), 0 0 40px rgba(251,191,36,0.3)`)
+      ? `${plotInsetShadow}, ${plotDepthShadow}, 0 0 30px rgba(251,191,36,0.42), 0 0 44px rgba(251,191,36,0.28)`
+      : `${plotInsetShadow}, ${plotDepthShadow}, 0 0 20px rgba(251,191,36,0.48), 0 0 40px rgba(251,191,36,0.22)`)
     : plot.state === 'stolen'
       ? (isHovered
-        ? `${plotInsetShadow}, 0 6px 20px rgba(239,68,68,0.34), 0 0 16px rgba(239,68,68,0.25)`
-        : `${plotInsetShadow}, 0 2px 8px rgba(0,0,0,0.1), 0 4px 16px rgba(0,0,0,0.08)`)
+        ? `${plotInsetShadow}, ${plotDepthShadow}, 0 0 16px rgba(239,68,68,0.22)`
+        : `${plotInsetShadow}, ${plotDepthShadow}`)
       : plot.state === 'empty'
         ? (isHovered
-          ? `${plotInsetShadow}, 0 6px 20px rgba(0,0,0,0.15)`
-          : `${plotInsetShadow}, 0 2px 8px rgba(0,0,0,0.1), 0 4px 16px rgba(0,0,0,0.08)`)
+          ? `${plotInsetShadow}, ${plotDepthShadow}`
+          : `${plotInsetShadow}, ${plotDepthShadow}`)
         : (isHovered
-          ? `${plotInsetShadow}, 0 6px 20px rgba(0,0,0,0.15)`
-          : `${plotInsetShadow}, 0 2px 8px rgba(0,0,0,0.1), 0 4px 16px rgba(0,0,0,0.08)`);
+          ? `${plotInsetShadow}, ${plotDepthShadow}`
+          : `${plotInsetShadow}, ${plotDepthShadow}`);
   const plotLightOverlay = getPlotLightOverlay(weather);
 
   return (
     <div
-      className={`group relative aspect-square sm:aspect-[3/4] w-full select-none rounded-[24px] bg-[#3f2b1c] shadow-[0_4px_8px_rgba(0,0,0,0.6)]${isTooltipOpen ? ' z-[100]' : ''}`}
+      className={`group relative aspect-square sm:aspect-[3/4] w-full select-none rounded-[24px]${isTooltipOpen ? ' z-[100]' : ''}`}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       onFocusCapture={() => setIsHovered(true)}
@@ -837,14 +834,14 @@ export function PlotCard({ plot, weather, stolenRecord, nowTimestamp, theme, t, 
       <div
         className="relative h-full w-full transform-gpu transition-all duration-200 ease-out"
         style={{
-          transform: isHovered ? 'translateY(-2px)' : 'translateY(0)',
+          transform: isHovered ? 'translateY(-3px)' : 'translateY(0)',
         }}
       >
         <div
           className="absolute inset-0 rounded-[24px] transition-all duration-200 ease-out"
           style={{
             background: tileBackground,
-            border: `3px solid ${tileBorderColor}`,
+            border: `4px solid ${tileBorderColor}`,
             boxShadow: tileShadow,
             opacity: plot.state === 'withered' ? 0.74 : plot.state === 'stolen' ? 0.96 : 1,
             animation: isPlantFxActive ? 'farmSoilShake 260ms ease-in-out' : 'none',

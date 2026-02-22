@@ -1,8 +1,8 @@
 /**
  * FarmEnvironment - Full-screen farm background.
  *
- * Renders a cartoon sky/grass scene with decorative SVG elements
- * and applies optional weather overlays.
+ * Recreates a warm cartoon farm scene with fixed sky/ground colors,
+ * smiling sun, rounded clouds, distant hills and grass details.
  */
 import type { Weather } from '../../types/farm';
 
@@ -10,48 +10,113 @@ interface FarmEnvironmentProps {
   weather?: Weather | null;
 }
 
-const SUN_RAY_ANGLES = [0, 36, 72, 108, 144, 180, 216, 252, 288, 324] as const;
+interface CloudPosition {
+  left: string;
+  top: string;
+  scale: number;
+}
 
-const CLOUD_POSITIONS = [
-  { left: '30%', top: '20%' },
-  { left: '60%', top: '15%' },
-  { left: '80%', top: '25%' },
-  { left: '45%', top: '30%' },
-] as const;
+interface GrassDecoration {
+  left: string;
+  top: string;
+  kind: 'v' | 'clover';
+  scale: number;
+}
 
-const GRASS_BLADE_PATHS = [
-  { left: '8%', top: '68%', d: 'M9 28 Q8 16 3 4' },
-  { left: '18%', top: '74%', d: 'M9 28 Q12 17 15 5' },
-  { left: '34%', top: '71%', d: 'M9 28 Q6 18 4 6' },
-  { left: '49%', top: '78%', d: 'M9 28 Q9 15 13 4' },
-  { left: '63%', top: '73%', d: 'M9 28 Q7 17 5 5' },
-  { left: '78%', top: '76%', d: 'M9 28 Q12 17 14 6' },
-  { left: '90%', top: '70%', d: 'M9 28 Q8 16 6 5' },
-] as const;
+const SUN_RAY_ANGLES = [0, 32, 64, 96, 128, 160, 192, 224, 256, 288, 320] as const;
+
+const CLOUD_POSITIONS: CloudPosition[] = [
+  { left: '14%', top: '14%', scale: 1.06 },
+  { left: '42%', top: '11%', scale: 0.92 },
+  { left: '72%', top: '13%', scale: 1.04 },
+  { left: '85%', top: '22%', scale: 0.86 },
+];
+
+const GRASS_DECORATIONS: GrassDecoration[] = [
+  { left: '16%', top: '62%', kind: 'v', scale: 1 },
+  { left: '30%', top: '59%', kind: 'clover', scale: 0.95 },
+  { left: '46%', top: '64%', kind: 'v', scale: 1.1 },
+  { left: '58%', top: '60%', kind: 'clover', scale: 0.9 },
+  { left: '72%', top: '65%', kind: 'v', scale: 1 },
+  { left: '84%', top: '61%', kind: 'clover', scale: 1 },
+  { left: '22%', top: '77%', kind: 'v', scale: 1.05 },
+  { left: '37%', top: '80%', kind: 'clover', scale: 0.95 },
+  { left: '54%', top: '82%', kind: 'v', scale: 1.15 },
+  { left: '68%', top: '78%', kind: 'clover', scale: 1.02 },
+  { left: '80%', top: '83%', kind: 'v', scale: 0.92 },
+];
 
 function getWeatherOverlay(weather: Weather | null | undefined): string | null {
   if (weather === 'sunny') {
-    return 'radial-gradient(circle at 80% 14%, rgba(255,247,204,0.36) 0%, rgba(255,247,204,0) 38%)';
+    return 'radial-gradient(circle at 82% 16%, rgba(255,245,203,0.3) 0%, rgba(255,245,203,0) 36%)';
   }
   if (weather === 'cloudy') {
-    return 'linear-gradient(to bottom, rgba(120,136,150,0.26) 0%, rgba(120,136,150,0.08) 44%, rgba(74,103,74,0.12) 100%)';
+    return 'linear-gradient(to bottom, rgba(120,136,150,0.24) 0%, rgba(120,136,150,0.08) 44%, rgba(74,103,74,0.1) 100%)';
   }
   if (weather === 'rainy') {
-    return 'linear-gradient(to bottom, rgba(36,67,99,0.34) 0%, rgba(36,67,99,0.16) 45%, rgba(24,56,40,0.22) 100%), repeating-linear-gradient(105deg, rgba(255,255,255,0.14) 0px, rgba(255,255,255,0.14) 1px, rgba(255,255,255,0) 4px, rgba(255,255,255,0) 12px)';
+    return 'linear-gradient(to bottom, rgba(36,67,99,0.34) 0%, rgba(36,67,99,0.16) 45%, rgba(24,56,40,0.2) 100%), repeating-linear-gradient(105deg, rgba(255,255,255,0.14) 0px, rgba(255,255,255,0.14) 1px, rgba(255,255,255,0) 4px, rgba(255,255,255,0) 12px)';
   }
   if (weather === 'night') {
-    return 'linear-gradient(to bottom, rgba(5,20,44,0.3) 0%, rgba(10,30,58,0.2) 44%, rgba(20,48,40,0.25) 100%)';
+    return 'linear-gradient(to bottom, rgba(6,20,44,0.32) 0%, rgba(10,30,58,0.22) 44%, rgba(20,48,40,0.25) 100%)';
   }
   if (weather === 'rainbow') {
-    return 'radial-gradient(circle at 22% 18%, rgba(255,255,255,0.26) 0%, rgba(255,255,255,0) 34%), linear-gradient(112deg, rgba(255,0,0,0.2) 0%, rgba(255,127,0,0.2) 16%, rgba(255,255,0,0.18) 32%, rgba(0,255,0,0.16) 48%, rgba(0,127,255,0.16) 64%, rgba(0,0,255,0.16) 80%, rgba(139,0,255,0.2) 100%)';
+    return 'radial-gradient(circle at 24% 18%, rgba(255,255,255,0.24) 0%, rgba(255,255,255,0) 34%), linear-gradient(112deg, rgba(255,0,0,0.18) 0%, rgba(255,127,0,0.18) 16%, rgba(255,255,0,0.16) 32%, rgba(0,255,0,0.15) 48%, rgba(0,127,255,0.14) 64%, rgba(0,0,255,0.15) 80%, rgba(139,0,255,0.18) 100%)';
   }
   if (weather === 'snowy') {
-    return 'linear-gradient(to bottom, rgba(208,227,255,0.35) 0%, rgba(228,240,255,0.24) 45%, rgba(226,242,232,0.26) 100%), radial-gradient(circle at 26% 16%, rgba(255,255,255,0.42) 0%, rgba(255,255,255,0) 34%)';
+    return 'linear-gradient(to bottom, rgba(208,227,255,0.3) 0%, rgba(228,240,255,0.22) 45%, rgba(226,242,232,0.24) 100%), radial-gradient(circle at 26% 16%, rgba(255,255,255,0.34) 0%, rgba(255,255,255,0) 34%)';
   }
   if (weather === 'stormy') {
-    return 'linear-gradient(to bottom, rgba(18,24,42,0.7) 0%, rgba(24,30,46,0.46) 40%, rgba(18,35,30,0.48) 100%), radial-gradient(circle at 78% 18%, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0) 30%)';
+    return 'linear-gradient(to bottom, rgba(18,24,42,0.68) 0%, rgba(24,30,46,0.46) 40%, rgba(18,35,30,0.46) 100%), radial-gradient(circle at 78% 18%, rgba(255,255,255,0.18) 0%, rgba(255,255,255,0) 30%)';
   }
   return null;
+}
+
+function Cloud({ left, top, scale }: CloudPosition) {
+  return (
+    <svg
+      className="absolute"
+      style={{
+        left,
+        top,
+        width: `${114 * scale}px`,
+        height: `${62 * scale}px`,
+      }}
+      viewBox="0 0 114 62"
+    >
+      <ellipse cx="57" cy="52" rx="42" ry="8" fill="#E0E0E0" opacity="0.6" />
+      <path
+        d="M15 43 C11 33 17 21 30 20 C33 11 43 6 53 8 C60 2 73 2 80 8 C90 8 99 16 101 26 C108 26 113 31 113 38 C113 47 104 53 94 53 H24 C15 53 7 48 7 41 C7 39 9 36 15 43 Z"
+        fill="#FFFFFF"
+      />
+      <path
+        d="M15 44 C12 34 18 22 30 22 C34 13 44 8 53 10 C60 4 72 4 79 10 C88 10 98 17 100 27 C106 27 111 32 111 38 C111 45 103 51 94 51 H25 C17 51 9 46 9 40 C9 38 11 36 15 44 Z"
+        fill="none"
+        stroke="#E0E0E0"
+        strokeWidth="2"
+      />
+    </svg>
+  );
+}
+
+function GrassDecorationIcon({ kind }: { kind: GrassDecoration['kind'] }) {
+  if (kind === 'clover') {
+    return (
+      <svg viewBox="0 0 20 20" className="h-5 w-5">
+        <circle cx="7" cy="8" r="3.2" fill="#9DC76E" />
+        <circle cx="13" cy="8" r="3.2" fill="#9DC76E" />
+        <circle cx="10" cy="5.5" r="3.2" fill="#9DC76E" />
+        <path d="M10 11 C9 13 9 15 10 18" stroke="#77A94E" strokeWidth="1.8" strokeLinecap="round" />
+      </svg>
+    );
+  }
+
+  return (
+    <svg viewBox="0 0 18 22" className="h-5 w-4">
+      <path d="M2 20 L8 6 L9 20 Z" fill="#9DC76E" />
+      <path d="M9 20 L10 6 L16 20 Z" fill="#8FBA63" />
+      <path d="M8.8 20 L9.4 3.5" stroke="#6D9D45" strokeWidth="1.8" strokeLinecap="round" />
+    </svg>
+  );
 }
 
 export function FarmEnvironment({ weather = null }: FarmEnvironmentProps) {
@@ -60,40 +125,34 @@ export function FarmEnvironment({ weather = null }: FarmEnvironmentProps) {
   return (
     <div className="pointer-events-none absolute inset-0 z-[-1] overflow-hidden" aria-hidden="true">
       <div
-        className="absolute left-0 top-0 h-1/2 w-full"
+        className="absolute inset-0"
         style={{
-          background: 'linear-gradient(to bottom, #B8E6F5 0%, #E8F8FC 100%)',
-        }}
-      />
-      <div
-        className="absolute bottom-0 left-0 h-1/2 w-full"
-        style={{
-          background: 'linear-gradient(to bottom, #D4ED6E 0%, #B8D84E 100%)',
+          background: 'linear-gradient(to bottom, #87CEEB 0%, #E0F6FF 56%, #C8DC8F 56%, #C8DC8F 100%)',
         }}
       />
 
-      <svg
-        className="absolute left-0 top-1/2 h-[20%] min-h-[96px] w-full"
-        viewBox="0 0 1440 180"
-        preserveAspectRatio="none"
-      >
+      <svg className="absolute inset-x-0 top-[40%] h-[22%] w-full" viewBox="0 0 1440 220" preserveAspectRatio="none">
         <path
-          d="M0 136 C180 88 340 90 500 122 C660 154 820 148 980 116 C1140 84 1280 92 1440 128 L1440 180 L0 180 Z"
-          fill="#D4ED6E"
+          d="M0 140 C160 88 296 84 438 120 C592 162 754 168 898 130 C1058 88 1202 92 1440 152 L1440 220 L0 220 Z"
+          fill="#B8D98A"
+        />
+        <path
+          d="M0 170 C220 126 390 118 560 144 C726 170 926 174 1082 146 C1236 118 1336 126 1440 152 L1440 220 L0 220 Z"
+          fill="#C8DC8F"
         />
       </svg>
 
       <svg
-        className="absolute h-[70px] w-[70px]"
-        style={{ left: '15%', top: '15%' }}
-        viewBox="0 0 70 70"
+        className="absolute left-[5%] top-[5%] h-[96px] w-[96px] sm:h-[114px] sm:w-[114px]"
+        viewBox="0 0 120 120"
       >
+        <circle cx="60" cy="60" r="30" fill="#FFD767" stroke="#E5AB33" strokeWidth="4" />
         {SUN_RAY_ANGLES.map((angle) => {
           const radian = (angle * Math.PI) / 180;
-          const x1 = 35 + Math.cos(radian) * 23;
-          const y1 = 35 + Math.sin(radian) * 23;
-          const x2 = 35 + Math.cos(radian) * 31;
-          const y2 = 35 + Math.sin(radian) * 31;
+          const x1 = 60 + Math.cos(radian) * 38;
+          const y1 = 60 + Math.sin(radian) * 38;
+          const x2 = 60 + Math.cos(radian) * 50;
+          const y2 = 60 + Math.sin(radian) * 50;
           return (
             <line
               key={angle}
@@ -101,48 +160,35 @@ export function FarmEnvironment({ weather = null }: FarmEnvironmentProps) {
               y1={y1}
               x2={x2}
               y2={y2}
-              stroke="#FFA500"
-              strokeWidth="2"
+              stroke="#E5AB33"
+              strokeWidth="5"
               strokeLinecap="round"
             />
           );
         })}
-        <circle cx="35" cy="35" r="18" fill="#FFD93D" stroke="#FFA500" strokeWidth="3" />
-        <circle cx="29" cy="31.5" r="2.2" fill="#6B4F00" />
-        <circle cx="41" cy="31.5" r="2.2" fill="#6B4F00" />
-        <path d="M27 40 Q35 47 43 40" stroke="#6B4F00" strokeWidth="2.5" strokeLinecap="round" fill="none" />
+        <circle cx="49" cy="56" r="3.5" fill="#6E4A1F" />
+        <circle cx="71" cy="56" r="3.5" fill="#6E4A1F" />
+        <circle cx="42" cy="66" r="3.4" fill="#FFB89B" />
+        <circle cx="78" cy="66" r="3.4" fill="#FFB89B" />
+        <path d="M47 72 Q60 83 73 72" stroke="#6E4A1F" strokeWidth="3.5" strokeLinecap="round" fill="none" />
       </svg>
 
-      {CLOUD_POSITIONS.map((cloud, index) => (
-        <svg
-          key={`${cloud.left}-${cloud.top}`}
-          className="absolute h-[32px] w-[50px]"
-          style={{ left: cloud.left, top: cloud.top, opacity: index === 3 ? 0.9 : 1 }}
-          viewBox="0 0 100 64"
-        >
-          <circle cx="30" cy="40" r="16" fill="#FFFFFF" />
-          <circle cx="48" cy="28" r="20" fill="#FFFFFF" />
-          <circle cx="66" cy="37" r="17" fill="#FFFFFF" />
-          <circle cx="82" cy="42" r="12" fill="#FFFFFF" />
-          <path
-            d="M16 45 C14 33 24 24 34 25 C38 16 45 11 54 11 C64 11 72 17 75 26 C84 24 93 30 94 40 C98 42 100 45 100 50 C100 56 94 61 86 61 H22 C12 61 6 55 6 48 C6 46 10 44 16 45 Z"
-            fill="none"
-            stroke="#E0E0E0"
-            strokeWidth="2.5"
-            strokeLinejoin="round"
-          />
-        </svg>
+      {CLOUD_POSITIONS.map((cloud) => (
+        <Cloud key={`${cloud.left}-${cloud.top}`} left={cloud.left} top={cloud.top} scale={cloud.scale} />
       ))}
 
-      {GRASS_BLADE_PATHS.map((blade) => (
-        <svg
-          key={`${blade.left}-${blade.top}`}
-          className="absolute h-[30px] w-[18px]"
-          style={{ left: blade.left, top: blade.top }}
-          viewBox="0 0 18 30"
+      {GRASS_DECORATIONS.map((decoration) => (
+        <div
+          key={`${decoration.left}-${decoration.top}`}
+          className="absolute"
+          style={{
+            left: decoration.left,
+            top: decoration.top,
+            transform: `scale(${decoration.scale})`,
+          }}
         >
-          <path d={blade.d} stroke="#7CB342" strokeWidth="2.4" strokeLinecap="round" fill="none" />
-        </svg>
+          <GrassDecorationIcon kind={decoration.kind} />
+        </div>
       ))}
 
       {weatherOverlay && (
