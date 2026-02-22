@@ -1,9 +1,10 @@
 /**
  * IsometricFarmGrid - 7-plot isometric farm layout.
  *
- * Uses a fixed 1-2-2-2 trapezoid arrangement and keeps PlotCard logic centralized
+ * Uses a responsive 1-2-1-2-1 diamond arrangement and keeps PlotCard logic centralized
  * by reusing the existing PlotCard component from FarmPage.
  */
+import { useEffect, useMemo, useState } from 'react';
 import { useTheme } from '../../hooks/useTheme';
 import { useI18n } from '../../i18n';
 import type { Plot, StolenRecord, Weather } from '../../types/farm';
@@ -36,22 +37,63 @@ interface PlotPosition {
   y: number;
 }
 
-const SCENE_SIZE = {
-  width: 700,
-  height: 500,
+interface FarmLayoutMetrics {
+  sceneSize: {
+    width: number;
+    height: number;
+  };
+  plotIslandSize: number;
+  xOffset: number;
+}
+
+const MOBILE_BREAKPOINT = 640;
+const TABLET_BREAKPOINT = 768;
+
+const MOBILE_LAYOUT: FarmLayoutMetrics = {
+  sceneSize: { width: 350, height: 450 },
+  plotIslandSize: 100,
+  xOffset: 60,
 };
 
-const PLOT_ISLAND_SIZE = 200;
+const TABLET_LAYOUT: FarmLayoutMetrics = {
+  sceneSize: { width: 550, height: 450 },
+  plotIslandSize: 160,
+  xOffset: 95,
+};
 
-const PLOT_POSITIONS: PlotPosition[] = [
-  { x: SCENE_SIZE.width / 2, y: 80 },      // 顶部 1块
-  { x: SCENE_SIZE.width / 2 + 110, y: 160 }, // 第2排左
-  { x: SCENE_SIZE.width / 2 - 110, y: 160 }, // 第2排右
-  { x: SCENE_SIZE.width / 2, y: 250 },      // 中间 1块
-  { x: SCENE_SIZE.width / 2 + 110, y: 340 }, // 第4排左
-  { x: SCENE_SIZE.width / 2 - 110, y: 340 }, // 第4排右
-  { x: SCENE_SIZE.width / 2, y: 420 },      // 底部 1块
-];
+const DESKTOP_LAYOUT: FarmLayoutMetrics = {
+  sceneSize: { width: 700, height: 500 },
+  plotIslandSize: 200,
+  xOffset: 110,
+};
+
+const PLOT_Y_RATIOS = [0.12, 0.26, 0.26, 0.42, 0.58, 0.58, 0.74] as const;
+const PLOT_X_DIRECTIONS = [0, 1, -1, 0, 1, -1, 0] as const;
+
+function getViewportWidth(): number {
+  if (typeof window === 'undefined') {
+    return DESKTOP_LAYOUT.sceneSize.width;
+  }
+  return window.innerWidth;
+}
+
+function getLayoutMetrics(viewportWidth: number): FarmLayoutMetrics {
+  if (viewportWidth < MOBILE_BREAKPOINT) {
+    return MOBILE_LAYOUT;
+  }
+  if (viewportWidth < TABLET_BREAKPOINT) {
+    return TABLET_LAYOUT;
+  }
+  return DESKTOP_LAYOUT;
+}
+
+function getPlotPositions(layout: FarmLayoutMetrics): PlotPosition[] {
+  const centerX = layout.sceneSize.width / 2;
+  return PLOT_Y_RATIOS.map((yRatio, index) => ({
+    x: centerX + (PLOT_X_DIRECTIONS[index] * layout.xOffset),
+    y: layout.sceneSize.height * yRatio,
+  }));
+}
 
 export function IsometricFarmGrid({
   plots,
@@ -76,17 +118,34 @@ export function IsometricFarmGrid({
 }: IsometricFarmGridProps) {
   const theme = useTheme();
   const t = useI18n();
+  const [viewportWidth, setViewportWidth] = useState<number>(() => getViewportWidth());
+
+  useEffect(() => {
+    if (typeof window === 'undefined') {
+      return undefined;
+    }
+    const handleResize = () => {
+      setViewportWidth(window.innerWidth);
+    };
+    window.addEventListener('resize', handleResize);
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
+  }, []);
+
+  const layout = useMemo(() => getLayoutMetrics(viewportWidth), [viewportWidth]);
+  const plotPositions = useMemo(() => getPlotPositions(layout), [layout]);
 
   return (
     <div className="farm-grid-perspective relative w-full overflow-visible" onClick={() => onActiveTooltipChange(null)}>
       <div
-        className="relative mx-auto origin-top scale-[0.7] sm:scale-[0.85] md:scale-100"
+        className="relative mx-auto origin-top"
         style={{
-          width: SCENE_SIZE.width,
-          height: SCENE_SIZE.height,
+          width: layout.sceneSize.width,
+          height: layout.sceneSize.height,
         }}
       >
-        {PLOT_POSITIONS.map((position, index) => {
+        {plotPositions.map((position, index) => {
           const plot = plots[index];
 
           if (!plot) {
@@ -97,8 +156,8 @@ export function IsometricFarmGrid({
                 style={{
                   left: position.x,
                   top: position.y,
-                  width: PLOT_ISLAND_SIZE,
-                  height: PLOT_ISLAND_SIZE,
+                  width: layout.plotIslandSize,
+                  height: layout.plotIslandSize,
                   transform: 'translate(-50%, -50%)',
                 }}
               >
@@ -128,8 +187,8 @@ export function IsometricFarmGrid({
               style={{
                 left: position.x,
                 top: position.y,
-                width: PLOT_ISLAND_SIZE,
-                height: PLOT_ISLAND_SIZE,
+                width: layout.plotIslandSize,
+                height: layout.plotIslandSize,
                 transform: 'translate(-50%, -50%)',
               }}
             >
