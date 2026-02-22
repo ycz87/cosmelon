@@ -365,14 +365,7 @@ export function FarmPage({
       </div>
 
       {/* 农场场景 */}
-      <div
-        className="farm-page relative isolate overflow-hidden min-h-[520px] sm:min-h-[620px] md:min-h-[720px] rounded-[var(--radius-panel)]"
-        style={{
-          filter: weather === null ? 'none' : getFarmToneFilter(weather),
-          transition: 'filter 260ms ease-out',
-          willChange: 'filter',
-        }}
-      >
+      <div className="farm-page relative isolate overflow-hidden min-h-[520px] sm:min-h-[620px] md:min-h-[720px] rounded-[var(--radius-panel)]">
         <FarmEnvironment weather={weather} />
         <div className="pointer-events-none absolute left-0 top-0 z-[10] h-[45%] w-full overflow-hidden">
           <SkyLayer weather={weather} currentTime={new Date()} />
@@ -469,16 +462,6 @@ export function FarmPage({
       )}
     </div>
   );
-}
-
-function getFarmToneFilter(weather: Weather): string {
-  if (weather === 'sunny') return 'brightness(1.05) saturate(1.1) contrast(1.02)';
-  if (weather === 'cloudy') return 'brightness(0.85) saturate(0.7) contrast(0.95)';
-  if (weather === 'rainy') return 'brightness(0.75) saturate(0.8) contrast(0.9) hue-rotate(5deg)';
-  if (weather === 'night') return 'brightness(0.6) saturate(0.9) contrast(1.1) hue-rotate(-5deg)';
-  if (weather === 'snowy') return 'brightness(0.95) saturate(0.85) contrast(1.05)';
-  if (weather === 'stormy') return 'brightness(0.65) saturate(0.75) contrast(0.85) hue-rotate(8deg)';
-  return 'brightness(1.08) saturate(1.15) contrast(1.04)';
 }
 
 function getPlotLightOverlay(weather: Weather | null): string {
