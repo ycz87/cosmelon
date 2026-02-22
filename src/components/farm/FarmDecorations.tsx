@@ -3,6 +3,8 @@
  *
  * Places houses/barns in all corners plus side animals with fully
  * SVG-drawn assets. Elements are responsive and stay outside gameplay.
+ *
+ * TEMPORARY: Testing PNG assets (house-red-roof.png, barn-red.png, fence-segment.png)
  */
 
 interface HouseIconProps {
@@ -10,8 +12,20 @@ interface HouseIconProps {
 }
 
 function HouseIcon({ roof }: HouseIconProps) {
-  const roofMain = roof === 'red' ? '#DF655A' : '#73AEEA';
-  const roofDark = roof === 'red' ? '#B1473D' : '#447AB8';
+  // TEMPORARY: Using PNG for red roof, keeping SVG for blue roof
+  if (roof === 'red') {
+    return (
+      <img
+        src="/assets/farm/house-red-roof.png"
+        alt="House"
+        className="h-[66px] w-[82px] sm:h-[82px] sm:w-[100px] md:h-[96px] md:w-[116px] object-contain"
+      />
+    );
+  }
+
+  // Blue roof house - keep SVG
+  const roofMain = '#73AEEA';
+  const roofDark = '#447AB8';
 
   return (
     <svg viewBox="0 0 150 132" className="h-[66px] w-[82px] sm:h-[82px] sm:w-[100px] md:h-[96px] md:w-[116px]">
@@ -32,23 +46,13 @@ function HouseIcon({ roof }: HouseIconProps) {
 }
 
 function BarnIcon() {
+  // TEMPORARY: Using PNG
   return (
-    <svg viewBox="0 0 150 132" className="h-[68px] w-[84px] sm:h-[84px] sm:w-[102px] md:h-[98px] md:w-[118px]">
-      <ellipse cx="75" cy="120" rx="48" ry="8" fill="#00000020" />
-      <path
-        d="M30 56 Q75 16 120 56 L120 104 Q120 112 112 112 H38 Q30 112 30 104 Z"
-        fill="#D65A4C"
-        stroke="#8E3A32"
-        strokeWidth="4"
-      />
-      <path d="M30 56 Q75 12 120 56" fill="none" stroke="#8E3A32" strokeWidth="4" />
-      <rect x="58" y="64" width="34" height="48" rx="5" fill="#F2E3CC" stroke="#8E3A32" strokeWidth="3.5" />
-      <line x1="58" y1="88" x2="92" y2="64" stroke="#8E3A32" strokeWidth="3" />
-      <line x1="58" y1="64" x2="92" y2="88" stroke="#8E3A32" strokeWidth="3" />
-      <rect x="62" y="44" width="26" height="18" rx="3.5" fill="#F2E3CC" stroke="#8E3A32" strokeWidth="3" />
-      <line x1="75" y1="44" x2="75" y2="62" stroke="#8E3A32" strokeWidth="2.5" />
-      <line x1="62" y1="53" x2="88" y2="53" stroke="#8E3A32" strokeWidth="2.5" />
-    </svg>
+    <img
+      src="/assets/farm/barn-red.png"
+      alt="Barn"
+      className="h-[68px] w-[84px] sm:h-[84px] sm:w-[102px] md:h-[98px] md:w-[118px] object-contain"
+    />
   );
 }
 
@@ -57,17 +61,14 @@ interface FenceSegmentProps {
 }
 
 function FenceSegment({ mirrored = false }: FenceSegmentProps) {
+  // TEMPORARY: Using PNG
   return (
-    <svg
-      viewBox="0 0 76 42"
-      className="h-[24px] w-[52px] sm:h-[30px] sm:w-[64px] md:h-[34px] md:w-[72px]"
+    <img
+      src="/assets/farm/fence-segment.png"
+      alt="Fence"
+      className="h-[24px] w-[52px] sm:h-[30px] sm:w-[64px] md:h-[34px] md:w-[72px] object-contain"
       style={{ transform: mirrored ? 'scaleX(-1)' : undefined }}
-    >
-      <rect x="8" y="9" width="11" height="30" rx="3" fill="#C79A6A" stroke="#896040" strokeWidth="2.5" />
-      <rect x="57" y="9" width="11" height="30" rx="3" fill="#C79A6A" stroke="#896040" strokeWidth="2.5" />
-      <rect x="16" y="16" width="44" height="7" rx="3.5" fill="#D5AD7F" stroke="#896040" strokeWidth="2" />
-      <rect x="16" y="26" width="44" height="7" rx="3.5" fill="#D5AD7F" stroke="#896040" strokeWidth="2" />
-    </svg>
+    />
   );
 }
 
