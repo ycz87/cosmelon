@@ -1258,10 +1258,23 @@ function getCoarsePointerMode(): boolean {
   return window.matchMedia('(pointer: coarse)').matches;
 }
 
+function isVisualOnlyMode(): boolean {
+  if (typeof window === 'undefined') {
+    return false;
+  }
+  const visualOnlyParam = new URLSearchParams(window.location.search).get('visualOnly');
+  if (!visualOnlyParam) {
+    return false;
+  }
+  const normalizedParam = visualOnlyParam.trim().toLowerCase();
+  return normalizedParam === '1' || normalizedParam === 'true';
+}
+
 function resolveSceneLayout(
   viewportWidth: number,
   viewportHeight: number,
   backdropLayout: SceneBackdropLayout,
+  visualOnlyMode: boolean,
 ): SceneLayout {
   const horizontalPadding = viewportWidth < 560 ? 20 : 30;
   const safeWidth = Math.max(220, viewportWidth - horizontalPadding * 2);
@@ -1271,16 +1284,17 @@ function resolveSceneLayout(
   const halfWidth = Math.round(clamp(Math.min(maxByWidth, maxByGround), 32, 70));
   const halfHeight = Math.round(halfWidth * 0.54);
   const thickness = Math.round(clamp(halfHeight * 0.46, 11, 28));
-  const stepX = Math.round(halfWidth * 1.06);
-  const stepY = Math.round(halfHeight * 0.99);
+  const stepX = Math.round(halfWidth * (visualOnlyMode ? 1.12 : 1.06));
+  const stepY = Math.round(halfHeight * (visualOnlyMode ? 1.04 : 0.99));
   const shadowWidth = Math.round(halfWidth * 0.86);
   const shadowHeight = Math.max(8, Math.round(halfHeight * 0.38));
   const shadowOffsetY = Math.round(thickness + shadowHeight * 0.34 + 1);
   const sceneBottom = 4 * stepY + halfHeight + thickness + shadowOffsetY + shadowHeight;
+  const stageLift = visualOnlyMode ? Math.round(Math.max(4, halfHeight * 0.16)) : 0;
   const preferredStageY = Math.round(backdropLayout.groundTopY + halfHeight + Math.max(10, halfHeight * 0.5));
   const minStageY = Math.max(halfHeight + 12, backdropLayout.groundTopY + Math.round(halfHeight * 0.72));
   const maxStageY = Math.max(minStageY, viewportHeight - sceneBottom - 12);
-  const stageY = clamp(preferredStageY, minStageY, maxStageY);
+  const stageY = clamp(preferredStageY - stageLift, minStageY, maxStageY);
   const hoverLift = Math.max(4, Math.round(thickness * 0.22));
 
   return {
@@ -2001,6 +2015,7 @@ function drawPlot(
 }
 
 export function FarmPixiPrototype() {
+  const visualOnlyMode = useMemo(() => isVisualOnlyMode(), []);
   const mountRef = useRef<HTMLDivElement | null>(null);
   const appRef = useRef<PixiApplicationLike | null>(null);
   const pixiRef = useRef<PixiModuleLike | null>(null);
@@ -2276,7 +2291,7 @@ export function FarmPixiPrototype() {
         app.renderer.resize(nextWidth, nextHeight);
 
         const nextBackdropLayout = resolveBackdropLayout(nextWidth, nextHeight);
-        const nextLayout = resolveSceneLayout(nextWidth, nextHeight, nextBackdropLayout);
+        const nextLayout = resolveSceneLayout(nextWidth, nextHeight, nextBackdropLayout, visualOnlyMode);
         layoutRef.current = nextLayout;
 
         drawSkyLayer(skyLayer, nextWidth, nextBackdropLayout);
@@ -2347,63 +2362,75 @@ export function FarmPixiPrototype() {
       cancelled = true;
       resetRuntime();
     };
-  }, [appendInteractionLog, handlePlotTap]);
+  }, [appendInteractionLog, handlePlotTap, visualOnlyMode]);
 
   return (
     <div className="min-h-dvh w-full bg-slate-950 px-4 py-5 text-slate-100 sm:px-6 sm:py-7">
       <div className="mx-auto w-full max-w-5xl rounded-3xl border border-slate-700/80 bg-slate-900/75 p-4 shadow-[0_20px_80px_rgba(15,23,42,0.55)] sm:p-6">
-        <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
-          <div>
-            <h1 className="text-lg font-semibold tracking-wide text-slate-100 sm:text-xl">Pixi Farm Prototype • Step 6 Final</h1>
-            <p className="text-xs text-slate-400 sm:text-sm">
-              Step 6 Final：在 Step 5 交互能力上完成收口，微调 3x3 菱形构图与前景装饰比例，保留现有命中/hover/种植-生长-收获链路。
-            </p>
+        {!visualOnlyMode && (
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <h1 className="text-lg font-semibold tracking-wide text-slate-100 sm:text-xl">Pixi Farm Prototype • Step 6 Final</h1>
+              <p className="text-xs text-slate-400 sm:text-sm">
+                Step 6 Final：在 Step 5 交互能力上完成收口，微调 3x3 菱形构图与前景装饰比例，保留现有命中/hover/种植-生长-收获链路。
+              </p>
+            </div>
+            <a
+              className="inline-flex w-fit items-center rounded-full border border-slate-500/80 px-3 py-1.5 text-xs text-slate-200 transition-colors hover:border-slate-300 hover:text-white"
+              href="/"
+            >
+              Back To App
+            </a>
           </div>
-          <a
-            className="inline-flex w-fit items-center rounded-full border border-slate-500/80 px-3 py-1.5 text-xs text-slate-200 transition-colors hover:border-slate-300 hover:text-white"
-            href="/"
-          >
-            Back To App
-          </a>
-        </div>
+        )}
 
-        <div className="mt-4 grid gap-3 sm:grid-cols-3 lg:grid-cols-6">
-          <MetricCard title="Unlocked" value={String(unlockedCount)} suffix="plots" />
-          <MetricCard title="Locked" value={String(lockedCount)} suffix="plots" />
-          <MetricCard title="Hover" value={hoverEnabled ? 'ON' : 'OFF'} suffix={hoverEnabled ? hoveredStateLabel : 'coarse'} />
-          <MetricCard title="Grid" value="3 x 3" suffix="isometric" />
-          <MetricCard title="Harvested" value={String(harvestedCount)} suffix="times" />
-          <MetricCard title="Last Action" value={lastAction.action} suffix={lastAction.detail} />
-        </div>
+        {!visualOnlyMode && (
+          <div className="mt-4 grid gap-3 sm:grid-cols-3 lg:grid-cols-6">
+            <MetricCard title="Unlocked" value={String(unlockedCount)} suffix="plots" />
+            <MetricCard title="Locked" value={String(lockedCount)} suffix="plots" />
+            <MetricCard title="Hover" value={hoverEnabled ? 'ON' : 'OFF'} suffix={hoverEnabled ? hoveredStateLabel : 'coarse'} />
+            <MetricCard title="Grid" value="3 x 3" suffix="isometric" />
+            <MetricCard title="Harvested" value={String(harvestedCount)} suffix="times" />
+            <MetricCard title="Last Action" value={lastAction.action} suffix={lastAction.detail} />
+          </div>
+        )}
 
-        <div className="mt-4 overflow-hidden rounded-3xl border border-slate-700 bg-slate-900 p-2 sm:p-3">
+        <div
+          className={
+            visualOnlyMode
+              ? 'overflow-hidden rounded-3xl border border-slate-700 bg-slate-900 p-2 sm:p-3'
+              : 'mt-4 overflow-hidden rounded-3xl border border-slate-700 bg-slate-900 p-2 sm:p-3'
+          }
+        >
           <div ref={mountRef} className="h-[360px] w-full rounded-2xl bg-slate-950 sm:h-[460px]" />
         </div>
 
-        <div className="mt-4 rounded-2xl border border-slate-700 bg-slate-900/70 p-3 sm:p-4">
-          <div className="flex items-center justify-between gap-2">
-            <h2 className="text-sm font-semibold text-slate-100 sm:text-base">Interaction Log (Latest 6)</h2>
-            <p className="text-[11px] text-slate-400 sm:text-xs">Time / Plot / Action / Result</p>
+        {!visualOnlyMode && (
+          <div className="mt-4 rounded-2xl border border-slate-700 bg-slate-900/70 p-3 sm:p-4">
+            <div className="flex items-center justify-between gap-2">
+              <h2 className="text-sm font-semibold text-slate-100 sm:text-base">Interaction Log (Latest 6)</h2>
+              <p className="text-[11px] text-slate-400 sm:text-xs">Time / Plot / Action / Result</p>
+            </div>
+            <div className="mt-3 space-y-1.5">
+              {interactionLogs.length === 0 && (
+                <p className="rounded-xl border border-slate-700/70 bg-slate-950/60 px-3 py-2 text-xs text-slate-400">
+                  Waiting for interaction...
+                </p>
+              )}
+              {interactionLogs.map((entry) => (
+                <div
+                  key={entry.id}
+                  className="grid grid-cols-[74px_52px_88px_1fr] items-center gap-2 rounded-xl border border-slate-700/60 bg-slate-950/70 px-3 py-2 text-xs text-slate-200"
+                >
+                  <span className="font-mono text-slate-300">{entry.time}</span>
+                  <span className="text-slate-300">{entry.plotId === null ? '--' : `#${entry.plotId + 1}`}</span>
+                  <span className="font-semibold tracking-wide text-emerald-200">{entry.action}</span>
+                  <span className="truncate text-slate-300">{entry.result}</span>
+                </div>
+              ))}
+            </div>
           </div>
-          <div className="mt-3 space-y-1.5">
-            {interactionLogs.length === 0 && (
-              <p className="rounded-xl border border-slate-700/70 bg-slate-950/60 px-3 py-2 text-xs text-slate-400">
-                Waiting for interaction...
-              </p>
-            )}
-            {interactionLogs.map((entry) => (
-              <div
-                key={entry.id}
-                className="grid grid-cols-[74px_52px_88px_1fr] items-center gap-2 rounded-xl border border-slate-700/60 bg-slate-950/70 px-3 py-2 text-xs text-slate-200"
-              >
-                <span className="font-mono text-slate-300">{entry.time}</span>
-                <span className="text-slate-300">{entry.plotId === null ? '--' : `#${entry.plotId + 1}`}</span>
-                <span className="font-semibold tracking-wide text-emerald-200">{entry.action}</span>
-                <span className="truncate text-slate-300">{entry.result}</span>
-              </div>
-            ))}
-          </div>
-        </div>
+        )}
 
         {status === 'loading' && (
           <p className="mt-3 text-xs text-slate-400">Loading Pixi runtime...</p>
