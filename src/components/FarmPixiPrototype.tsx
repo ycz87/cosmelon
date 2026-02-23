@@ -1,5 +1,5 @@
 /**
- * FarmPixiPrototype — Step 1 + Step 2 可验收 Pixi 样机。
+ * FarmPixiPrototype — Step 3 完成态可验收 Pixi 样机。
  *
  * 目标：
  * 1) 3x3 等距地块（前 4 解锁，后 5 锁定）
@@ -21,7 +21,6 @@ interface PlotPalette {
   left: number;
   right: number;
   edge: number;
-  label: string;
 }
 
 interface PixiScaleLike {
@@ -56,12 +55,6 @@ interface PixiGraphicsLike extends PixiDisplayObjectLike {
   on(event: 'pointertap' | 'pointerover' | 'pointerout', fn: () => void): void;
 }
 
-interface PixiTextLike extends PixiDisplayObjectLike {
-  text: string;
-  anchor: { set(x: number, y?: number): void };
-  style?: Partial<PixiTextStyleLike>;
-}
-
 interface PixiRendererLike {
   resize(width: number, height: number): void;
   render(displayObject: PixiContainerLike): void;
@@ -73,18 +66,6 @@ interface PixiApplicationLike {
   screen: { width: number; height: number };
   view?: HTMLCanvasElement;
   destroy(removeView?: boolean, options?: { children?: boolean; texture?: boolean; baseTexture?: boolean }): void;
-}
-
-interface PixiTextStyleLike {
-  fontFamily: string;
-  fontSize: number;
-  fill: number;
-  fontWeight: string | number;
-  align?: 'left' | 'center' | 'right';
-  dropShadow?: boolean;
-  dropShadowColor?: string;
-  dropShadowBlur?: number;
-  dropShadowDistance?: number;
 }
 
 interface PixiModuleLike {
@@ -99,7 +80,6 @@ interface PixiModuleLike {
   }) => PixiApplicationLike;
   Container: new () => PixiContainerLike;
   Graphics: new () => PixiGraphicsLike;
-  Text: new (text: string, style: PixiTextStyleLike) => PixiTextLike;
   Polygon: new (points: number[]) => unknown;
 }
 
@@ -114,7 +94,6 @@ interface SceneLayout {
   shadowOffsetY: number;
   stageY: number;
   hoverLift: number;
-  iconFontSize: number;
 }
 
 interface RenderPlot {
@@ -124,7 +103,7 @@ interface RenderPlot {
   container: PixiContainerLike;
   shape: PixiGraphicsLike;
   overlay: PixiGraphicsLike;
-  lockIcon: PixiTextLike;
+  lockOverlay: PixiGraphicsLike;
 }
 
 interface SceneBackdropLayout {
@@ -158,36 +137,38 @@ const PLOT_PALETTES: Record<PlotVisualState, PlotPalette> = {
     left: 0xaa7449,
     right: 0x966239,
     edge: 0x6a4427,
-    label: 'EMPTY',
   },
   growing: {
     top: 0xd6b67e,
     left: 0x9d7642,
     right: 0x8f6837,
     edge: 0x674726,
-    label: 'GROWING',
   },
   mature: {
     top: 0xd7ac73,
     left: 0x8f663a,
     right: 0x7f582f,
     edge: 0x5c3e24,
-    label: 'MATURE',
   },
   withered: {
     top: 0xac9a83,
     left: 0x746353,
     right: 0x675849,
     edge: 0x43372e,
-    label: 'WITHERED',
   },
   locked: {
     top: 0xa8a4a1,
     left: 0x898683,
     right: 0x7b7875,
     edge: 0x5a5856,
-    label: 'LOCKED',
   },
+};
+
+const HOVER_STATE_LABELS: Record<PlotState, string> = {
+  empty: 'EMPTY',
+  growing: 'GROWING',
+  mature: 'MATURE',
+  withered: 'WITHERED',
 };
 
 let pixiLegacyLoadPromise: Promise<PixiModuleLike> | null = null;
@@ -199,7 +180,6 @@ function isPixiModule(value: unknown): value is PixiModuleLike {
     typeof objectValue.Application === 'function' &&
     typeof objectValue.Container === 'function' &&
     typeof objectValue.Graphics === 'function' &&
-    typeof objectValue.Text === 'function' &&
     typeof objectValue.Polygon === 'function'
   );
 }
@@ -789,7 +769,6 @@ function resolveSceneLayout(
   const minStageY = Math.max(halfHeight + 12, backdropLayout.groundTopY + Math.round(halfHeight * 0.72));
   const maxStageY = Math.max(minStageY, viewportHeight - sceneBottom - 12);
   const stageY = clamp(preferredStageY, minStageY, maxStageY);
-  const iconFontSize = Math.max(14, Math.round(halfWidth * 0.34));
   const hoverLift = Math.max(4, Math.round(thickness * 0.22));
 
   return {
@@ -803,7 +782,6 @@ function resolveSceneLayout(
     shadowOffsetY,
     stageY,
     hoverLift,
-    iconFontSize,
   };
 }
 
@@ -891,6 +869,50 @@ function drawWitheredOverlay(overlay: PixiGraphicsLike, layout: SceneLayout): vo
   overlay.endFill();
 }
 
+function drawLockOverlay(lockOverlay: PixiGraphicsLike, layout: SceneLayout, topColor: number): void {
+  const bodyWidth = Math.max(12, layout.halfWidth * 0.34);
+  const bodyHeight = Math.max(10, layout.halfHeight * 0.58);
+  const bodyTopY = -layout.halfHeight * 0.03;
+  const shackleCenterY = bodyTopY - bodyHeight * 0.16;
+  const shackleOuterX = bodyWidth * 0.46;
+  const shackleOuterY = bodyHeight * 0.64;
+  const shackleInnerX = bodyWidth * 0.25;
+  const shackleInnerY = bodyHeight * 0.44;
+  const keyholeY = bodyTopY + bodyHeight * 0.5;
+  const keyholeRadius = Math.max(1.6, bodyWidth * 0.09);
+
+  lockOverlay.clear();
+  lockOverlay.lineStyle(0, 0x000000, 0);
+  lockOverlay.beginFill(0x19120d, 0.22);
+  lockOverlay.drawEllipse(0, bodyTopY + bodyHeight * 0.96, bodyWidth * 0.84, bodyHeight * 0.3);
+  lockOverlay.endFill();
+
+  lockOverlay.lineStyle(2, 0x62594f, 0.92);
+  lockOverlay.beginFill(0xddd6cd, 0.98);
+  lockOverlay.drawEllipse(0, shackleCenterY, shackleOuterX, shackleOuterY);
+  lockOverlay.endFill();
+
+  lockOverlay.lineStyle(0, 0x000000, 0);
+  lockOverlay.beginFill(topColor, 1);
+  lockOverlay.drawEllipse(0, shackleCenterY + bodyHeight * 0.2, shackleInnerX, shackleInnerY);
+  lockOverlay.endFill();
+
+  lockOverlay.lineStyle(2, 0x4b4138, 0.95);
+  lockOverlay.beginFill(0xbeb8af, 0.99);
+  lockOverlay.drawRect(-bodyWidth * 0.5, bodyTopY, bodyWidth, bodyHeight);
+  lockOverlay.endFill();
+
+  lockOverlay.lineStyle(0, 0x000000, 0);
+  lockOverlay.beginFill(0xffffff, 0.16);
+  lockOverlay.drawRect(-bodyWidth * 0.34, bodyTopY + bodyHeight * 0.15, bodyWidth * 0.68, bodyHeight * 0.18);
+  lockOverlay.endFill();
+
+  lockOverlay.beginFill(0x4d443c, 0.96);
+  lockOverlay.drawCircle(0, keyholeY, keyholeRadius);
+  lockOverlay.drawRect(-keyholeRadius * 0.56, keyholeY, keyholeRadius * 1.12, bodyHeight * 0.2);
+  lockOverlay.endFill();
+}
+
 function drawPlot(
   plot: RenderPlot,
   state: PlotVisualState,
@@ -924,21 +946,38 @@ function drawPlot(
     -halfWidth, 0,
   ]);
 
-  const shadowAlpha = state === 'locked' ? 0.12 : 0.21;
-  shape.beginFill(0x201610, shadowAlpha * 0.7);
+  const ambientShadowAlpha = state === 'locked' ? 0.08 : hoverActive ? 0.12 : 0.15;
+  const contactShadowAlpha = state === 'locked' ? 0.11 : hoverActive ? 0.18 : 0.22;
+
+  shape.lineStyle(0, 0x000000, 0);
+  shape.beginFill(0x21160f, ambientShadowAlpha);
   shape.drawEllipse(
     0,
-    halfHeight + layout.shadowOffsetY + layout.shadowHeight * 0.2,
-    layout.shadowWidth * 1.05,
-    layout.shadowHeight * 1.08,
+    halfHeight + layout.shadowOffsetY + layout.shadowHeight * 0.38,
+    layout.shadowWidth * 1.24,
+    layout.shadowHeight * 1.32,
   );
   shape.endFill();
 
-  shape.beginFill(0x120b07, shadowAlpha);
-  shape.drawEllipse(0, halfHeight + layout.shadowOffsetY, layout.shadowWidth * 0.78, layout.shadowHeight * 0.66);
+  shape.beginFill(0x17100b, contactShadowAlpha * 0.8);
+  shape.drawEllipse(
+    0,
+    halfHeight + layout.shadowOffsetY + layout.shadowHeight * 0.14,
+    layout.shadowWidth * 0.98,
+    layout.shadowHeight * 0.78,
+  );
   shape.endFill();
 
-  shape.lineStyle(2, borderColor, state === 'locked' ? 0.82 : 1);
+  shape.beginFill(0x100a07, contactShadowAlpha);
+  shape.drawEllipse(
+    0,
+    halfHeight + thickness + layout.shadowHeight * 0.08,
+    layout.shadowWidth * 0.66,
+    layout.shadowHeight * 0.42,
+  );
+  shape.endFill();
+
+  shape.lineStyle(hoverActive ? 2 : 1.5, borderColor, state === 'locked' ? 0.56 : 0.78);
   shape.beginFill(palette.left, 1);
   shape.drawPolygon([
     -halfWidth, 0,
@@ -949,25 +988,34 @@ function drawPlot(
   shape.endFill();
 
   shape.lineStyle(0, 0x000000, 0);
-  shape.beginFill(lightenColor(palette.left, 0.17), state === 'locked' ? 0.18 : 0.3);
+  shape.beginFill(lightenColor(palette.left, 0.2), state === 'locked' ? 0.14 : 0.22);
   shape.drawPolygon([
     -halfWidth, 0,
     0, halfHeight,
-    0, halfHeight + thickness * 0.34,
-    -halfWidth, thickness * 0.34,
+    0, halfHeight + thickness * 0.26,
+    -halfWidth, thickness * 0.26,
   ]);
   shape.endFill();
 
-  shape.beginFill(mixColor(palette.left, 0x26170f, 0.42), state === 'locked' ? 0.22 : 0.38);
+  shape.beginFill(mixColor(palette.left, topColor, 0.24), state === 'locked' ? 0.08 : 0.14);
   shape.drawPolygon([
-    -halfWidth, thickness * 0.58,
-    0, halfHeight + thickness * 0.58,
+    -halfWidth, thickness * 0.2,
+    0, halfHeight + thickness * 0.2,
+    0, halfHeight + thickness * 0.68,
+    -halfWidth, thickness * 0.68,
+  ]);
+  shape.endFill();
+
+  shape.beginFill(mixColor(palette.left, 0x26170f, 0.5), state === 'locked' ? 0.2 : 0.31);
+  shape.drawPolygon([
+    -halfWidth, thickness * 0.62,
+    0, halfHeight + thickness * 0.62,
     0, halfHeight + thickness,
     -halfWidth, thickness,
   ]);
   shape.endFill();
 
-  shape.lineStyle(2, borderColor, state === 'locked' ? 0.82 : 1);
+  shape.lineStyle(hoverActive ? 2 : 1.5, borderColor, state === 'locked' ? 0.56 : 0.78);
   shape.beginFill(palette.right, 1);
   shape.drawPolygon([
     0, halfHeight,
@@ -978,25 +1026,35 @@ function drawPlot(
   shape.endFill();
 
   shape.lineStyle(0, 0x000000, 0);
-  shape.beginFill(lightenColor(palette.right, 0.11), state === 'locked' ? 0.14 : 0.24);
+  shape.beginFill(lightenColor(palette.right, 0.14), state === 'locked' ? 0.12 : 0.2);
   shape.drawPolygon([
     0, halfHeight,
     halfWidth, 0,
-    halfWidth, thickness * 0.3,
-    0, halfHeight + thickness * 0.3,
+    halfWidth, thickness * 0.24,
+    0, halfHeight + thickness * 0.24,
   ]);
   shape.endFill();
 
-  shape.beginFill(mixColor(palette.right, 0x21150e, 0.46), state === 'locked' ? 0.24 : 0.4);
+  shape.beginFill(mixColor(palette.right, topColor, 0.2), state === 'locked' ? 0.08 : 0.14);
   shape.drawPolygon([
-    0, halfHeight + thickness * 0.54,
-    halfWidth, thickness * 0.54,
+    0, halfHeight + thickness * 0.18,
+    halfWidth, thickness * 0.18,
+    halfWidth, thickness * 0.66,
+    0, halfHeight + thickness * 0.66,
+  ]);
+  shape.endFill();
+
+  shape.beginFill(mixColor(palette.right, 0x21150e, 0.52), state === 'locked' ? 0.22 : 0.34);
+  shape.drawPolygon([
+    0, halfHeight + thickness * 0.6,
+    halfWidth, thickness * 0.6,
     halfWidth, thickness,
     0, halfHeight + thickness,
   ]);
   shape.endFill();
 
-  shape.lineStyle(hoverActive ? 3 : 2, borderColor, 1);
+  const topEdgeColor = mixColor(borderColor, 0xf8f0e4, 0.12);
+  shape.lineStyle(hoverActive ? 2.4 : 1.8, topEdgeColor, state === 'locked' ? 0.62 : 0.86);
   shape.beginFill(topColor, 1);
   shape.drawPolygon([
     0, -halfHeight,
@@ -1006,30 +1064,55 @@ function drawPlot(
   ]);
   shape.endFill();
 
-  shape.beginFill(0xffffff, state === 'locked' ? 0.12 : hoverActive ? 0.24 : 0.18);
+  shape.lineStyle(0, 0x000000, 0);
+  shape.beginFill(lightenColor(topColor, 0.22), state === 'locked' ? 0.09 : hoverActive ? 0.23 : 0.17);
   shape.drawPolygon([
-    -halfWidth * 0.45, -halfHeight * 0.01,
-    0, -halfHeight * 0.52,
-    halfWidth * 0.45, -halfHeight * 0.01,
-    0, halfHeight * 0.18,
+    -halfWidth * 0.76, -halfHeight * 0.05,
+    0, -halfHeight * 0.9,
+    halfWidth * 0.76, -halfHeight * 0.05,
+    0, -halfHeight * 0.24,
   ]);
   shape.endFill();
 
-  shape.beginFill(mixColor(topColor, palette.edge, 0.42), state === 'locked' ? 0.08 : 0.16);
+  shape.beginFill(mixColor(topColor, 0xf9e0bc, 0.34), state === 'locked' ? 0.06 : 0.12);
   shape.drawPolygon([
-    -halfWidth * 0.36, halfHeight * 0.06,
-    0, halfHeight * 0.3,
-    halfWidth * 0.36, halfHeight * 0.06,
-    0, -halfHeight * 0.08,
+    -halfWidth * 0.52, -halfHeight * 0.04,
+    0, -halfHeight * 0.56,
+    halfWidth * 0.52, -halfHeight * 0.04,
+    0, halfHeight * 0.16,
   ]);
   shape.endFill();
 
-  shape.lineStyle(1, lightenColor(palette.edge, 0.45), state === 'locked' ? 0.2 : 0.38);
-  shape.moveTo(-halfWidth * 0.8, -halfHeight * 0.02);
-  shape.lineTo(0, -halfHeight * 0.66);
-  shape.lineTo(halfWidth * 0.8, -halfHeight * 0.02);
+  shape.beginFill(mixColor(topColor, palette.edge, 0.52), state === 'locked' ? 0.1 : 0.18);
+  shape.drawPolygon([
+    -halfWidth * 0.76, halfHeight * 0.08,
+    0, halfHeight * 0.9,
+    halfWidth * 0.76, halfHeight * 0.08,
+    0, halfHeight * 0.24,
+  ]);
+  shape.endFill();
 
-  shape.lineStyle(1, 0x4b2e1a, 0.2);
+  shape.beginFill(mixColor(topColor, 0x1a110b, 0.38), state === 'locked' ? 0.05 : 0.1);
+  shape.drawPolygon([
+    -halfWidth * 0.94, 0,
+    -halfWidth * 0.64, -halfHeight * 0.23,
+    -halfWidth * 0.23, -halfHeight * 0.06,
+    -halfWidth * 0.52, halfHeight * 0.19,
+  ]);
+  shape.drawPolygon([
+    halfWidth * 0.94, 0,
+    halfWidth * 0.64, -halfHeight * 0.23,
+    halfWidth * 0.23, -halfHeight * 0.06,
+    halfWidth * 0.52, halfHeight * 0.19,
+  ]);
+  shape.endFill();
+
+  shape.lineStyle(1, lightenColor(palette.edge, 0.44), state === 'locked' ? 0.14 : 0.24);
+  shape.moveTo(-halfWidth * 0.86, -halfHeight * 0.03);
+  shape.lineTo(0, -halfHeight * 0.72);
+  shape.lineTo(halfWidth * 0.86, -halfHeight * 0.03);
+
+  shape.lineStyle(1, mixColor(palette.edge, 0x2d1c11, 0.6), state === 'locked' ? 0.16 : 0.24);
   shape.moveTo(0, halfHeight);
   shape.lineTo(0, halfHeight + thickness);
 
@@ -1039,10 +1122,13 @@ function drawPlot(
   if (state === 'mature') drawMatureOverlay(overlay, layout);
   if (state === 'withered') drawWitheredOverlay(overlay, layout);
 
-  plot.lockIcon.alpha = state === 'locked' ? 0.95 : 0;
-  plot.lockIcon.y = Math.round(halfHeight * 0.08);
-  if (plot.lockIcon.style) {
-    plot.lockIcon.style.fontSize = layout.iconFontSize;
+  if (state === 'locked') {
+    plot.lockOverlay.alpha = 0.97;
+    plot.lockOverlay.y = Math.round(halfHeight * 0.1);
+    drawLockOverlay(plot.lockOverlay, layout, topColor);
+  } else {
+    plot.lockOverlay.clear();
+    plot.lockOverlay.alpha = 0;
   }
 }
 
@@ -1072,7 +1158,9 @@ export function FarmPixiPrototype() {
   const lockedCount = TOTAL_PLOTS - unlockedCount;
   const hoveredStateLabel = useMemo(() => {
     if (hoveredPlotId === null) return 'NONE';
-    return PLOT_PALETTES[plotStates[hoveredPlotId] ?? 'locked'].label;
+    const hoveredState = plotStates[hoveredPlotId] ?? 'locked';
+    if (!isUnlockedState(hoveredState)) return 'NONE';
+    return HOVER_STATE_LABELS[hoveredState];
   }, [hoveredPlotId, plotStates]);
 
   useEffect(() => {
@@ -1184,14 +1272,7 @@ export function FarmPixiPrototype() {
         const container = new pixi.Container();
         const shape = new pixi.Graphics();
         const overlay = new pixi.Graphics();
-        const lockIcon = new pixi.Text('🔒', {
-          fontFamily: 'Apple Color Emoji, Segoe UI Emoji, Noto Color Emoji, sans-serif',
-          fontSize: 20,
-          fill: 0xffffff,
-          fontWeight: 700,
-          align: 'center',
-        });
-        lockIcon.anchor.set(0.5, 0.5);
+        const lockOverlay = new pixi.Graphics();
 
         shape.interactive = true;
         shape.cursor = 'pointer';
@@ -1215,7 +1296,7 @@ export function FarmPixiPrototype() {
           });
         }
 
-        container.addChild(shape, overlay, lockIcon);
+        container.addChild(shape, overlay, lockOverlay);
         plotLayer.addChild(container);
 
         return {
@@ -1225,7 +1306,7 @@ export function FarmPixiPrototype() {
           container,
           shape,
           overlay,
-          lockIcon,
+          lockOverlay,
         } satisfies RenderPlot;
       });
 
@@ -1316,9 +1397,9 @@ export function FarmPixiPrototype() {
       <div className="mx-auto w-full max-w-5xl rounded-3xl border border-slate-700/80 bg-slate-900/75 p-4 shadow-[0_20px_80px_rgba(15,23,42,0.55)] sm:p-6">
         <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <h1 className="text-lg font-semibold tracking-wide text-slate-100 sm:text-xl">Pixi Farm Prototype • Step 1 + Step 2</h1>
+            <h1 className="text-lg font-semibold tracking-wide text-slate-100 sm:text-xl">Pixi Farm Prototype • Step 3 Complete</h1>
             <p className="text-xs text-slate-400 sm:text-sm">
-              已接入完整背景与装饰（天空、太阳、云、草地、房屋、谷仓、栅栏、牛羊），保留 3x3 地块状态交互。
+              Step 3 完成态：全景卡通背景、地块体积光影与锁定图形化已合并，保留 3x3 地块交互与状态切换。
             </p>
           </div>
           <a
