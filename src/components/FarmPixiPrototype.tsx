@@ -136,7 +136,9 @@ interface SceneBackdropLayout {
   decorationScale: number;
 }
 
-const PIXI_CDN_URL = 'https://cdn.jsdelivr.net/npm/pixi.js@7.4.3/dist/pixi.min.mjs';
+const PIXI_ESM_CDN_URL = 'https://cdn.jsdelivr.net/npm/pixi.js@7.4.3/dist/pixi.min.mjs';
+const PIXI_LEGACY_CDN_URL = 'https://cdn.jsdelivr.net/npm/pixi.js-legacy@7.4.3/dist/pixi-legacy.min.js';
+const PIXI_LEGACY_SCRIPT_ID = 'farm-pixi-legacy-runtime';
 const GRID_SIZE = 3;
 const TOTAL_PLOTS = GRID_SIZE * GRID_SIZE;
 const PLOT_RENDER_ORDER = [0, 1, 3, 2, 4, 6, 5, 7, 8] as const;
@@ -196,6 +198,8 @@ const PLOT_PALETTES: Record<PlotVisualState, PlotPalette> = {
   },
 };
 
+let pixiLegacyLoadPromise: Promise<PixiModuleLike> | null = null;
+
 function isPixiModule(value: unknown): value is PixiModuleLike {
   if (!value || typeof value !== 'object') return false;
   const objectValue = value as Record<string, unknown>;
@@ -210,6 +214,95 @@ function isPixiModule(value: unknown): value is PixiModuleLike {
 
 function isUnlockedState(state: PlotVisualState): state is PlotState {
   return state !== 'locked';
+}
+
+function getErrorMessage(error: unknown): string {
+  if (error instanceof Error) return error.message;
+  if (typeof error === 'string') return error;
+  return 'Unknown Pixi setup error';
+}
+
+function isAutoDetectRendererError(error: unknown): boolean {
+  return /auto-?detect.*suitable renderer/i.test(getErrorMessage(error));
+}
+
+function getLegacyPixiFromWindow(): PixiModuleLike | null {
+  if (typeof window === 'undefined') return null;
+  const globalPixi = (window as Window & { PIXI?: unknown }).PIXI;
+  if (!isPixiModule(globalPixi)) return null;
+  return globalPixi;
+}
+
+function loadPixiLegacyModule(): Promise<PixiModuleLike> {
+  const existingModule = getLegacyPixiFromWindow();
+  if (existingModule) return Promise.resolve(existingModule);
+  if (pixiLegacyLoadPromise) return pixiLegacyLoadPromise;
+  if (typeof document === 'undefined') {
+    return Promise.reject(new Error('Document is unavailable for Pixi legacy fallback'));
+  }
+
+  pixiLegacyLoadPromise = new Promise<PixiModuleLike>((resolve, reject) => {
+    const resolveLegacyModule = () => {
+      const legacyModule = getLegacyPixiFromWindow();
+      if (!legacyModule) {
+        reject(new Error('Pixi legacy runtime loaded but window.PIXI is unavailable'));
+        return;
+      }
+      resolve(legacyModule);
+    };
+
+    const existingScript = document.getElementById(PIXI_LEGACY_SCRIPT_ID);
+    const script = existingScript instanceof HTMLScriptElement ? existingScript : document.createElement('script');
+
+    if (!existingScript) {
+      script.id = PIXI_LEGACY_SCRIPT_ID;
+      script.src = PIXI_LEGACY_CDN_URL;
+      script.async = true;
+      script.crossOrigin = 'anonymous';
+    }
+
+    const loadedModule = getLegacyPixiFromWindow();
+    if (loadedModule) {
+      script.setAttribute('data-loaded', 'true');
+      resolve(loadedModule);
+      return;
+    }
+
+    script.addEventListener(
+      'load',
+      () => {
+        script.setAttribute('data-loaded', 'true');
+        resolveLegacyModule();
+      },
+      { once: true },
+    );
+    script.addEventListener(
+      'error',
+      () => {
+        reject(new Error('Failed to load pixi.js-legacy fallback runtime'));
+      },
+      { once: true },
+    );
+
+    if (!script.isConnected) {
+      const parent = document.head ?? document.body;
+      if (!parent) {
+        reject(new Error('Document has no head/body to attach Pixi legacy script'));
+        return;
+      }
+      parent.appendChild(script);
+      return;
+    }
+
+    if (script.getAttribute('data-loaded') === 'true') {
+      resolveLegacyModule();
+    }
+  }).catch((error) => {
+    pixiLegacyLoadPromise = null;
+    throw error;
+  });
+
+  return pixiLegacyLoadPromise;
 }
 
 function clamp(value: number, min: number, max: number): number {
@@ -899,197 +992,10 @@ export function FarmPixiPrototype() {
     let cancelled = false;
     let resizeObserver: ResizeObserver | null = null;
 
-    const setupPrototype = async () => {
-      try {
-        const pixiUnknown: unknown = await import(/* @vite-ignore */ PIXI_CDN_URL);
-        if (cancelled) return;
-        if (!isPixiModule(pixiUnknown)) {
-          throw new Error('Pixi CDN module shape is invalid');
-        }
-
-        const pixi = pixiUnknown;
-        pixiRef.current = pixi;
-
-        const host = mountRef.current;
-        if (!host) return;
-
-        const coarsePointer = getCoarsePointerMode();
-        setHoverEnabled(!coarsePointer);
-        setHoveredPlotId(null);
-        hoverEnabledRef.current = !coarsePointer;
-        hoveredPlotIdRef.current = null;
-
-        const initialWidth = Math.max(320, host.clientWidth || 320);
-        const fallbackHeight = window.innerWidth < 768 ? 360 : 460;
-        const initialHeight = Math.max(320, host.clientHeight || fallbackHeight);
-        const resolution = clamp(window.devicePixelRatio || 1, 0.9, 1.4);
-
-        const app = new pixi.Application({
-          width: initialWidth,
-          height: initialHeight,
-          antialias: true,
-          autoDensity: true,
-          resolution,
-          backgroundAlpha: 0,
-          autoStart: false,
-        });
-        appRef.current = app;
-
-        const canvas = app.view;
-        if (!canvas) {
-          throw new Error('Pixi canvas is unavailable');
-        }
-        canvas.style.display = 'block';
-        canvas.style.width = '100%';
-        canvas.style.height = '100%';
-        host.innerHTML = '';
-        host.appendChild(canvas);
-
-        const sceneRoot = new pixi.Container();
-        const backgroundLayer = new pixi.Graphics();
-        const decorationBackLayer = new pixi.Graphics();
-        const plotLayer = new pixi.Container();
-        const decorationFrontLayer = new pixi.Graphics();
-        sceneRoot.addChild(backgroundLayer, decorationBackLayer, plotLayer, decorationFrontLayer);
-        stageRef.current = plotLayer;
-        app.stage.addChild(sceneRoot);
-
-        const requestRender = () => {
-          if (cancelled || isRenderQueuedRef.current) return;
-          isRenderQueuedRef.current = true;
-          renderRequestIdRef.current = window.requestAnimationFrame(() => {
-            isRenderQueuedRef.current = false;
-            renderRequestIdRef.current = null;
-            app.renderer.render(app.stage);
-          });
-        };
-        requestRenderRef.current = requestRender;
-
-        const renderPlots = () => {
-          const activeLayout = layoutRef.current;
-          if (!activeLayout) return;
-
-          const activeHoveredPlotId = hoverEnabledRef.current ? hoveredPlotIdRef.current : null;
-          for (const plot of plotObjectsRef.current) {
-            const state = plotStatesRef.current[plot.id] ?? 'locked';
-            drawPlot(plot, state, activeHoveredPlotId === plot.id, activeLayout, hoverEnabledRef.current, pixi);
-          }
-          requestRender();
-        };
-        renderPlotsRef.current = renderPlots;
-
-        const renderPlotsInOrder = PLOT_RENDER_ORDER.map((plotId) => {
-          const container = new pixi.Container();
-          const shape = new pixi.Graphics();
-          const overlay = new pixi.Graphics();
-          const statusText = new pixi.Text('', {
-            fontFamily: 'JetBrains Mono, ui-monospace, monospace',
-            fontSize: 12,
-            fill: 0xffffff,
-            fontWeight: 700,
-            align: 'center',
-            dropShadow: true,
-            dropShadowColor: '#0f172a',
-            dropShadowDistance: 1,
-            dropShadowBlur: 1,
-          });
-          statusText.anchor.set(0.5, 0.5);
-
-          const lockIcon = new pixi.Text('🔒', {
-            fontFamily: 'Apple Color Emoji, Segoe UI Emoji, Noto Color Emoji, sans-serif',
-            fontSize: 20,
-            fill: 0xffffff,
-            fontWeight: 700,
-            align: 'center',
-          });
-          lockIcon.anchor.set(0.5, 0.5);
-
-          shape.interactive = true;
-          shape.cursor = 'pointer';
-          shape.on('pointertap', () => {
-            setPlotStates((previous) => {
-              const current = previous[plotId];
-              if (!current || !isUnlockedState(current)) return previous;
-              const next = previous.slice();
-              next[plotId] = cyclePlotState(current);
-              return next;
-            });
-          });
-
-          if (!coarsePointer) {
-            shape.on('pointerover', () => {
-              if ((plotStatesRef.current[plotId] ?? 'locked') === 'locked') return;
-              setHoveredPlotId((current) => (current === plotId ? current : plotId));
-            });
-            shape.on('pointerout', () => {
-              setHoveredPlotId((current) => (current === plotId ? null : current));
-            });
-          }
-
-          container.addChild(shape, overlay, statusText, lockIcon);
-          plotLayer.addChild(container);
-
-          return {
-            id: plotId,
-            baseX: 0,
-            baseY: 0,
-            container,
-            shape,
-            overlay,
-            statusText,
-            lockIcon,
-          } satisfies RenderPlot;
-        });
-
-        plotObjectsRef.current = renderPlotsInOrder;
-
-        const applyLayout = () => {
-          const nextWidth = Math.max(320, host.clientWidth || 320);
-          const fallbackNextHeight = window.innerWidth < 768 ? 360 : 460;
-          const nextHeight = Math.max(320, host.clientHeight || fallbackNextHeight);
-          app.renderer.resize(nextWidth, nextHeight);
-
-          const nextBackdropLayout = resolveBackdropLayout(nextWidth, nextHeight);
-          drawBackdropLayer(backgroundLayer, nextWidth, nextHeight, nextBackdropLayout);
-          drawDecorationLayers(decorationBackLayer, decorationFrontLayer, nextWidth, nextHeight, nextBackdropLayout);
-
-          const nextLayout = resolveSceneLayout(nextWidth, nextHeight);
-          layoutRef.current = nextLayout;
-
-          plotLayer.x = Math.round(nextWidth / 2);
-          plotLayer.y = nextLayout.stageY;
-
-          for (const plot of plotObjectsRef.current) {
-            const coordinate = resolvePlotCoordinate(plot.id, nextLayout);
-            plot.baseX = coordinate.x;
-            plot.baseY = coordinate.y;
-            plot.container.x = coordinate.x;
-          }
-
-          renderPlots();
-        };
-
-        applyLayout();
-        resizeObserver = new ResizeObserver(applyLayout);
-        resizeObserver.observe(host);
-        setStatus('ready');
-      } catch (error) {
-        if (cancelled) return;
-        setStatus('error');
-        if (error instanceof Error) {
-          setErrorText(error.message);
-        } else {
-          setErrorText('Unknown Pixi setup error');
-        }
-      }
-    };
-
-    void setupPrototype();
-
-    return () => {
-      cancelled = true;
+    const resetRuntime = () => {
       if (resizeObserver) {
         resizeObserver.disconnect();
+        resizeObserver = null;
       }
       if (renderRequestIdRef.current !== null) {
         window.cancelAnimationFrame(renderRequestIdRef.current);
@@ -1104,6 +1010,217 @@ export function FarmPixiPrototype() {
       stageRef.current = null;
       layoutRef.current = null;
       plotObjectsRef.current = [];
+      if (mountRef.current) {
+        mountRef.current.innerHTML = '';
+      }
+    };
+
+    const initializeScene = (pixi: PixiModuleLike) => {
+      pixiRef.current = pixi;
+
+      const host = mountRef.current;
+      if (!host) return;
+
+      const coarsePointer = getCoarsePointerMode();
+      setHoverEnabled(!coarsePointer);
+      setHoveredPlotId(null);
+      hoverEnabledRef.current = !coarsePointer;
+      hoveredPlotIdRef.current = null;
+
+      const initialWidth = Math.max(320, host.clientWidth || 320);
+      const fallbackHeight = window.innerWidth < 768 ? 360 : 460;
+      const initialHeight = Math.max(320, host.clientHeight || fallbackHeight);
+      const resolution = clamp(window.devicePixelRatio || 1, 0.9, 1.4);
+
+      const app = new pixi.Application({
+        width: initialWidth,
+        height: initialHeight,
+        antialias: true,
+        autoDensity: true,
+        resolution,
+        backgroundAlpha: 0,
+        autoStart: false,
+      });
+      appRef.current = app;
+
+      const canvas = app.view;
+      if (!canvas) {
+        throw new Error('Pixi canvas is unavailable');
+      }
+      canvas.style.display = 'block';
+      canvas.style.width = '100%';
+      canvas.style.height = '100%';
+      host.innerHTML = '';
+      host.appendChild(canvas);
+
+      const sceneRoot = new pixi.Container();
+      const backgroundLayer = new pixi.Graphics();
+      const decorationBackLayer = new pixi.Graphics();
+      const plotLayer = new pixi.Container();
+      const decorationFrontLayer = new pixi.Graphics();
+      sceneRoot.addChild(backgroundLayer, decorationBackLayer, plotLayer, decorationFrontLayer);
+      stageRef.current = plotLayer;
+      app.stage.addChild(sceneRoot);
+
+      const requestRender = () => {
+        if (cancelled || isRenderQueuedRef.current) return;
+        isRenderQueuedRef.current = true;
+        renderRequestIdRef.current = window.requestAnimationFrame(() => {
+          isRenderQueuedRef.current = false;
+          renderRequestIdRef.current = null;
+          app.renderer.render(app.stage);
+        });
+      };
+      requestRenderRef.current = requestRender;
+
+      const renderPlots = () => {
+        const activeLayout = layoutRef.current;
+        if (!activeLayout) return;
+
+        const activeHoveredPlotId = hoverEnabledRef.current ? hoveredPlotIdRef.current : null;
+        for (const plot of plotObjectsRef.current) {
+          const state = plotStatesRef.current[plot.id] ?? 'locked';
+          drawPlot(plot, state, activeHoveredPlotId === plot.id, activeLayout, hoverEnabledRef.current, pixi);
+        }
+        requestRender();
+      };
+      renderPlotsRef.current = renderPlots;
+
+      const renderPlotsInOrder = PLOT_RENDER_ORDER.map((plotId) => {
+        const container = new pixi.Container();
+        const shape = new pixi.Graphics();
+        const overlay = new pixi.Graphics();
+        const statusText = new pixi.Text('', {
+          fontFamily: 'JetBrains Mono, ui-monospace, monospace',
+          fontSize: 12,
+          fill: 0xffffff,
+          fontWeight: 700,
+          align: 'center',
+          dropShadow: true,
+          dropShadowColor: '#0f172a',
+          dropShadowDistance: 1,
+          dropShadowBlur: 1,
+        });
+        statusText.anchor.set(0.5, 0.5);
+
+        const lockIcon = new pixi.Text('🔒', {
+          fontFamily: 'Apple Color Emoji, Segoe UI Emoji, Noto Color Emoji, sans-serif',
+          fontSize: 20,
+          fill: 0xffffff,
+          fontWeight: 700,
+          align: 'center',
+        });
+        lockIcon.anchor.set(0.5, 0.5);
+
+        shape.interactive = true;
+        shape.cursor = 'pointer';
+        shape.on('pointertap', () => {
+          setPlotStates((previous) => {
+            const current = previous[plotId];
+            if (!current || !isUnlockedState(current)) return previous;
+            const next = previous.slice();
+            next[plotId] = cyclePlotState(current);
+            return next;
+          });
+        });
+
+        if (!coarsePointer) {
+          shape.on('pointerover', () => {
+            if ((plotStatesRef.current[plotId] ?? 'locked') === 'locked') return;
+            setHoveredPlotId((current) => (current === plotId ? current : plotId));
+          });
+          shape.on('pointerout', () => {
+            setHoveredPlotId((current) => (current === plotId ? null : current));
+          });
+        }
+
+        container.addChild(shape, overlay, statusText, lockIcon);
+        plotLayer.addChild(container);
+
+        return {
+          id: plotId,
+          baseX: 0,
+          baseY: 0,
+          container,
+          shape,
+          overlay,
+          statusText,
+          lockIcon,
+        } satisfies RenderPlot;
+      });
+
+      plotObjectsRef.current = renderPlotsInOrder;
+
+      const applyLayout = () => {
+        const nextWidth = Math.max(320, host.clientWidth || 320);
+        const fallbackNextHeight = window.innerWidth < 768 ? 360 : 460;
+        const nextHeight = Math.max(320, host.clientHeight || fallbackNextHeight);
+        app.renderer.resize(nextWidth, nextHeight);
+
+        const nextBackdropLayout = resolveBackdropLayout(nextWidth, nextHeight);
+        drawBackdropLayer(backgroundLayer, nextWidth, nextHeight, nextBackdropLayout);
+        drawDecorationLayers(decorationBackLayer, decorationFrontLayer, nextWidth, nextHeight, nextBackdropLayout);
+
+        const nextLayout = resolveSceneLayout(nextWidth, nextHeight);
+        layoutRef.current = nextLayout;
+
+        plotLayer.x = Math.round(nextWidth / 2);
+        plotLayer.y = nextLayout.stageY;
+
+        for (const plot of plotObjectsRef.current) {
+          const coordinate = resolvePlotCoordinate(plot.id, nextLayout);
+          plot.baseX = coordinate.x;
+          plot.baseY = coordinate.y;
+          plot.container.x = coordinate.x;
+        }
+
+        renderPlots();
+      };
+
+      applyLayout();
+      resizeObserver = new ResizeObserver(applyLayout);
+      resizeObserver.observe(host);
+      setStatus('ready');
+    };
+
+    const setupPrototype = async () => {
+      setStatus('loading');
+      setErrorText('');
+      try {
+        const pixiUnknown: unknown = await import(/* @vite-ignore */ PIXI_ESM_CDN_URL);
+        if (cancelled) return;
+        if (!isPixiModule(pixiUnknown)) {
+          throw new Error('Pixi ESM module shape is invalid');
+        }
+        initializeScene(pixiUnknown);
+      } catch (error) {
+        if (cancelled) return;
+        if (!isAutoDetectRendererError(error)) {
+          setStatus('error');
+          setErrorText(getErrorMessage(error));
+          return;
+        }
+
+        try {
+          resetRuntime();
+          const legacyPixi = await loadPixiLegacyModule();
+          if (cancelled) return;
+          initializeScene(legacyPixi);
+        } catch (legacyError) {
+          if (cancelled) return;
+          setStatus('error');
+          setErrorText(
+            `${getErrorMessage(error)} | Legacy fallback failed: ${getErrorMessage(legacyError)}`,
+          );
+        }
+      }
+    };
+
+    void setupPrototype();
+
+    return () => {
+      cancelled = true;
+      resetRuntime();
     };
   }, []);
 
