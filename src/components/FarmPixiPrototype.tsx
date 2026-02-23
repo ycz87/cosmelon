@@ -1,10 +1,10 @@
 /**
- * FarmPixiPrototype — Step 5 交互优化版 Pixi 样机。
+ * FarmPixiPrototype — Step 6 Final 收口版 Pixi 样机。
  *
  * 目标：
- * 1) 保持 Step 4 视觉层（背景/装饰/地块体积感）不回退
- * 2) 使用菱形 hitArea 并可通过日志验证命中
- * 3) 接入种植/生长/收获语义链路与锁定拦截日志
+ * 1) 保持 Step 5 视觉与交互能力不回退
+ * 2) 微调 3x3 地块构图（减弱聚合感，贴近参考构图）
+ * 3) 小幅校正前景装饰比例（牛羊/栅栏与地块关系更自然）
  * 4) 保持交互轻量与渲染流畅
  *
  * 约束：
@@ -1181,11 +1181,11 @@ function drawFrontDecorationLayer(
   frontLayer.clear();
 
   const scale = backdropLayout.decorationScale;
-  const depthScale = clamp((viewportHeight - sceneLayout.stageY) / 310, 0.92, 1.18);
+  const depthScale = clamp((viewportHeight - sceneLayout.stageY) / 310, 0.92, 1.16);
   const nearScale = scale * depthScale;
-  const frontSegmentWidth = Math.max(10, 16 * nearScale);
+  const frontSegmentWidth = Math.max(10, 15 * nearScale);
   const frontFenceSpan = 5 * frontSegmentWidth;
-  const edgeOffset = Math.max(10, 16 * nearScale);
+  const edgeOffset = Math.max(10, 15 * nearScale);
   const plotBottomY =
     sceneLayout.stageY +
     sceneLayout.stepY * 4 +
@@ -1232,20 +1232,20 @@ function drawFrontDecorationLayer(
   ]);
   frontLayer.endFill();
 
-  drawFence(frontLayer, edgeOffset, frontGroundY + 1.5 * nearScale, 5, frontSegmentWidth, 0.88 * nearScale);
+  drawFence(frontLayer, edgeOffset, frontGroundY + 1.5 * nearScale, 5, frontSegmentWidth, 0.84 * nearScale);
   drawFence(
     frontLayer,
     viewportWidth - frontFenceSpan - edgeOffset,
     frontGroundY + 1.5 * nearScale,
     5,
     frontSegmentWidth,
-    0.88 * nearScale,
+    0.84 * nearScale,
   );
 
-  const cowX = clamp(viewportWidth * 0.18, 48 * nearScale, viewportWidth * 0.37);
-  const sheepX = clamp(viewportWidth * 0.82, viewportWidth * 0.63, viewportWidth - 46 * nearScale);
-  drawCow(frontLayer, cowX, frontGroundY - 21 * nearScale, 0.82 * nearScale, false);
-  drawSheep(frontLayer, sheepX, frontGroundY - 22 * nearScale, 0.79 * nearScale, true);
+  const cowX = clamp(viewportWidth * 0.17, 46 * nearScale, viewportWidth * 0.35);
+  const sheepX = clamp(viewportWidth * 0.83, viewportWidth * 0.65, viewportWidth - 44 * nearScale);
+  drawCow(frontLayer, cowX, frontGroundY - 19 * nearScale, 0.77 * nearScale, false);
+  drawSheep(frontLayer, sheepX, frontGroundY - 20 * nearScale, 0.74 * nearScale, true);
 
   drawGrassTufts(frontLayer, 0, bermTopY + 12 * nearScale, viewportWidth, 28, 0.72 * nearScale, 0x6d9c40, 0.42);
   drawGrassTufts(frontLayer, 0, bermTopY + 14.6 * nearScale, viewportWidth, 22, 0.58 * nearScale, 0x4f7d2f, 0.3);
@@ -1265,14 +1265,14 @@ function resolveSceneLayout(
 ): SceneLayout {
   const horizontalPadding = viewportWidth < 560 ? 20 : 30;
   const safeWidth = Math.max(220, viewportWidth - horizontalPadding * 2);
-  const maxByWidth = safeWidth / 6.05;
+  const maxByWidth = safeWidth / 6.18;
   const groundHeight = Math.max(150, viewportHeight - backdropLayout.groundTopY - 10);
   const maxByGround = (groundHeight - 26) / 4.35;
   const halfWidth = Math.round(clamp(Math.min(maxByWidth, maxByGround), 32, 70));
   const halfHeight = Math.round(halfWidth * 0.54);
   const thickness = Math.round(clamp(halfHeight * 0.46, 11, 28));
-  const stepX = Math.round(halfWidth * 1.0);
-  const stepY = Math.round(halfHeight * 0.95);
+  const stepX = Math.round(halfWidth * 1.06);
+  const stepY = Math.round(halfHeight * 0.99);
   const shadowWidth = Math.round(halfWidth * 0.86);
   const shadowHeight = Math.max(8, Math.round(halfHeight * 0.38));
   const shadowOffsetY = Math.round(thickness + shadowHeight * 0.34 + 1);
@@ -2354,9 +2354,9 @@ export function FarmPixiPrototype() {
       <div className="mx-auto w-full max-w-5xl rounded-3xl border border-slate-700/80 bg-slate-900/75 p-4 shadow-[0_20px_80px_rgba(15,23,42,0.55)] sm:p-6">
         <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <h1 className="text-lg font-semibold tracking-wide text-slate-100 sm:text-xl">Pixi Farm Prototype • Step 5 Interactive</h1>
+            <h1 className="text-lg font-semibold tracking-wide text-slate-100 sm:text-xl">Pixi Farm Prototype • Step 6 Final</h1>
             <p className="text-xs text-slate-400 sm:text-sm">
-              Step 5：保留 Step 4 视觉层，新增菱形命中日志、hover 强化高亮与种植/生长/收获语义交互。
+              Step 6 Final：在 Step 5 交互能力上完成收口，微调 3x3 菱形构图与前景装饰比例，保留现有命中/hover/种植-生长-收获链路。
             </p>
           </div>
           <a
