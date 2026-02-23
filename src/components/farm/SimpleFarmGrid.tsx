@@ -125,7 +125,7 @@ export function SimpleFarmGrid({
           return (
             <div
               key={plot ? `plot-simple-${plot.id}` : `plot-locked-${slotIndex}`}
-              className={`relative rounded-xl border-[3px] border-[#8B6914] bg-[#C4956A] shadow-md ${
+              className={`relative border-[3px] border-[#8B6914] bg-[#C4956A] ${
                 isLastMobilePlot ? 'col-span-2 justify-self-center' : ''
               }`}
               style={{ width: layout.plotSize, height: layout.plotSize }}
@@ -156,7 +156,7 @@ export function SimpleFarmGrid({
                     onUseTrapNet={() => onUseTrapNet(plot.id)}
                   />
                 ) : (
-                  <div className="flex h-full w-full items-center justify-center rounded-lg border-2 border-dashed border-[#8B6914] bg-[#C4956A]/40">
+                  <div className="flex h-full w-full items-center justify-center border-2 border-dashed border-[#8B6914] bg-[#C4956A]/40">
                     <span className="text-2xl leading-none">🔒</span>
                   </div>
                 )}
