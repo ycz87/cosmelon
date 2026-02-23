@@ -347,11 +347,7 @@ export function FarmPage({
       </div>
 
       {/* 农场场景 */}
-      <div
-        className="farm-page relative min-h-[520px] sm:min-h-[620px] md:min-h-[720px] rounded-[var(--radius-panel)]"
-        style={{ backgroundColor: theme.surface }}
-      >
-        <div className="relative z-[20] pt-8 sm:pt-12 md:pt-16">
+      <div className="farm-page pt-4">
           <SimpleFarmGrid
             plots={farm.plots}
             weather={weather}
@@ -376,7 +372,6 @@ export function FarmPage({
             onUseStarTracker={onUseStarTracker}
             onUseTrapNet={onUseTrapNet}
           />
-        </div>
       </div>
 
       {/* 没有种子提示 */}
