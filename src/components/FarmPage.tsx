@@ -277,7 +277,7 @@ export function FarmPage({
 
   return (
     <div
-      className="flex-1 flex flex-col w-full px-4 pt-4 pb-6 gap-4 rounded-[var(--radius-panel)] transition-[background] duration-300 ease-out bg-[linear-gradient(to_bottom,#D4F1F9_0%,#E8F8FC_100%)]"
+      className="flex-1 flex flex-col w-full px-4 pt-4 pb-6 gap-4"
     >
       {/* Sub-tab header */}
       <SubTabHeader subTab={subTab} setSubTab={setSubTab} theme={theme} t={t} />
