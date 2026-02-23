@@ -30,70 +30,70 @@ interface IsometricPlotShellProps {
 
 const PALETTES: Record<PlotShellState, PlotShellPalette> = {
   empty: {
-    topLight: '#E0B07C',
-    topDark: '#C89161',
-    leftLight: '#AA7449',
-    leftDark: '#895A33',
-    rightLight: '#9A673F',
-    rightDark: '#7D522F',
-    edge: '#6A4427',
-    highlight: 'rgba(255,255,255,0.38)',
-    shadow: 'rgba(50,30,15,0.3)',
+    topLight: '#E8C58E',
+    topDark: '#D8AA73',
+    leftLight: '#C28F57',
+    leftDark: '#A67543',
+    rightLight: '#BA854F',
+    rightDark: '#9E6D3E',
+    edge: '#896038',
+    highlight: 'rgba(255,255,255,0.44)',
+    shadow: 'rgba(78,52,27,0.2)',
   },
   growing: {
-    topLight: '#D6B67E',
-    topDark: '#B99055',
-    leftLight: '#9D7642',
-    leftDark: '#7D5930',
-    rightLight: '#8F6837',
-    rightDark: '#704F2B',
-    edge: '#674726',
-    highlight: 'rgba(235,255,214,0.32)',
-    shadow: 'rgba(56,38,22,0.3)',
+    topLight: '#E7CB92',
+    topDark: '#D2AD6D',
+    leftLight: '#BE9256',
+    leftDark: '#A57A45',
+    rightLight: '#B58A50',
+    rightDark: '#9B733F',
+    edge: '#88633A',
+    highlight: 'rgba(236,255,214,0.4)',
+    shadow: 'rgba(74,50,28,0.2)',
   },
   mature: {
-    topLight: '#D7AC73',
-    topDark: '#A87948',
-    leftLight: '#8F663A',
-    leftDark: '#6C4928',
-    rightLight: '#805A32',
-    rightDark: '#624326',
-    edge: '#5C3E24',
-    highlight: 'rgba(255,236,177,0.34)',
-    shadow: 'rgba(52,34,20,0.33)',
+    topLight: '#EDC68C',
+    topDark: '#CC9858',
+    leftLight: '#B68245',
+    leftDark: '#956636',
+    rightLight: '#A9773D',
+    rightDark: '#8C5D31',
+    edge: '#7D5630',
+    highlight: 'rgba(255,237,177,0.42)',
+    shadow: 'rgba(76,49,26,0.24)',
   },
   withered: {
-    topLight: '#AC9A83',
-    topDark: '#8B7661',
-    leftLight: '#746353',
-    leftDark: '#564939',
-    rightLight: '#675849',
-    rightDark: '#4B3E31',
-    edge: '#43372E',
-    highlight: 'rgba(255,255,255,0.22)',
-    shadow: 'rgba(24,18,12,0.35)',
+    topLight: '#C7B39A',
+    topDark: '#A38D74',
+    leftLight: '#927E69',
+    leftDark: '#776250',
+    rightLight: '#887460',
+    rightDark: '#6E5A49',
+    edge: '#665443',
+    highlight: 'rgba(255,255,255,0.28)',
+    shadow: 'rgba(60,47,35,0.22)',
   },
   stolen: {
-    topLight: '#9D5E55',
-    topDark: '#783A34',
-    leftLight: '#68302B',
-    leftDark: '#4E2521',
-    rightLight: '#5F2D28',
-    rightDark: '#45201C',
-    edge: '#3D1B18',
-    highlight: 'rgba(255,200,193,0.24)',
-    shadow: 'rgba(37,13,11,0.42)',
+    topLight: '#C98378',
+    topDark: '#A25B53',
+    leftLight: '#9A4D46',
+    leftDark: '#7D3A35',
+    rightLight: '#8F4841',
+    rightDark: '#71332E',
+    edge: '#6A2F2A',
+    highlight: 'rgba(255,213,205,0.32)',
+    shadow: 'rgba(74,30,26,0.3)',
   },
   locked: {
-    topLight: '#BCA58A',
-    topDark: '#9C846A',
-    leftLight: '#886F56',
-    leftDark: '#68543F',
-    rightLight: '#7E6851',
-    rightDark: '#624E3B',
-    edge: '#564534',
-    highlight: 'rgba(255,255,255,0.24)',
-    shadow: 'rgba(40,31,24,0.3)',
+    topLight: '#D1BC9F',
+    topDark: '#B59D80',
+    leftLight: '#A3896D',
+    leftDark: '#876F56',
+    rightLight: '#987F64',
+    rightDark: '#7B664E',
+    edge: '#6E5B46',
+    highlight: 'rgba(255,255,255,0.3)',
+    shadow: 'rgba(70,56,42,0.2)',
   },
 };
 
@@ -103,15 +103,15 @@ export function IsometricPlotShell({ size, state, children }: IsometricPlotShell
 
   const topHeight = Math.round(size * 0.62);
   const halfTopHeight = topHeight / 2;
-  const depth = Math.max(10, Math.round(size * 0.2));
-  const shadowPad = Math.max(12, Math.round(size * 0.2));
+  const depth = Math.max(9, Math.round(size * 0.17));
+  const shadowPad = Math.max(12, Math.round(size * 0.18));
   const shellHeight = topHeight + depth + shadowPad;
 
   const contentWidth = Math.round(size * 0.68);
   const contentTop = Math.round(topHeight * 0.1);
 
-  const shadowWidth = Math.round(size * 0.82);
-  const shadowHeight = Math.max(10, Math.round(size * 0.16));
+  const shadowWidth = Math.round(size * 0.88);
+  const shadowHeight = Math.max(9, Math.round(size * 0.14));
 
   const topPoints = `${size / 2},0 ${size},${halfTopHeight} ${size / 2},${topHeight} 0,${halfTopHeight}`;
   const leftPoints = `0,${halfTopHeight} ${size / 2},${topHeight} ${size / 2},${topHeight + depth} 0,${halfTopHeight + depth}`;
@@ -137,6 +137,13 @@ export function IsometricPlotShell({ size, state, children }: IsometricPlotShell
             <stop offset="0%" stopColor={palette.rightLight} />
             <stop offset="100%" stopColor={palette.rightDark} />
           </linearGradient>
+          <radialGradient id={`shine-${gradientId}`} cx="50%" cy="24%" r="76%">
+            <stop offset="0%" stopColor={palette.highlight} />
+            <stop offset="100%" stopColor="rgba(255,255,255,0)" />
+          </radialGradient>
+          <filter id={`shadow-${gradientId}`} x="-24%" y="-100%" width="148%" height="270%">
+            <feGaussianBlur stdDeviation={Math.max(1.2, size * 0.013)} />
+          </filter>
         </defs>
 
         <ellipse
@@ -145,6 +152,7 @@ export function IsometricPlotShell({ size, state, children }: IsometricPlotShell
           rx={shadowWidth / 2}
           ry={shadowHeight / 2}
           fill={palette.shadow}
+          filter={`url(#shadow-${gradientId})`}
         />
 
         <polygon points={leftPoints} fill={`url(#left-${gradientId})`} />
@@ -157,6 +165,7 @@ export function IsometricPlotShell({ size, state, children }: IsometricPlotShell
           strokeWidth={Math.max(1.2, size * 0.014)}
           strokeLinejoin="round"
         />
+        <polygon points={topPoints} fill={`url(#shine-${gradientId})`} opacity="0.52" />
         <polyline
           points={`0,${halfTopHeight} ${size / 2},0 ${size},${halfTopHeight}`}
           stroke={palette.highlight}
