@@ -184,17 +184,17 @@ const WIREFRAME_SECONDARY_STROKE = 0x334155;
 
 const VISUAL_ONLY_PLOT_LAYOUT: ReadonlyArray<{ x: number; y: number }> = [
   // Row 1: 1
-  { x: 0, y: -2.2 },
+  { x: 0, y: -2.46 },
   // Row 2: 2
-  { x: -1.56, y: -1.08 },
-  { x: 1.56, y: -1.08 },
+  { x: -1.74, y: -1.23 },
+  { x: 1.74, y: -1.23 },
   // Row 3: 1
-  { x: 0, y: 0.04 },
+  { x: 0, y: 0.02 },
   // Row 4: 2
-  { x: -1.56, y: 1.16 },
-  { x: 1.56, y: 1.16 },
+  { x: -1.74, y: 1.27 },
+  { x: 1.74, y: 1.27 },
   // Row 5: 1
-  { x: 0, y: 2.28 },
+  { x: 0, y: 2.52 },
 ];
 
 const PLOT_PALETTES: Record<PlotVisualState, PlotPalette> = {
@@ -1976,7 +1976,7 @@ function resolvePlotCoordinate(
     if (!visualOnlyCoordinate) {
       return { x: 0, y: 0 };
     }
-    const spreadRatio = 1.3;
+    const spreadRatio = 1.42;
     return {
       x: Math.round(layout.halfWidth * visualOnlyCoordinate.x * spreadRatio),
       y: Math.round(layout.halfHeight * visualOnlyCoordinate.y * spreadRatio),
@@ -2551,8 +2551,15 @@ function drawPlot(
   }
 
   if (visualOnlyMode) {
-    const bedHalfWidth = halfWidth * 0.94;
-    const bedHalfHeight = halfHeight * 0.64;
+    const bedHalfWidth = halfWidth * 0.9;
+    const bedHalfHeight = halfHeight * 0.62;
+    const bedWidth = bedHalfWidth * 2;
+    const bedHeight = bedHalfHeight * 2;
+    const bedLeft = -bedHalfWidth;
+    const bedTop = -bedHalfHeight;
+    const cornerRadius = clamp(Math.min(bedWidth, bedHeight) * 0.24, 6, 14);
+    const inset = clamp(Math.min(bedWidth, bedHeight) * 0.1, 3.5, 7.8);
+    const innerRadius = Math.max(3, cornerRadius - inset * 0.78);
     const stateLift =
       state === 'empty' ? 0.11 : state === 'sprout' ? 0.09 : state === 'mature' ? 0.055 : state === 'withered' ? 0.04 : 0.072;
     const bedTopColor = hoverActive ? lightenColor(palette.top, 0.14) : lightenColor(palette.top, stateLift);
@@ -2568,44 +2575,56 @@ function drawPlot(
     plot.container.scale.set(1);
 
     shape.hitArea = new pixi.Polygon([
-      -bedHalfWidth * 0.96, 0,
-      -bedHalfWidth * 0.72, -bedHalfHeight * 0.56,
-      0, -bedHalfHeight * 0.84,
-      bedHalfWidth * 0.72, -bedHalfHeight * 0.56,
-      bedHalfWidth * 0.96, 0,
-      bedHalfWidth * 0.72, bedHalfHeight * 0.56,
-      0, bedHalfHeight * 0.84,
-      -bedHalfWidth * 0.72, bedHalfHeight * 0.56,
+      bedLeft + cornerRadius, bedTop,
+      bedLeft + bedWidth - cornerRadius, bedTop,
+      bedLeft + bedWidth, bedTop + cornerRadius,
+      bedLeft + bedWidth, bedTop + bedHeight - cornerRadius,
+      bedLeft + bedWidth - cornerRadius, bedTop + bedHeight,
+      bedLeft + cornerRadius, bedTop + bedHeight,
+      bedLeft, bedTop + bedHeight - cornerRadius,
+      bedLeft, bedTop + cornerRadius,
     ]);
 
     shape.lineStyle(0, 0x000000, 0);
     shape.beginFill(0x1f3318, hoverActive ? 0.23 : 0.19);
-    shape.drawEllipse(0, shadowY, bedHalfWidth * 1.26, bedHalfHeight * 0.55);
+    shape.drawRoundedRect(bedLeft + 2, shadowY - bedHalfHeight * 0.34, bedWidth * 0.96, bedHeight * 0.4, Math.max(4, cornerRadius * 0.72));
     shape.endFill();
 
     shape.beginFill(0x12230d, hoverActive ? 0.16 : 0.125);
-    shape.drawEllipse(0, shadowY + bedHalfHeight * 0.12, bedHalfWidth * 0.9, bedHalfHeight * 0.31);
+    shape.drawRoundedRect(bedLeft + 8, shadowY - bedHalfHeight * 0.16, bedWidth * 0.84, bedHeight * 0.26, Math.max(3, cornerRadius * 0.58));
     shape.endFill();
 
     shape.lineStyle(hoverActive ? 2.3 : 2, bedBorderColor, 0.92);
     shape.beginFill(bedMidColor, 1);
-    shape.drawEllipse(0, 0, bedHalfWidth, bedHalfHeight);
+    shape.drawRoundedRect(bedLeft, bedTop, bedWidth, bedHeight, cornerRadius);
     shape.endFill();
 
     shape.lineStyle(0, 0x000000, 0);
     shape.beginFill(lightenColor(bedTopColor, 0.24), hoverActive ? 0.3 : 0.25);
-    shape.drawEllipse(-bedHalfWidth * 0.22, -bedHalfHeight * 0.35, bedHalfWidth * 0.62, bedHalfHeight * 0.34);
+    shape.drawRoundedRect(
+      bedLeft + inset,
+      bedTop + inset,
+      bedWidth * 0.56,
+      bedHeight * 0.36,
+      Math.max(3, innerRadius * 0.76),
+    );
     shape.endFill();
 
     shape.beginFill(mixColor(bedMidColor, bedDeepColor, 0.56), hoverActive ? 0.18 : 0.145);
-    shape.drawEllipse(bedHalfWidth * 0.2, bedHalfHeight * 0.32, bedHalfWidth * 0.6, bedHalfHeight * 0.3);
+    shape.drawRoundedRect(
+      bedLeft + bedWidth * 0.42,
+      bedTop + bedHeight * 0.52,
+      bedWidth * 0.5,
+      bedHeight * 0.32,
+      Math.max(3, innerRadius * 0.74),
+    );
     shape.endFill();
 
     shape.beginFill(mixColor(bedTopColor, palette.edge, 0.5), 0.14);
     for (const point of SOIL_MICRO_POINTS) {
       shape.drawCircle(
-        bedHalfWidth * point.x * 0.8,
-        bedHalfHeight * point.y * 0.9,
+        bedHalfWidth * point.x * 0.74,
+        bedHalfHeight * point.y * 0.84,
         grainRadius * point.size,
       );
     }
@@ -2613,16 +2632,28 @@ function drawPlot(
 
     shape.lineStyle(1.1, mixColor(palette.edge, 0x2b1b11, 0.63), 0.26);
     for (const crack of SOIL_MICRO_CRACKS) {
-      shape.moveTo(bedHalfWidth * crack[0] * 0.66, bedHalfHeight * crack[1] * 0.78);
-      shape.lineTo(bedHalfWidth * crack[2] * 0.66, bedHalfHeight * crack[3] * 0.78);
-      shape.lineTo(bedHalfWidth * crack[4] * 0.66, bedHalfHeight * crack[5] * 0.78);
+      shape.moveTo(bedHalfWidth * crack[0] * 0.61, bedHalfHeight * crack[1] * 0.7);
+      shape.lineTo(bedHalfWidth * crack[2] * 0.61, bedHalfHeight * crack[3] * 0.7);
+      shape.lineTo(bedHalfWidth * crack[4] * 0.61, bedHalfHeight * crack[5] * 0.7);
     }
 
     shape.lineStyle(1.2, rimHighlightColor, 0.42);
-    shape.drawEllipse(0, -bedHalfHeight * 0.05, bedHalfWidth * 0.9, bedHalfHeight * 0.58);
+    shape.drawRoundedRect(
+      bedLeft + inset * 0.9,
+      bedTop + inset * 0.9,
+      bedWidth - inset * 1.8,
+      bedHeight - inset * 1.8,
+      Math.max(3, innerRadius),
+    );
 
     shape.lineStyle(1, mixColor(bedBorderColor, 0x2d1d12, 0.5), 0.22);
-    shape.drawEllipse(0, bedHalfHeight * 0.22, bedHalfWidth * 0.82, bedHalfHeight * 0.44);
+    shape.drawRoundedRect(
+      bedLeft + inset * 1.25,
+      bedTop + bedHeight * 0.45,
+      bedWidth - inset * 2.5,
+      bedHeight * 0.42,
+      Math.max(3, innerRadius * 0.8),
+    );
 
     const overlayAlpha =
       state === 'empty' ? 0.92 : state === 'sprout' ? 0.99 : state === 'mature' ? 1 : state === 'withered' ? 0.94 : 0.97;
