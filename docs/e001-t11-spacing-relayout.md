@@ -4,36 +4,40 @@
 
 文件：`src/components/farm/SimpleFarmGrid.tsx`
 
-### 1) 地块整体下移（纵向落位）
+### 1) 地块整体继续下移（相对 `7461c24`）
 - `sceneTopPadding`
-  - compact mobile: `1.98x -> 2.22x`
-  - mobile: `2.04x -> 2.26x`
-  - desktop/tablet: `1.90x -> 2.08x`
+  - compact mobile: `2.22x -> 2.42x`
+  - mobile: `2.26x -> 2.44x`
+  - desktop/tablet: `2.08x -> 2.24x`
 - `sceneBottomPadding`
-  - compact mobile: `0.68x -> 0.62x`
-  - mobile: `0.64x -> 0.60x`
-  - desktop/tablet: `0.56x -> 0.52x`
+  - compact mobile: `0.62x -> 0.56x`
+  - mobile: `0.60x -> 0.54x`
+  - desktop/tablet: `0.52x -> 0.48x`
 
-### 2) 地块间距收紧（排密）
+### 2) 地块间距继续压缩（更密）
 - `gap`
-  - compact mobile: `5 -> 4`
-  - mobile: `6 -> 5`
-  - tablet: `10 -> 8`
-  - desktop: `12 -> 10`
+  - compact mobile: `4 -> 3`
+  - mobile: `5 -> 4`
+  - tablet: `8 -> 7`
+  - desktop: `10 -> 9`
 
-### 3) 地块群排布内聚
+### 3) 地块群排布继续内聚（相对 `7461c24`）
 - slot `xOffset`
-  - row2: `±8 -> ±12`
-  - row4: `±14 -> ±20`
+  - row2: `±12 -> ±16`
+  - row4: `±20 -> ±26`
 - slot `yOffset`
-  - row2: `-4 -> -8`
-  - row3: `-8 -> -14`
-  - row4: `-12 -> -22`
-  - row5: `-18 -> -30`
+  - row2: `-8 -> -10`
+  - row3: `-14 -> -18`
+  - row4: `-22 -> -30`
+  - row5: `-30 -> -40`
 
-> 结果：地块群整体下沉到山体下方，同时横纵节奏收紧，视觉更密但不重叠。
+> 结果：地块群进一步下沉，全部稳定处于山体下方；横纵间距较 `7461c24` 继续收紧，视觉更密但无重叠。
+
+## 版本号证明
+
+- `package.json` 版本：`0.60.1`
 
 ## 产物
 
-- 三联对比：`artifacts/e-001-t11/20260224-153903Z/E-001-T11-compare-{desktop|mobile|detail}.png`
-- detail 放大（含标注）：`artifacts/e-001-t11/20260224-153903Z/E-001-T11-zoom-detail-annotated.png`
+- 三联对比：`artifacts/e-001-t11/20260224-231458Z/E-001-T11-compare-{desktop|mobile|detail}.png`
+- detail 放大（含标注）：`artifacts/e-001-t11/20260224-231458Z/E-001-T11-zoom-detail-annotated.png`
