@@ -1490,83 +1490,6 @@ function resolveVisualOnlyAnchorFrameLayout(
   };
 }
 
-function drawDetailedAnchorFrame(
-  layer: PixiGraphicsLike,
-  left: number,
-  top: number,
-  width: number,
-  height: number,
-  icon: WireframeAnchorIcon,
-): void {
-  const radius = clamp(Math.min(width, height) * 0.12, 8, 18);
-  const inset = clamp(Math.min(width, height) * 0.11, 6, 14);
-  const innerLeft = left + inset;
-  const innerTop = top + inset;
-  const innerWidth = width - inset * 2;
-  const innerHeight = height - inset * 2;
-  const innerRadius = Math.max(4, radius - inset * 0.56);
-
-  layer.lineStyle(0, 0x000000, 0);
-  layer.beginFill(0x2a3d21, 0.2);
-  layer.drawRoundedRect(left + 1.2, top + 2.2, width, height, radius);
-  layer.endFill();
-
-  layer.lineStyle(1.8, 0x58733f, 0.88);
-  layer.beginFill(0xf4f8df, 0.96);
-  layer.drawRoundedRect(left, top, width, height, radius);
-  layer.endFill();
-
-  layer.lineStyle(1.2, 0xb7cf8b, 0.86);
-  layer.beginFill(0xe8f1cc, 0.98);
-  layer.drawRoundedRect(innerLeft, innerTop, innerWidth, innerHeight, innerRadius);
-  layer.endFill();
-
-  const horizonY = innerTop + innerHeight * 0.46;
-  layer.lineStyle(0, 0x000000, 0);
-  layer.beginFill(0xeaf7d4, 0.7);
-  layer.drawRect(innerLeft + 1, innerTop + 1, innerWidth - 2, Math.max(2, horizonY - innerTop - 1));
-  layer.endFill();
-
-  layer.beginFill(0xb6d888, 0.86);
-  layer.drawRect(innerLeft + 1, horizonY, innerWidth - 2, innerTop + innerHeight - horizonY - 1);
-  layer.endFill();
-
-  layer.beginFill(0x6f9d48, 0.24);
-  layer.drawEllipse(innerLeft + innerWidth * 0.5, innerTop + innerHeight * 0.78, innerWidth * 0.45, innerHeight * 0.11);
-  layer.endFill();
-
-  const artPaddingX = innerWidth * 0.08;
-  const artPaddingTop = innerHeight * 0.12;
-  const artPaddingBottom = innerHeight * 0.1;
-  const artLeft = innerLeft + artPaddingX;
-  const artTop = innerTop + artPaddingTop;
-  const artWidth = Math.max(12, innerWidth - artPaddingX * 2);
-  const artHeight = Math.max(12, innerHeight - artPaddingTop - artPaddingBottom);
-  const artCenterX = artLeft + artWidth * 0.5;
-  const artGroundY = artTop + artHeight * 0.84;
-
-  if (icon === 'house') {
-    const scale = clamp(Math.min(artWidth / 102, artHeight / 114), 0.22, 0.58);
-    drawCottage(layer, artCenterX, artGroundY, scale);
-    return;
-  }
-
-  if (icon === 'barn') {
-    const scale = clamp(Math.min(artWidth / 112, artHeight / 108), 0.22, 0.58);
-    drawBarn(layer, artCenterX, artGroundY, scale);
-    return;
-  }
-
-  if (icon === 'cow') {
-    const scale = clamp(Math.min(artWidth / 74, artHeight / 46), 0.25, 0.72);
-    drawCow(layer, artCenterX - artWidth * 0.02, artGroundY, scale, false);
-    return;
-  }
-
-  const scale = clamp(Math.min(artWidth / 66, artHeight / 43), 0.25, 0.74);
-  drawSheep(layer, artCenterX + artWidth * 0.02, artGroundY, scale, true);
-}
-
 function drawFrontDecorationLayer(
   frontLayer: PixiGraphicsLike,
   viewportWidth: number,
@@ -1725,54 +1648,30 @@ function drawFrontDecorationLayer(
       0.84 * nearScale,
     );
 
-    drawDetailedAnchorFrame(
-      frontLayer,
-      frameLeftX,
-      anchorLayout.topY,
-      anchorLayout.frameWidth,
-      anchorLayout.frameHeight,
-      'house',
-    );
-    drawDetailedAnchorFrame(
-      frontLayer,
-      frameRightX,
-      anchorLayout.topY,
-      anchorLayout.frameWidth,
-      anchorLayout.frameHeight,
-      'barn',
-    );
-    drawDetailedAnchorFrame(
-      frontLayer,
-      frameLeftX,
-      anchorLayout.bottomY,
-      anchorLayout.frameWidth,
-      anchorLayout.frameHeight,
-      'cow',
-    );
-    drawDetailedAnchorFrame(
-      frontLayer,
-      anchorLayout.leftPairStartX + anchorLayout.frameWidth + anchorLayout.pairInnerGap,
-      anchorLayout.bottomY,
-      anchorLayout.frameWidth,
-      anchorLayout.frameHeight,
-      'barn',
-    );
-    drawDetailedAnchorFrame(
-      frontLayer,
-      anchorLayout.rightPairStartX,
-      anchorLayout.bottomY,
-      anchorLayout.frameWidth,
-      anchorLayout.frameHeight,
-      'sheep',
-    );
-    drawDetailedAnchorFrame(
-      frontLayer,
-      anchorLayout.rightPairStartX + anchorLayout.frameWidth + anchorLayout.pairInnerGap,
-      anchorLayout.bottomY,
-      anchorLayout.frameWidth,
-      anchorLayout.frameHeight,
-      'house',
-    );
+    const topLeftX = frameLeftX + anchorLayout.frameWidth * 0.5;
+    const topRightX = frameRightX + anchorLayout.frameWidth * 0.5;
+    const topGroundY = anchorLayout.topY + anchorLayout.frameHeight * 0.9;
+    const bottomLeftA = anchorLayout.leftPairStartX + anchorLayout.frameWidth * 0.46;
+    const bottomLeftB = anchorLayout.leftPairStartX + anchorLayout.frameWidth * 1.4 + anchorLayout.pairInnerGap;
+    const bottomRightA = anchorLayout.rightPairStartX + anchorLayout.frameWidth * 0.52;
+    const bottomRightB = anchorLayout.rightPairStartX + anchorLayout.frameWidth * 1.38 + anchorLayout.pairInnerGap;
+    const bottomGroundY = anchorLayout.bottomY + anchorLayout.frameHeight * 0.94;
+
+    frontLayer.beginFill(0x203518, 0.22);
+    frontLayer.drawEllipse(topLeftX, topGroundY + 4, anchorLayout.frameWidth * 0.66, anchorLayout.frameHeight * 0.16);
+    frontLayer.drawEllipse(topRightX, topGroundY + 4, anchorLayout.frameWidth * 0.64, anchorLayout.frameHeight * 0.16);
+    frontLayer.drawEllipse(bottomLeftA, bottomGroundY + 4, anchorLayout.frameWidth * 0.62, anchorLayout.frameHeight * 0.16);
+    frontLayer.drawEllipse(bottomLeftB, bottomGroundY + 4, anchorLayout.frameWidth * 0.64, anchorLayout.frameHeight * 0.16);
+    frontLayer.drawEllipse(bottomRightA, bottomGroundY + 4, anchorLayout.frameWidth * 0.6, anchorLayout.frameHeight * 0.16);
+    frontLayer.drawEllipse(bottomRightB, bottomGroundY + 4, anchorLayout.frameWidth * 0.66, anchorLayout.frameHeight * 0.16);
+    frontLayer.endFill();
+
+    drawCottage(frontLayer, topLeftX, topGroundY, clamp(anchorLayout.frameWidth / 120, 0.28, 0.58));
+    drawBarn(frontLayer, topRightX, topGroundY, clamp(anchorLayout.frameWidth / 126, 0.28, 0.58));
+    drawBarn(frontLayer, bottomLeftA, bottomGroundY, clamp(anchorLayout.frameWidth / 124, 0.3, 0.62));
+    drawCow(frontLayer, bottomLeftB, bottomGroundY, clamp(anchorLayout.frameWidth / 92, 0.32, 0.68), false);
+    drawCottage(frontLayer, bottomRightA, bottomGroundY, clamp(anchorLayout.frameWidth / 122, 0.28, 0.6));
+    drawSheep(frontLayer, bottomRightB, bottomGroundY, clamp(anchorLayout.frameWidth / 88, 0.32, 0.7), true);
 
     drawGrassTufts(frontLayer, 0, bermTopY + 12 * nearScale, viewportWidth, 28, 0.72 * nearScale, 0x6d9c40, 0.42);
     drawGrassTufts(frontLayer, 0, bermTopY + 14.6 * nearScale, viewportWidth, 22, 0.58 * nearScale, 0x4f7d2f, 0.3);
