@@ -184,17 +184,17 @@ const WIREFRAME_SECONDARY_STROKE = 0x334155;
 
 const VISUAL_ONLY_PLOT_LAYOUT: ReadonlyArray<{ x: number; y: number }> = [
   // Row 1: 1
-  { x: 0, y: -2.46 },
+  { x: 0, y: -2.5 },
   // Row 2: 2
-  { x: -1.74, y: -1.23 },
-  { x: 1.74, y: -1.23 },
+  { x: -1.78, y: -1.28 },
+  { x: 1.78, y: -1.28 },
   // Row 3: 1
-  { x: 0, y: 0.02 },
+  { x: 0, y: 0.24 },
   // Row 4: 2
-  { x: -1.74, y: 1.27 },
-  { x: 1.74, y: 1.27 },
+  { x: -1.78, y: 1.92 },
+  { x: 1.78, y: 1.92 },
   // Row 5: 1
-  { x: 0, y: 2.52 },
+  { x: 0, y: 3.52 },
 ];
 
 const PLOT_PALETTES: Record<PlotVisualState, PlotPalette> = {
@@ -2551,8 +2551,9 @@ function drawPlot(
   }
 
   if (visualOnlyMode) {
-    const bedHalfWidth = halfWidth * 0.9;
-    const bedHalfHeight = halfHeight * 0.62;
+    const bedHalfBase = Math.min(halfWidth * 0.72, halfHeight * 1.02);
+    const bedHalfWidth = bedHalfBase * 1.04;
+    const bedHalfHeight = bedHalfBase * 0.96;
     const bedWidth = bedHalfWidth * 2;
     const bedHeight = bedHalfHeight * 2;
     const bedLeft = -bedHalfWidth;
