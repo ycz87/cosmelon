@@ -42,9 +42,9 @@ const PALETTES: Record<PlotShellState, PlotShellPalette> = {
     edge: '#7c5c39',
     edgeSoft: 'rgba(132,102,67,0.7)',
     highlight: 'rgba(255,248,226,0.56)',
-    shadow: 'rgba(83,64,38,0.18)',
-    groundTint: 'rgba(156,191,106,0.22)',
-    contactShadow: 'rgba(72,54,32,0.24)',
+    shadow: 'rgba(86,66,42,0.2)',
+    groundTint: 'rgba(142,175,98,0.24)',
+    contactShadow: 'rgba(70,52,31,0.34)',
   },
   growing: {
     topLight: '#e7d5a5',
@@ -56,9 +56,9 @@ const PALETTES: Record<PlotShellState, PlotShellPalette> = {
     edge: '#775a37',
     edgeSoft: 'rgba(125,101,66,0.68)',
     highlight: 'rgba(244,255,222,0.5)',
-    shadow: 'rgba(79,64,38,0.18)',
-    groundTint: 'rgba(149,193,106,0.25)',
-    contactShadow: 'rgba(70,54,33,0.24)',
+    shadow: 'rgba(82,65,40,0.2)',
+    groundTint: 'rgba(138,180,95,0.25)',
+    contactShadow: 'rgba(68,51,30,0.34)',
   },
   mature: {
     topLight: '#eec898',
@@ -70,9 +70,9 @@ const PALETTES: Record<PlotShellState, PlotShellPalette> = {
     edge: '#6c4927',
     edgeSoft: 'rgba(110,77,45,0.72)',
     highlight: 'rgba(255,237,194,0.52)',
-    shadow: 'rgba(80,58,33,0.2)',
-    groundTint: 'rgba(152,188,98,0.2)',
-    contactShadow: 'rgba(72,49,28,0.27)',
+    shadow: 'rgba(82,57,32,0.22)',
+    groundTint: 'rgba(143,176,91,0.22)',
+    contactShadow: 'rgba(70,46,25,0.36)',
   },
   withered: {
     topLight: '#d4c5b0',
@@ -84,9 +84,9 @@ const PALETTES: Record<PlotShellState, PlotShellPalette> = {
     edge: '#62513f',
     edgeSoft: 'rgba(98,84,68,0.66)',
     highlight: 'rgba(252,249,244,0.38)',
-    shadow: 'rgba(66,54,43,0.2)',
-    groundTint: 'rgba(145,173,114,0.16)',
-    contactShadow: 'rgba(58,45,36,0.24)',
+    shadow: 'rgba(68,55,44,0.21)',
+    groundTint: 'rgba(132,160,102,0.2)',
+    contactShadow: 'rgba(56,43,34,0.33)',
   },
   stolen: {
     topLight: '#d99a90',
@@ -98,9 +98,9 @@ const PALETTES: Record<PlotShellState, PlotShellPalette> = {
     edge: '#6a3934',
     edgeSoft: 'rgba(106,63,58,0.68)',
     highlight: 'rgba(255,224,216,0.43)',
-    shadow: 'rgba(78,44,39,0.24)',
-    groundTint: 'rgba(147,172,106,0.16)',
-    contactShadow: 'rgba(70,37,33,0.28)',
+    shadow: 'rgba(78,46,40,0.24)',
+    groundTint: 'rgba(132,156,95,0.2)',
+    contactShadow: 'rgba(69,36,31,0.36)',
   },
   locked: {
     topLight: '#ddcbb0',
@@ -112,9 +112,9 @@ const PALETTES: Record<PlotShellState, PlotShellPalette> = {
     edge: '#65523f',
     edgeSoft: 'rgba(103,86,66,0.68)',
     highlight: 'rgba(255,252,245,0.36)',
-    shadow: 'rgba(67,56,44,0.18)',
-    groundTint: 'rgba(144,171,113,0.16)',
-    contactShadow: 'rgba(63,50,39,0.24)',
+    shadow: 'rgba(69,57,45,0.2)',
+    groundTint: 'rgba(132,160,102,0.18)',
+    contactShadow: 'rgba(61,48,37,0.33)',
   },
 };
 
@@ -168,13 +168,17 @@ export function IsometricPlotShell({ size, state, children }: IsometricPlotShell
             <stop offset="0%" stopColor={palette.groundTint} />
             <stop offset="100%" stopColor="rgba(149,193,106,0)" />
           </radialGradient>
+          <linearGradient id={`occlusion-${gradientId}`} x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stopColor="rgba(68,54,36,0)" />
+            <stop offset="100%" stopColor="rgba(68,54,36,0.2)" />
+          </linearGradient>
           <filter id={`shadow-${gradientId}`} x="-28%" y="-130%" width="156%" height="296%">
             <feGaussianBlur stdDeviation={Math.max(1.4, size * 0.015)} />
           </filter>
         </defs>
 
         <ellipse
-          cx={size / 2}
+          cx={size * 0.53}
           cy={topHeight + depth + shadowHeight * 0.35}
           rx={shadowWidth / 2}
           ry={shadowHeight / 2}
@@ -182,7 +186,7 @@ export function IsometricPlotShell({ size, state, children }: IsometricPlotShell
           filter={`url(#shadow-${gradientId})`}
         />
         <ellipse
-          cx={size / 2}
+          cx={size * 0.55}
           cy={topHeight + depth + shadowHeight * 0.58}
           rx={shadowWidth / 2}
           ry={shadowHeight / 2}
@@ -190,16 +194,18 @@ export function IsometricPlotShell({ size, state, children }: IsometricPlotShell
           filter={`url(#shadow-${gradientId})`}
         />
         <ellipse
-          cx={size / 2}
+          cx={size * 0.54}
           cy={topHeight + depth + contactShadowHeight * 0.35}
           rx={contactShadowWidth / 2}
           ry={contactShadowHeight / 2}
           fill={palette.contactShadow}
-          opacity="0.72"
+          opacity="0.78"
         />
 
         <polygon points={leftPoints} fill={`url(#left-${gradientId})`} stroke={palette.edgeSoft} strokeWidth={Math.max(0.8, size * 0.008)} strokeLinejoin="round" />
         <polygon points={rightPoints} fill={`url(#right-${gradientId})`} stroke={palette.edgeSoft} strokeWidth={Math.max(0.8, size * 0.008)} strokeLinejoin="round" />
+        <polygon points={leftPoints} fill={`url(#occlusion-${gradientId})`} opacity="0.72" />
+        <polygon points={rightPoints} fill={`url(#occlusion-${gradientId})`} opacity="0.56" />
 
         <polygon
           points={topPoints}
