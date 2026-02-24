@@ -4,10 +4,9 @@ import { spawn } from 'node:child_process';
 import sharp from 'sharp';
 import { chromium } from 'playwright';
 
-const TASK_ID = 'E-001-T02';
+const DEFAULT_TASK_ID = 'E-001-T02';
 const ROOT_DIR = '/home/ycz87/.openclaw/workspace-coder/cosmelon';
 const BASELINE_DIR = path.join(ROOT_DIR, 'baseline', 'e001-t01');
-const OUTPUT_ROOT = path.join(ROOT_DIR, 'artifacts', 'e001-t02');
 const DEV_SERVER_PORT = 4173;
 const DEV_SERVER_URL = `http://127.0.0.1:${DEV_SERVER_PORT}`;
 
@@ -16,6 +15,22 @@ const viewports = [
   { name: 'mobile', width: 390, height: 640 },
   { name: 'detail', width: 1024, height: 1024 },
 ];
+
+function parseTaskIdFromArgs() {
+  const arg = process.argv.find((item) => item.startsWith('--task-id='));
+  if (!arg) {
+    return DEFAULT_TASK_ID;
+  }
+  const value = arg.slice('--task-id='.length).trim();
+  if (!value) {
+    return DEFAULT_TASK_ID;
+  }
+  return value.toUpperCase();
+}
+
+function toTaskSlug(taskId) {
+  return taskId.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+}
 
 function buildRunId(now = new Date()) {
   const yyyy = now.getUTCFullYear();
@@ -96,7 +111,7 @@ function seedFarmStateScript() {
   };
 }
 
-async function captureCurrentScreenshots(outputDir) {
+async function captureCurrentScreenshots(outputDir, taskId) {
   const browser = await chromium.launch();
   try {
     for (const viewport of viewports) {
@@ -107,7 +122,7 @@ async function captureCurrentScreenshots(outputDir) {
       await page.locator('header button').filter({ hasText: '🌱' }).first().click();
       await page.locator('.farm-page').waitFor({ state: 'visible' });
 
-      const currentPath = path.join(outputDir, `${TASK_ID}-current-${viewport.name}.png`);
+      const currentPath = path.join(outputDir, `${taskId}-current-${viewport.name}.png`);
       await page.screenshot({ path: currentPath, fullPage: false });
       await context.close();
     }
@@ -116,7 +131,7 @@ async function captureCurrentScreenshots(outputDir) {
   }
 }
 
-function buildCompareHeaderSvg(width, headerHeight, viewportName) {
+function buildCompareHeaderSvg(width, headerHeight, viewportName, taskId) {
   const leftCenter = Math.round(width * 0.25);
   const rightCenter = Math.round(width * 0.75);
   const dividerX = Math.round(width / 2);
@@ -126,12 +141,12 @@ function buildCompareHeaderSvg(width, headerHeight, viewportName) {
       <line x1="${dividerX}" y1="10" x2="${dividerX}" y2="${headerHeight - 10}" stroke="#334155" stroke-width="2"/>
       <text x="${leftCenter}" y="26" font-size="17" font-family="Arial, sans-serif" text-anchor="middle" fill="#e2e8f0">Reference (E-001-T01 baseline)</text>
       <text x="${rightCenter}" y="26" font-size="17" font-family="Arial, sans-serif" text-anchor="middle" fill="#e2e8f0">Current Implementation</text>
-      <text x="${width / 2}" y="48" font-size="14" font-family="Arial, sans-serif" text-anchor="middle" fill="#94a3b8">${TASK_ID} · ${viewportName}</text>
+      <text x="${width / 2}" y="48" font-size="14" font-family="Arial, sans-serif" text-anchor="middle" fill="#94a3b8">${taskId} · ${viewportName}</text>
     </svg>
   `);
 }
 
-async function buildCompareImage({ viewportName, baselinePath, currentPath, outputPath }) {
+async function buildCompareImage({ viewportName, baselinePath, currentPath, outputPath, taskId }) {
   ensureFileExists(baselinePath);
   ensureFileExists(currentPath);
 
@@ -157,7 +172,7 @@ async function buildCompareImage({ viewportName, baselinePath, currentPath, outp
     },
   })
     .composite([
-      { input: buildCompareHeaderSvg(outW * 2, headerHeight, viewportName), top: 0, left: 0 },
+      { input: buildCompareHeaderSvg(outW * 2, headerHeight, viewportName, taskId), top: 0, left: 0 },
       { input: await sharp(baselinePath).png().toBuffer(), top: headerHeight, left: 0 },
       { input: resizedCurrent, top: headerHeight, left: outW },
     ])
@@ -167,8 +182,9 @@ async function buildCompareImage({ viewportName, baselinePath, currentPath, outp
   await sharp(compareCanvas).toFile(outputPath);
 }
 
-async function generateCompareArtifacts(runId) {
-  const outputDir = path.join(OUTPUT_ROOT, runId);
+async function generateCompareArtifacts(runId, taskId) {
+  const outputRoot = path.join(ROOT_DIR, 'artifacts', toTaskSlug(taskId));
+  const outputDir = path.join(outputRoot, runId);
   fs.mkdirSync(outputDir, { recursive: true });
 
   const devServerProcess = spawn(
@@ -183,29 +199,30 @@ async function generateCompareArtifacts(runId) {
 
   try {
     await waitForDevServer(DEV_SERVER_URL);
-    await captureCurrentScreenshots(outputDir);
+    await captureCurrentScreenshots(outputDir, taskId);
 
     for (const viewport of viewports) {
       const baselinePath = path.join(BASELINE_DIR, `e001-t01-baseline-${viewport.name}.png`);
-      const currentPath = path.join(outputDir, `${TASK_ID}-current-${viewport.name}.png`);
-      const outputPath = path.join(outputDir, `${TASK_ID}-compare-${viewport.name}.png`);
+      const currentPath = path.join(outputDir, `${taskId}-current-${viewport.name}.png`);
+      const outputPath = path.join(outputDir, `${taskId}-compare-${viewport.name}.png`);
 
       await buildCompareImage({
         viewportName: viewport.name,
         baselinePath,
         currentPath,
         outputPath,
+        taskId,
       });
     }
 
     const summary = {
-      taskId: TASK_ID,
+      taskId,
       runId,
       outputDir,
-      compareFiles: viewports.map((viewport) => `${TASK_ID}-compare-${viewport.name}.png`),
+      compareFiles: viewports.map((viewport) => `${taskId}-compare-${viewport.name}.png`),
       generatedAt: new Date().toISOString(),
     };
-    fs.writeFileSync(path.join(outputDir, `${TASK_ID}-summary.json`), JSON.stringify(summary, null, 2));
+    fs.writeFileSync(path.join(outputDir, `${taskId}-summary.json`), JSON.stringify(summary, null, 2));
 
     return outputDir;
   } finally {
@@ -215,7 +232,8 @@ async function generateCompareArtifacts(runId) {
 
 async function main() {
   const runId = buildRunId();
-  const outputDir = await generateCompareArtifacts(runId);
+  const taskId = parseTaskIdFromArgs();
+  const outputDir = await generateCompareArtifacts(runId, taskId);
   console.log(`Triptych compare output generated: ${outputDir}`);
 }
 

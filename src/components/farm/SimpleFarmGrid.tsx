@@ -46,17 +46,17 @@ const TOTAL_SLOTS = 7;
 
 const MOBILE_LAYOUT: GridLayout = {
   gap: 8,
-  plotSize: 92,
+  plotSize: 96,
 };
 
 const TABLET_LAYOUT: GridLayout = {
   gap: 12,
-  plotSize: 104,
+  plotSize: 110,
 };
 
 const DESKTOP_LAYOUT: GridLayout = {
   gap: 14,
-  plotSize: 120,
+  plotSize: 128,
 };
 
 function getViewportWidth(): number {
@@ -186,12 +186,13 @@ export function SimpleFarmGrid({
   const scenePalette = useMemo(() => buildScenePalette(theme), [theme]);
   const sceneWidth = layout.plotSize * 3 + layout.gap * 2;
   const sceneFrameMaxWidth = sceneWidth + (viewportWidth < MOBILE_BREAKPOINT ? 64 : 102);
+  // Camera framing only: push the cluster lower and slightly enlarge the subject area.
   const sceneTopPadding = viewportWidth < MOBILE_BREAKPOINT
-    ? Math.round(layout.plotSize * 1.88)
-    : Math.round(layout.plotSize * 1.72);
+    ? Math.round(layout.plotSize * 2.08)
+    : Math.round(layout.plotSize * 1.9);
   const sceneBottomPadding = viewportWidth < MOBILE_BREAKPOINT
-    ? Math.round(layout.plotSize * 0.68)
-    : Math.round(layout.plotSize * 0.6);
+    ? Math.round(layout.plotSize * 0.62)
+    : Math.round(layout.plotSize * 0.56);
 
   return (
     <div className="relative w-full overflow-visible" onClick={() => onActiveTooltipChange(null)}>

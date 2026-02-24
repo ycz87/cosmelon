@@ -9,7 +9,8 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "tauri": "tauri",
-    "compare:e001-t02": "node scripts/e001-t02-generate-triptych-compare.mjs"
+    "compare:e001-t02": "node scripts/e001-t02-generate-triptych-compare.mjs --task-id=E-001-T02",
+    "compare:e001-t03": "node scripts/e001-t02-generate-triptych-compare.mjs --task-id=E-001-T03"
   },
   "dependencies": {
     "@capacitor/android": "^8.1.0",
