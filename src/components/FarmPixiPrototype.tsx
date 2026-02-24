@@ -183,13 +183,18 @@ const WIREFRAME_PRIMARY_STROKE = 0x0f172a;
 const WIREFRAME_SECONDARY_STROKE = 0x334155;
 
 const VISUAL_ONLY_PLOT_LAYOUT: ReadonlyArray<{ x: number; y: number }> = [
-  { x: 0, y: -1.58 },
-  { x: -1.4, y: -0.78 },
-  { x: 1.4, y: -0.78 },
-  { x: 0, y: 0.08 },
-  { x: -1.4, y: 0.94 },
-  { x: 1.4, y: 0.94 },
-  { x: 0, y: 1.78 },
+  // Row 1: 1
+  { x: 0, y: -2.2 },
+  // Row 2: 2
+  { x: -1.56, y: -1.08 },
+  { x: 1.56, y: -1.08 },
+  // Row 3: 1
+  { x: 0, y: 0.04 },
+  // Row 4: 2
+  { x: -1.56, y: 1.16 },
+  { x: 1.56, y: 1.16 },
+  // Row 5: 1
+  { x: 0, y: 2.28 },
 ];
 
 const PLOT_PALETTES: Record<PlotVisualState, PlotPalette> = {
@@ -663,17 +668,19 @@ function drawFarMidLayer(
   drawCloud(farLayer, viewportWidth * 0.56, viewportHeight * 0.13, 0.76 * scale);
   drawCloud(farLayer, viewportWidth * 0.9, viewportHeight * 0.18, 0.86 * scale);
 
-  drawCottage(farLayer, leftBuildingX, farGroundY - 3.5 * scale, 0.74 * scale);
-  drawBarn(farLayer, rightBuildingX, farGroundY - 2.8 * scale, 0.78 * scale);
-  drawFence(farLayer, farFenceOffset, farGroundY + 3.2 * scale, 5, farSegmentWidth, 0.78 * scale);
-  drawFence(
-    farLayer,
-    viewportWidth - farFenceSpan - farFenceOffset,
-    farGroundY + 3.2 * scale,
-    5,
-    farSegmentWidth,
-    0.78 * scale,
-  );
+  if (!visualOnlyMode) {
+    drawCottage(farLayer, leftBuildingX, farGroundY - 3.5 * scale, 0.74 * scale);
+    drawBarn(farLayer, rightBuildingX, farGroundY - 2.8 * scale, 0.78 * scale);
+    drawFence(farLayer, farFenceOffset, farGroundY + 3.2 * scale, 5, farSegmentWidth, 0.78 * scale);
+    drawFence(
+      farLayer,
+      viewportWidth - farFenceSpan - farFenceOffset,
+      farGroundY + 3.2 * scale,
+      5,
+      farSegmentWidth,
+      0.78 * scale,
+    );
+  }
   drawPainterlyPasses(farLayer, viewportWidth, viewportHeight, backdropLayout, undefined, visualOnlyMode);
 }
 
@@ -1744,11 +1751,27 @@ function drawFrontDecorationLayer(
     );
     drawDetailedAnchorFrame(
       frontLayer,
-      frameRightX,
+      anchorLayout.leftPairStartX + anchorLayout.frameWidth + anchorLayout.pairInnerGap,
+      anchorLayout.bottomY,
+      anchorLayout.frameWidth,
+      anchorLayout.frameHeight,
+      'barn',
+    );
+    drawDetailedAnchorFrame(
+      frontLayer,
+      anchorLayout.rightPairStartX,
       anchorLayout.bottomY,
       anchorLayout.frameWidth,
       anchorLayout.frameHeight,
       'sheep',
+    );
+    drawDetailedAnchorFrame(
+      frontLayer,
+      anchorLayout.rightPairStartX + anchorLayout.frameWidth + anchorLayout.pairInnerGap,
+      anchorLayout.bottomY,
+      anchorLayout.frameWidth,
+      anchorLayout.frameHeight,
+      'house',
     );
 
     drawGrassTufts(frontLayer, 0, bermTopY + 12 * nearScale, viewportWidth, 28, 0.72 * nearScale, 0x6d9c40, 0.42);
