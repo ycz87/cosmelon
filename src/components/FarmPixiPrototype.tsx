@@ -468,6 +468,89 @@ function drawSkyLayer(
   skyLayer.endFill();
 }
 
+function drawPainterlyPasses(
+  layer: PixiGraphicsLike,
+  viewportWidth: number,
+  viewportHeight: number,
+  backdropLayout: SceneBackdropLayout,
+  sceneLayout?: SceneLayout,
+): void {
+  const scale = backdropLayout.decorationScale;
+  const skyBandY = backdropLayout.horizonY + 10 * scale;
+  const groundSpan = Math.max(60, viewportHeight - backdropLayout.groundTopY);
+  const plotInfluenceY = sceneLayout
+    ? sceneLayout.stageY + sceneLayout.stepY * 4 + sceneLayout.halfHeight + sceneLayout.thickness
+    : backdropLayout.groundTopY + groundSpan * 0.5;
+  const driftY = sceneLayout ? Math.max(7, sceneLayout.halfHeight * 0.2) : Math.max(5, 7 * scale);
+
+  layer.lineStyle(0, 0x000000, 0);
+
+  layer.beginFill(0xe6f3c6, sceneLayout ? 0.06 : 0.05);
+  layer.drawPolygon([
+    -20 * scale, skyBandY + 4 * scale,
+    viewportWidth * 0.16, skyBandY - 10 * scale,
+    viewportWidth * 0.39, skyBandY + 7 * scale,
+    viewportWidth * 0.64, skyBandY - 7 * scale,
+    viewportWidth * 0.88, skyBandY + 8 * scale,
+    viewportWidth + 20 * scale, skyBandY + 3 * scale,
+    viewportWidth + 20 * scale, skyBandY + 24 * scale,
+    -20 * scale, skyBandY + 26 * scale,
+  ]);
+  layer.endFill();
+
+  layer.beginFill(0x96ba6b, sceneLayout ? 0.05 : 0.042);
+  layer.drawEllipse(viewportWidth * 0.24, backdropLayout.groundTopY + groundSpan * 0.48, viewportWidth * 0.29, 30 * scale);
+  layer.drawEllipse(viewportWidth * 0.78, backdropLayout.groundTopY + groundSpan * 0.58, viewportWidth * 0.33, 32 * scale);
+  layer.endFill();
+
+  layer.beginFill(0xd5af78, sceneLayout ? 0.046 : 0.038);
+  layer.drawPolygon([
+    0, plotInfluenceY + driftY * 1.8,
+    viewportWidth * 0.15, plotInfluenceY + driftY * 0.35,
+    viewportWidth * 0.32, plotInfluenceY + driftY * 1.15,
+    viewportWidth * 0.51, plotInfluenceY - driftY * 0.1,
+    viewportWidth * 0.69, plotInfluenceY + driftY * 1.05,
+    viewportWidth * 0.86, plotInfluenceY + driftY * 0.4,
+    viewportWidth, plotInfluenceY + driftY * 1.4,
+    viewportWidth, plotInfluenceY + driftY * 2.45,
+    0, plotInfluenceY + driftY * 2.45,
+  ]);
+  layer.endFill();
+
+  if (sceneLayout) {
+    const frameBaseY =
+      sceneLayout.stageY +
+      sceneLayout.stepY * 4 +
+      sceneLayout.halfHeight +
+      sceneLayout.thickness +
+      sceneLayout.shadowOffsetY;
+    layer.beginFill(0x4b6e34, 0.058);
+    layer.drawEllipse(
+      viewportWidth * 0.5,
+      frameBaseY + Math.max(8, sceneLayout.shadowHeight * 0.62),
+      viewportWidth * 0.5,
+      Math.max(11, sceneLayout.shadowHeight * 1.28),
+    );
+    layer.endFill();
+  }
+
+  const strokeCount = sceneLayout ? 7 : 5;
+  const strokeBaseY = backdropLayout.groundTopY + groundSpan * (sceneLayout ? 0.66 : 0.58);
+  const strokeWidth = Math.max(1, 1.2 * scale);
+  const strokeDenominator = Math.max(1, strokeCount - 1);
+  for (let index = 0; index < strokeCount; index += 1) {
+    const ratio = index / strokeDenominator;
+    const centerX = viewportWidth * (0.08 + ratio * 0.84);
+    const halfSpan = viewportWidth * (0.08 + ratio * 0.07);
+    const strokeY = strokeBaseY + Math.sin(index * 1.6) * 8 * scale + (index % 2) * driftY * 0.2;
+    const color = mixColor(0x7ea450, 0xc1d28a, ratio * 0.76);
+    const alpha = (sceneLayout ? 0.062 : 0.052) - ratio * 0.01;
+    layer.lineStyle(strokeWidth, color, alpha);
+    layer.moveTo(centerX - halfSpan, strokeY);
+    layer.lineTo(centerX + halfSpan, strokeY + 2.2 * scale);
+  }
+}
+
 function drawFarMidLayer(
   farLayer: PixiGraphicsLike,
   viewportWidth: number,
@@ -514,10 +597,11 @@ function drawFarMidLayer(
 
   const scale = backdropLayout.decorationScale;
   const farGroundY = backdropLayout.groundTopY + grassHeight * 0.44;
-  const leftBuildingX = Math.max(54 * scale, viewportWidth * 0.11);
-  const rightBuildingX = Math.min(viewportWidth - 54 * scale, viewportWidth * 0.89);
-  const farFenceOffset = Math.max(6, 14 * scale);
-  const farSegmentWidth = Math.max(8, 14 * scale);
+  const farAnchorOffset = Math.max(66 * scale, viewportWidth * 0.16);
+  const leftBuildingX = farAnchorOffset;
+  const rightBuildingX = viewportWidth - farAnchorOffset;
+  const farFenceOffset = Math.max(8, 15 * scale);
+  const farSegmentWidth = Math.max(9, 16.4 * scale);
   const farFenceSpan = 5 * farSegmentWidth;
 
   farLayer.beginFill(0xeaf8c9, 0.18);
@@ -534,17 +618,18 @@ function drawFarMidLayer(
   drawCloud(farLayer, viewportWidth * 0.56, viewportHeight * 0.13, 0.76 * scale);
   drawCloud(farLayer, viewportWidth * 0.9, viewportHeight * 0.18, 0.86 * scale);
 
-  drawCottage(farLayer, leftBuildingX, farGroundY + 2 * scale, 0.6 * scale);
-  drawBarn(farLayer, rightBuildingX, farGroundY + 3 * scale, 0.63 * scale);
-  drawFence(farLayer, farFenceOffset, farGroundY + 5 * scale, 5, farSegmentWidth, 0.7 * scale);
+  drawCottage(farLayer, leftBuildingX, farGroundY - 3.5 * scale, 0.74 * scale);
+  drawBarn(farLayer, rightBuildingX, farGroundY - 2.8 * scale, 0.78 * scale);
+  drawFence(farLayer, farFenceOffset, farGroundY + 3.2 * scale, 5, farSegmentWidth, 0.78 * scale);
   drawFence(
     farLayer,
     viewportWidth - farFenceSpan - farFenceOffset,
-    farGroundY + 5 * scale,
+    farGroundY + 3.2 * scale,
     5,
     farSegmentWidth,
-    0.7 * scale,
+    0.78 * scale,
   );
+  drawPainterlyPasses(farLayer, viewportWidth, viewportHeight, backdropLayout);
 }
 
 function drawCloud(
@@ -1183,6 +1268,7 @@ function drawFrontDecorationLayer(
   const scale = backdropLayout.decorationScale;
   const depthScale = clamp((viewportHeight - sceneLayout.stageY) / 310, 0.92, 1.16);
   const nearScale = scale * depthScale;
+  const cornerScale = nearScale * 1.14;
   const frontSegmentWidth = Math.max(10, 15 * nearScale);
   const frontFenceSpan = 5 * frontSegmentWidth;
   const edgeOffset = Math.max(10, 15 * nearScale);
@@ -1192,43 +1278,67 @@ function drawFrontDecorationLayer(
     sceneLayout.halfHeight +
     sceneLayout.thickness +
     sceneLayout.shadowOffsetY;
-  const frontGroundY = clamp(plotBottomY + 12 * scale, viewportHeight * 0.74, viewportHeight - 8);
-  const bermTopY = clamp(plotBottomY + 5 * scale, frontGroundY - 22 * nearScale, frontGroundY - 7 * nearScale);
+  const frontGroundY = clamp(plotBottomY + 11 * scale, viewportHeight * 0.73, viewportHeight - 8);
+  const bermTopY = clamp(plotBottomY + 1 * scale, frontGroundY - 25 * nearScale, frontGroundY - 8 * nearScale);
+  const leftCornerX = clamp(viewportWidth * 0.08, 26 * cornerScale, 82 * cornerScale);
+  const rightCornerX = viewportWidth - leftCornerX;
+  const cornerGroundY = viewportHeight * 0.996;
 
-  drawBarn(frontLayer, -28 * nearScale, viewportHeight * 0.996, 0.92 * nearScale);
-  drawCottage(frontLayer, viewportWidth + 28 * nearScale, viewportHeight * 0.996, 0.88 * nearScale);
+  frontLayer.lineStyle(0, 0x000000, 0);
+  frontLayer.beginFill(0x25371c, 0.34);
+  frontLayer.drawEllipse(leftCornerX + 17 * cornerScale, cornerGroundY + 3 * cornerScale, 95 * cornerScale, 21 * cornerScale);
+  frontLayer.drawEllipse(rightCornerX - 16 * cornerScale, cornerGroundY + 3 * cornerScale, 90 * cornerScale, 20 * cornerScale);
+  frontLayer.endFill();
+
+  drawBarn(frontLayer, leftCornerX, cornerGroundY, 1.04 * cornerScale);
+  drawCottage(frontLayer, rightCornerX, cornerGroundY, 1.01 * cornerScale);
 
   frontLayer.lineStyle(0, 0x000000, 0);
   frontLayer.beginFill(0x304726, 0.24);
   frontLayer.drawEllipse(viewportWidth * 0.5, frontGroundY + 14 * nearScale, viewportWidth * 0.45, 19 * nearScale);
   frontLayer.endFill();
 
-  frontLayer.beginFill(0x6fa342, 0.92);
+  frontLayer.beginFill(0x6fa342, 0.94);
   frontLayer.drawPolygon([
     0, viewportHeight,
-    0, bermTopY + 12 * nearScale,
-    viewportWidth * 0.1, bermTopY + 3 * nearScale,
-    viewportWidth * 0.24, bermTopY + 8 * nearScale,
-    viewportWidth * 0.38, bermTopY,
-    viewportWidth * 0.55, bermTopY + 7 * nearScale,
-    viewportWidth * 0.72, bermTopY + 1.5 * nearScale,
-    viewportWidth * 0.9, bermTopY + 10 * nearScale,
-    viewportWidth, bermTopY + 6 * nearScale,
+    0, bermTopY + 13 * nearScale,
+    viewportWidth * 0.08, bermTopY + 3.4 * nearScale,
+    viewportWidth * 0.22, bermTopY + 8.9 * nearScale,
+    viewportWidth * 0.35, bermTopY + 1.2 * nearScale,
+    viewportWidth * 0.5, bermTopY + 7 * nearScale,
+    viewportWidth * 0.64, bermTopY - 0.8 * nearScale,
+    viewportWidth * 0.79, bermTopY + 5.7 * nearScale,
+    viewportWidth * 0.92, bermTopY + 2.6 * nearScale,
+    viewportWidth, bermTopY + 8.3 * nearScale,
     viewportWidth, viewportHeight,
+  ]);
+  frontLayer.endFill();
+
+  frontLayer.beginFill(0x3f5f2b, 0.3);
+  frontLayer.drawPolygon([
+    0, bermTopY + 3.2 * nearScale,
+    viewportWidth * 0.12, bermTopY + 0.8 * nearScale,
+    viewportWidth * 0.31, bermTopY + 2.3 * nearScale,
+    viewportWidth * 0.52, bermTopY - 0.7 * nearScale,
+    viewportWidth * 0.71, bermTopY + 1.5 * nearScale,
+    viewportWidth * 0.88, bermTopY + 0.9 * nearScale,
+    viewportWidth, bermTopY + 2.6 * nearScale,
+    viewportWidth, bermTopY + 7 * nearScale,
+    0, bermTopY + 7 * nearScale,
   ]);
   frontLayer.endFill();
 
   frontLayer.beginFill(0xbfdf88, 0.24);
   frontLayer.drawPolygon([
-    0, bermTopY + 12.5 * nearScale,
-    viewportWidth * 0.14, bermTopY + 5.2 * nearScale,
-    viewportWidth * 0.32, bermTopY + 7.6 * nearScale,
-    viewportWidth * 0.51, bermTopY + 3.4 * nearScale,
-    viewportWidth * 0.69, bermTopY + 7.8 * nearScale,
-    viewportWidth * 0.86, bermTopY + 6.5 * nearScale,
-    viewportWidth, bermTopY + 9.2 * nearScale,
-    viewportWidth, bermTopY + 13.5 * nearScale,
-    0, bermTopY + 13.5 * nearScale,
+    0, bermTopY + 12.9 * nearScale,
+    viewportWidth * 0.14, bermTopY + 5.5 * nearScale,
+    viewportWidth * 0.31, bermTopY + 7.4 * nearScale,
+    viewportWidth * 0.5, bermTopY + 3.6 * nearScale,
+    viewportWidth * 0.68, bermTopY + 7.4 * nearScale,
+    viewportWidth * 0.85, bermTopY + 6 * nearScale,
+    viewportWidth, bermTopY + 8.8 * nearScale,
+    viewportWidth, bermTopY + 13.7 * nearScale,
+    0, bermTopY + 13.7 * nearScale,
   ]);
   frontLayer.endFill();
 
@@ -1242,13 +1352,27 @@ function drawFrontDecorationLayer(
     0.84 * nearScale,
   );
 
-  const cowX = clamp(viewportWidth * 0.17, 46 * nearScale, viewportWidth * 0.35);
-  const sheepX = clamp(viewportWidth * 0.83, viewportWidth * 0.65, viewportWidth - 44 * nearScale);
-  drawCow(frontLayer, cowX, frontGroundY - 19 * nearScale, 0.77 * nearScale, false);
-  drawSheep(frontLayer, sheepX, frontGroundY - 20 * nearScale, 0.74 * nearScale, true);
+  const cowX = clamp(viewportWidth * 0.22, 58 * nearScale, viewportWidth * 0.42);
+  const sheepX = clamp(viewportWidth * 0.78, viewportWidth * 0.58, viewportWidth - 54 * nearScale);
+  const cowHoofY = clamp(plotBottomY + 9 * nearScale, bermTopY + 11 * nearScale, frontGroundY - 8 * nearScale);
+  const sheepHoofY = clamp(plotBottomY + 9.4 * nearScale, bermTopY + 11.4 * nearScale, frontGroundY - 8 * nearScale);
+
+  frontLayer.beginFill(0x2e4322, 0.36);
+  frontLayer.drawEllipse(cowX + 4 * nearScale, cowHoofY + 8 * nearScale, 37 * nearScale, 11.5 * nearScale);
+  frontLayer.drawEllipse(sheepX - 3 * nearScale, sheepHoofY + 7.5 * nearScale, 33 * nearScale, 10.5 * nearScale);
+  frontLayer.endFill();
+
+  frontLayer.beginFill(0x1d2c16, 0.22);
+  frontLayer.drawEllipse(cowX + 5 * nearScale, cowHoofY + 8.6 * nearScale, 24 * nearScale, 6.7 * nearScale);
+  frontLayer.drawEllipse(sheepX - 2 * nearScale, sheepHoofY + 8 * nearScale, 21 * nearScale, 6.2 * nearScale);
+  frontLayer.endFill();
+
+  drawCow(frontLayer, cowX, cowHoofY, 0.86 * nearScale, false);
+  drawSheep(frontLayer, sheepX, sheepHoofY, 0.84 * nearScale, true);
 
   drawGrassTufts(frontLayer, 0, bermTopY + 12 * nearScale, viewportWidth, 28, 0.72 * nearScale, 0x6d9c40, 0.42);
   drawGrassTufts(frontLayer, 0, bermTopY + 14.6 * nearScale, viewportWidth, 22, 0.58 * nearScale, 0x4f7d2f, 0.3);
+  drawPainterlyPasses(frontLayer, viewportWidth, viewportHeight, backdropLayout, sceneLayout);
 }
 
 function getCoarsePointerMode(): boolean {
@@ -1788,16 +1912,16 @@ function drawPlot(
     -halfWidth, 0,
   ]);
 
-  const ambientShadowAlpha = state === 'locked' ? 0.08 : hoverActive ? 0.12 : 0.15;
-  const contactShadowAlpha = state === 'locked' ? 0.11 : hoverActive ? 0.18 : 0.22;
+  const ambientShadowAlpha = state === 'locked' ? 0.1 : hoverActive ? 0.15 : 0.19;
+  const contactShadowAlpha = state === 'locked' ? 0.14 : hoverActive ? 0.22 : 0.27;
 
   shape.lineStyle(0, 0x000000, 0);
   shape.beginFill(0x21160f, ambientShadowAlpha);
   shape.drawEllipse(
     0,
     halfHeight + layout.shadowOffsetY + layout.shadowHeight * 0.38,
-    layout.shadowWidth * 1.24,
-    layout.shadowHeight * 1.32,
+    layout.shadowWidth * 1.32,
+    layout.shadowHeight * 1.44,
   );
   shape.endFill();
 
@@ -1805,8 +1929,8 @@ function drawPlot(
   shape.drawEllipse(
     0,
     halfHeight + layout.shadowOffsetY + layout.shadowHeight * 0.14,
-    layout.shadowWidth * 0.98,
-    layout.shadowHeight * 0.78,
+    layout.shadowWidth * 1.06,
+    layout.shadowHeight * 0.88,
   );
   shape.endFill();
 
@@ -1814,8 +1938,8 @@ function drawPlot(
   shape.drawEllipse(
     0,
     halfHeight + thickness + layout.shadowHeight * 0.08,
-    layout.shadowWidth * 0.66,
-    layout.shadowHeight * 0.42,
+    layout.shadowWidth * 0.74,
+    layout.shadowHeight * 0.5,
   );
   shape.endFill();
 
@@ -1947,6 +2071,10 @@ function drawPlot(
     halfWidth * 0.76, halfHeight * 0.08,
     0, halfHeight * 0.24,
   ]);
+  shape.endFill();
+
+  shape.beginFill(mixColor(topColor, 0x120c08, 0.55), state === 'locked' ? 0.08 : hoverActive ? 0.14 : 0.18);
+  shape.drawEllipse(0, halfHeight * 0.58, halfWidth * 0.5, halfHeight * 0.2);
   shape.endFill();
 
   shape.beginFill(mixColor(topColor, 0x1a110b, 0.38), state === 'locked' ? 0.05 : 0.1);
