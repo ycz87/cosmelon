@@ -153,6 +153,18 @@ const DEFAULT_PLOT_STATES: PlotVisualState[] = [
   'locked',
 ];
 
+const VISUAL_ONLY_PLOT_STATES: PlotVisualState[] = ['mature', 'fruit', 'sprout', 'leaf', 'seed', 'empty', 'mature'];
+
+const VISUAL_ONLY_PLOT_LAYOUT: ReadonlyArray<{ x: number; y: number }> = [
+  { x: -1.15, y: -1.02 },
+  { x: 0.28, y: -0.82 },
+  { x: -1.92, y: -0.2 },
+  { x: -0.58, y: 0.02 },
+  { x: 0.88, y: 0.22 },
+  { x: -1.24, y: 0.92 },
+  { x: 0.34, y: 1.12 },
+];
+
 const PLOT_PALETTES: Record<PlotVisualState, PlotPalette> = {
   empty: {
     top: 0xd9a367,
@@ -448,22 +460,25 @@ function drawSkyLayer(
   skyLayer: PixiGraphicsLike,
   viewportWidth: number,
   backdropLayout: SceneBackdropLayout,
+  visualOnlyMode: boolean,
 ): void {
   skyLayer.clear();
   skyLayer.lineStyle(0, 0x000000, 0);
+  const skyStartColor = visualOnlyMode ? 0x8bd5ff : 0x7bccff;
+  const skyEndColor = visualOnlyMode ? 0xf6fdff : 0xecfbff;
 
   const skyBandCount = 24;
   for (let index = 0; index < skyBandCount; index += 1) {
     const startY = Math.round((backdropLayout.horizonY * index) / skyBandCount);
     const endY = Math.round((backdropLayout.horizonY * (index + 1)) / skyBandCount);
     const bandHeight = Math.max(2, endY - startY + 1);
-    const color = mixColor(0x7bccff, 0xecfbff, index / (skyBandCount - 1));
+    const color = mixColor(skyStartColor, skyEndColor, index / (skyBandCount - 1));
     skyLayer.beginFill(color, 1);
     skyLayer.drawRect(0, startY, viewportWidth, bandHeight);
     skyLayer.endFill();
   }
 
-  skyLayer.beginFill(0xd8f5ff, 0.52);
+  skyLayer.beginFill(visualOnlyMode ? 0xe8f9ff : 0xd8f5ff, visualOnlyMode ? 0.64 : 0.52);
   skyLayer.drawRect(0, backdropLayout.horizonY - 3, viewportWidth, 8);
   skyLayer.endFill();
 }
@@ -474,6 +489,7 @@ function drawPainterlyPasses(
   viewportHeight: number,
   backdropLayout: SceneBackdropLayout,
   sceneLayout?: SceneLayout,
+  visualOnlyMode = false,
 ): void {
   const scale = backdropLayout.decorationScale;
   const skyBandY = backdropLayout.horizonY + 10 * scale;
@@ -485,7 +501,7 @@ function drawPainterlyPasses(
 
   layer.lineStyle(0, 0x000000, 0);
 
-  layer.beginFill(0xe6f3c6, sceneLayout ? 0.06 : 0.05);
+  layer.beginFill(visualOnlyMode ? 0xf0f8d3 : 0xe6f3c6, sceneLayout ? (visualOnlyMode ? 0.084 : 0.06) : visualOnlyMode ? 0.072 : 0.05);
   layer.drawPolygon([
     -20 * scale, skyBandY + 4 * scale,
     viewportWidth * 0.16, skyBandY - 10 * scale,
@@ -498,12 +514,12 @@ function drawPainterlyPasses(
   ]);
   layer.endFill();
 
-  layer.beginFill(0x96ba6b, sceneLayout ? 0.05 : 0.042);
+  layer.beginFill(visualOnlyMode ? 0xaed07f : 0x96ba6b, sceneLayout ? (visualOnlyMode ? 0.07 : 0.05) : visualOnlyMode ? 0.058 : 0.042);
   layer.drawEllipse(viewportWidth * 0.24, backdropLayout.groundTopY + groundSpan * 0.48, viewportWidth * 0.29, 30 * scale);
   layer.drawEllipse(viewportWidth * 0.78, backdropLayout.groundTopY + groundSpan * 0.58, viewportWidth * 0.33, 32 * scale);
   layer.endFill();
 
-  layer.beginFill(0xd5af78, sceneLayout ? 0.046 : 0.038);
+  layer.beginFill(visualOnlyMode ? 0xe4c492 : 0xd5af78, sceneLayout ? (visualOnlyMode ? 0.064 : 0.046) : visualOnlyMode ? 0.054 : 0.038);
   layer.drawPolygon([
     0, plotInfluenceY + driftY * 1.8,
     viewportWidth * 0.15, plotInfluenceY + driftY * 0.35,
@@ -524,7 +540,7 @@ function drawPainterlyPasses(
       sceneLayout.halfHeight +
       sceneLayout.thickness +
       sceneLayout.shadowOffsetY;
-    layer.beginFill(0x4b6e34, 0.058);
+    layer.beginFill(visualOnlyMode ? 0x628a44 : 0x4b6e34, visualOnlyMode ? 0.072 : 0.058);
     layer.drawEllipse(
       viewportWidth * 0.5,
       frameBaseY + Math.max(8, sceneLayout.shadowHeight * 0.62),
@@ -543,8 +559,9 @@ function drawPainterlyPasses(
     const centerX = viewportWidth * (0.08 + ratio * 0.84);
     const halfSpan = viewportWidth * (0.08 + ratio * 0.07);
     const strokeY = strokeBaseY + Math.sin(index * 1.6) * 8 * scale + (index % 2) * driftY * 0.2;
-    const color = mixColor(0x7ea450, 0xc1d28a, ratio * 0.76);
-    const alpha = (sceneLayout ? 0.062 : 0.052) - ratio * 0.01;
+    const color = mixColor(visualOnlyMode ? 0x95b862 : 0x7ea450, visualOnlyMode ? 0xd6e5a8 : 0xc1d28a, ratio * 0.76);
+    const alphaBase = sceneLayout ? (visualOnlyMode ? 0.078 : 0.062) : visualOnlyMode ? 0.066 : 0.052;
+    const alpha = alphaBase - ratio * 0.01;
     layer.lineStyle(strokeWidth, color, alpha);
     layer.moveTo(centerX - halfSpan, strokeY);
     layer.lineTo(centerX + halfSpan, strokeY + 2.2 * scale);
@@ -556,13 +573,14 @@ function drawFarMidLayer(
   viewportWidth: number,
   viewportHeight: number,
   backdropLayout: SceneBackdropLayout,
+  visualOnlyMode: boolean,
 ): void {
   farLayer.clear();
   farLayer.lineStyle(0, 0x000000, 0);
 
   const hillBaseY = backdropLayout.horizonY + Math.round(30 * backdropLayout.decorationScale);
-  farLayer.lineStyle(2, 0x94bc71, 0.62);
-  farLayer.beginFill(0xcde8a0, 1);
+  farLayer.lineStyle(2, visualOnlyMode ? 0xa4c987 : 0x94bc71, visualOnlyMode ? 0.68 : 0.62);
+  farLayer.beginFill(visualOnlyMode ? 0xdcf0b9 : 0xcde8a0, 1);
   farLayer.drawPolygon([
     0, hillBaseY + 16,
     viewportWidth * 0.08, hillBaseY + 2,
@@ -584,13 +602,13 @@ function drawFarMidLayer(
     const startY = backdropLayout.groundTopY + Math.round((grassHeight * index) / grassBandCount);
     const endY = backdropLayout.groundTopY + Math.round((grassHeight * (index + 1)) / grassBandCount);
     const bandHeight = Math.max(2, endY - startY + 1);
-    const color = mixColor(0xc6e98c, 0x96c953, index / (grassBandCount - 1));
+    const color = mixColor(visualOnlyMode ? 0xd4ef9f : 0xc6e98c, visualOnlyMode ? 0xa9d36b : 0x96c953, index / (grassBandCount - 1));
     farLayer.beginFill(color, 1);
     farLayer.drawRect(0, startY, viewportWidth, bandHeight);
     farLayer.endFill();
   }
 
-  farLayer.beginFill(0xddf4ae, 0.26);
+  farLayer.beginFill(visualOnlyMode ? 0xebf8c6 : 0xddf4ae, visualOnlyMode ? 0.34 : 0.26);
   farLayer.drawEllipse(viewportWidth * 0.23, viewportHeight * 0.84, viewportWidth * 0.33, viewportHeight * 0.11);
   farLayer.drawEllipse(viewportWidth * 0.77, viewportHeight * 0.75, viewportWidth * 0.3, viewportHeight * 0.1);
   farLayer.endFill();
@@ -604,7 +622,7 @@ function drawFarMidLayer(
   const farSegmentWidth = Math.max(9, 16.4 * scale);
   const farFenceSpan = 5 * farSegmentWidth;
 
-  farLayer.beginFill(0xeaf8c9, 0.18);
+  farLayer.beginFill(visualOnlyMode ? 0xf2fcdd : 0xeaf8c9, visualOnlyMode ? 0.25 : 0.18);
   farLayer.drawRect(0, backdropLayout.groundTopY - 2, viewportWidth, Math.max(10, 17 * scale));
   farLayer.endFill();
 
@@ -629,7 +647,7 @@ function drawFarMidLayer(
     farSegmentWidth,
     0.78 * scale,
   );
-  drawPainterlyPasses(farLayer, viewportWidth, viewportHeight, backdropLayout);
+  drawPainterlyPasses(farLayer, viewportWidth, viewportHeight, backdropLayout, undefined, visualOnlyMode);
 }
 
 function drawCloud(
@@ -1262,13 +1280,14 @@ function drawFrontDecorationLayer(
   viewportHeight: number,
   backdropLayout: SceneBackdropLayout,
   sceneLayout: SceneLayout,
+  visualOnlyMode: boolean,
 ): void {
   frontLayer.clear();
 
   const scale = backdropLayout.decorationScale;
   const depthScale = clamp((viewportHeight - sceneLayout.stageY) / 310, 0.92, 1.16);
   const nearScale = scale * depthScale;
-  const cornerScale = nearScale * 1.14;
+  const cornerScale = nearScale * (visualOnlyMode ? 1.27 : 1.14);
   const frontSegmentWidth = Math.max(10, 15 * nearScale);
   const frontFenceSpan = 5 * frontSegmentWidth;
   const edgeOffset = Math.max(10, 15 * nearScale);
@@ -1280,25 +1299,25 @@ function drawFrontDecorationLayer(
     sceneLayout.shadowOffsetY;
   const frontGroundY = clamp(plotBottomY + 11 * scale, viewportHeight * 0.73, viewportHeight - 8);
   const bermTopY = clamp(plotBottomY + 1 * scale, frontGroundY - 25 * nearScale, frontGroundY - 8 * nearScale);
-  const leftCornerX = clamp(viewportWidth * 0.08, 26 * cornerScale, 82 * cornerScale);
+  const leftCornerX = clamp(viewportWidth * 0.08, (visualOnlyMode ? 30 : 26) * cornerScale, (visualOnlyMode ? 90 : 82) * cornerScale);
   const rightCornerX = viewportWidth - leftCornerX;
   const cornerGroundY = viewportHeight * 0.996;
 
   frontLayer.lineStyle(0, 0x000000, 0);
-  frontLayer.beginFill(0x25371c, 0.34);
+  frontLayer.beginFill(0x25371c, visualOnlyMode ? 0.26 : 0.34);
   frontLayer.drawEllipse(leftCornerX + 17 * cornerScale, cornerGroundY + 3 * cornerScale, 95 * cornerScale, 21 * cornerScale);
   frontLayer.drawEllipse(rightCornerX - 16 * cornerScale, cornerGroundY + 3 * cornerScale, 90 * cornerScale, 20 * cornerScale);
   frontLayer.endFill();
 
-  drawBarn(frontLayer, leftCornerX, cornerGroundY, 1.04 * cornerScale);
-  drawCottage(frontLayer, rightCornerX, cornerGroundY, 1.01 * cornerScale);
+  drawBarn(frontLayer, leftCornerX, cornerGroundY, (visualOnlyMode ? 1.17 : 1.04) * cornerScale);
+  drawCottage(frontLayer, rightCornerX, cornerGroundY, (visualOnlyMode ? 1.14 : 1.01) * cornerScale);
 
   frontLayer.lineStyle(0, 0x000000, 0);
-  frontLayer.beginFill(0x304726, 0.24);
+  frontLayer.beginFill(0x304726, visualOnlyMode ? 0.2 : 0.24);
   frontLayer.drawEllipse(viewportWidth * 0.5, frontGroundY + 14 * nearScale, viewportWidth * 0.45, 19 * nearScale);
   frontLayer.endFill();
 
-  frontLayer.beginFill(0x6fa342, 0.94);
+  frontLayer.beginFill(visualOnlyMode ? 0x79ad4d : 0x6fa342, visualOnlyMode ? 0.98 : 0.94);
   frontLayer.drawPolygon([
     0, viewportHeight,
     0, bermTopY + 13 * nearScale,
@@ -1314,7 +1333,7 @@ function drawFrontDecorationLayer(
   ]);
   frontLayer.endFill();
 
-  frontLayer.beginFill(0x3f5f2b, 0.3);
+  frontLayer.beginFill(visualOnlyMode ? 0x4a6c32 : 0x3f5f2b, visualOnlyMode ? 0.35 : 0.3);
   frontLayer.drawPolygon([
     0, bermTopY + 3.2 * nearScale,
     viewportWidth * 0.12, bermTopY + 0.8 * nearScale,
@@ -1328,7 +1347,7 @@ function drawFrontDecorationLayer(
   ]);
   frontLayer.endFill();
 
-  frontLayer.beginFill(0xbfdf88, 0.24);
+  frontLayer.beginFill(visualOnlyMode ? 0xd3ebaa : 0xbfdf88, visualOnlyMode ? 0.3 : 0.24);
   frontLayer.drawPolygon([
     0, bermTopY + 12.9 * nearScale,
     viewportWidth * 0.14, bermTopY + 5.5 * nearScale,
@@ -1367,12 +1386,12 @@ function drawFrontDecorationLayer(
   frontLayer.drawEllipse(sheepX - 2 * nearScale, sheepHoofY + 8 * nearScale, 21 * nearScale, 6.2 * nearScale);
   frontLayer.endFill();
 
-  drawCow(frontLayer, cowX, cowHoofY, 0.86 * nearScale, false);
-  drawSheep(frontLayer, sheepX, sheepHoofY, 0.84 * nearScale, true);
+  drawCow(frontLayer, cowX, cowHoofY, (visualOnlyMode ? 0.95 : 0.86) * nearScale, false);
+  drawSheep(frontLayer, sheepX, sheepHoofY, (visualOnlyMode ? 0.93 : 0.84) * nearScale, true);
 
   drawGrassTufts(frontLayer, 0, bermTopY + 12 * nearScale, viewportWidth, 28, 0.72 * nearScale, 0x6d9c40, 0.42);
   drawGrassTufts(frontLayer, 0, bermTopY + 14.6 * nearScale, viewportWidth, 22, 0.58 * nearScale, 0x4f7d2f, 0.3);
-  drawPainterlyPasses(frontLayer, viewportWidth, viewportHeight, backdropLayout, sceneLayout);
+  drawPainterlyPasses(frontLayer, viewportWidth, viewportHeight, backdropLayout, sceneLayout, visualOnlyMode);
 }
 
 function getCoarsePointerMode(): boolean {
@@ -1435,13 +1454,31 @@ function resolveSceneLayout(
   };
 }
 
-function resolvePlotCoordinate(plotId: number, layout: SceneLayout): { x: number; y: number } {
+function resolvePlotCoordinate(plotId: number, layout: SceneLayout, visualOnlyMode: boolean): { x: number; y: number } {
+  if (visualOnlyMode) {
+    const visualOnlyCoordinate = VISUAL_ONLY_PLOT_LAYOUT[plotId];
+    if (!visualOnlyCoordinate) {
+      return { x: 0, y: 0 };
+    }
+    return {
+      x: Math.round(layout.halfWidth * visualOnlyCoordinate.x),
+      y: Math.round(layout.halfHeight * visualOnlyCoordinate.y),
+    };
+  }
+
   const row = Math.floor(plotId / GRID_SIZE);
   const col = plotId % GRID_SIZE;
   return {
     x: (col - row) * layout.stepX,
     y: (col + row) * layout.stepY,
   };
+}
+
+function resolveRenderPlotIds(visualOnlyMode: boolean): number[] {
+  if (visualOnlyMode) {
+    return VISUAL_ONLY_PLOT_LAYOUT.map((_, index) => index);
+  }
+  return [...PLOT_RENDER_ORDER];
 }
 
 function findHitPlotId(
@@ -2144,6 +2181,10 @@ function drawPlot(
 
 export function FarmPixiPrototype() {
   const visualOnlyMode = useMemo(() => isVisualOnlyMode(), []);
+  const initialPlotStates = useMemo<PlotVisualState[]>(
+    () => (visualOnlyMode ? VISUAL_ONLY_PLOT_STATES : DEFAULT_PLOT_STATES),
+    [visualOnlyMode],
+  );
   const mountRef = useRef<HTMLDivElement | null>(null);
   const appRef = useRef<PixiApplicationLike | null>(null);
   const pixiRef = useRef<PixiModuleLike | null>(null);
@@ -2158,7 +2199,7 @@ export function FarmPixiPrototype() {
   const pulseFrameIdRef = useRef<number | null>(null);
   const interactionLogIdRef = useRef(0);
 
-  const [plotStates, setPlotStates] = useState<PlotVisualState[]>(DEFAULT_PLOT_STATES);
+  const [plotStates, setPlotStates] = useState<PlotVisualState[]>(initialPlotStates);
   const [hoveredPlotId, setHoveredPlotId] = useState<number | null>(null);
   const [hoverEnabled, setHoverEnabled] = useState(true);
   const [status, setStatus] = useState<PrototypeStatus>('loading');
@@ -2170,7 +2211,7 @@ export function FarmPixiPrototype() {
     detail: 'waiting input',
   });
 
-  const plotStatesRef = useRef<PlotVisualState[]>(DEFAULT_PLOT_STATES);
+  const plotStatesRef = useRef<PlotVisualState[]>(initialPlotStates);
   const hoveredPlotIdRef = useRef<number | null>(null);
   const hoverEnabledRef = useRef(true);
 
@@ -2195,6 +2236,8 @@ export function FarmPixiPrototype() {
 
   const handlePlotTap = useCallback(
     (plotId: number) => {
+      if (visualOnlyMode) return;
+      if (plotId < 0 || plotId >= plotStatesRef.current.length) return;
       const currentState = plotStatesRef.current[plotId] ?? 'locked';
       if (!isUnlockedState(currentState)) {
         appendInteractionLog(plotId, 'LOCKED_BLOCK', 'locked');
@@ -2212,13 +2255,14 @@ export function FarmPixiPrototype() {
       }
       appendInteractionLog(plotId, transition.action, transition.result);
     },
-    [appendInteractionLog],
+    [appendInteractionLog, visualOnlyMode],
   );
 
   const unlockedCount = useMemo(() => plotStates.filter((state) => state !== 'locked').length, [plotStates]);
   const lockedCount = TOTAL_PLOTS - unlockedCount;
   const hoveredStateLabel = useMemo(() => {
     if (hoveredPlotId === null) return 'NONE';
+    if (hoveredPlotId < 0 || hoveredPlotId >= plotStates.length) return 'NONE';
     const hoveredState = plotStates[hoveredPlotId] ?? 'locked';
     if (!isUnlockedState(hoveredState)) return 'NONE';
     return HOVER_STATE_LABELS[hoveredState];
@@ -2275,9 +2319,9 @@ export function FarmPixiPrototype() {
       if (!host) return;
 
       const coarsePointer = getCoarsePointerMode();
-      setHoverEnabled(!coarsePointer);
+      setHoverEnabled(!coarsePointer && !visualOnlyMode);
       setHoveredPlotId(null);
-      hoverEnabledRef.current = !coarsePointer;
+      hoverEnabledRef.current = !coarsePointer && !visualOnlyMode;
       hoveredPlotIdRef.current = null;
 
       const initialWidth = Math.max(320, host.clientWidth || 320);
@@ -2316,6 +2360,7 @@ export function FarmPixiPrototype() {
       app.stage.addChild(sceneRoot);
 
       const handleCanvasPointerUp = (event: PointerEvent) => {
+        if (visualOnlyMode) return;
         const activeLayout = layoutRef.current;
         const activePlotLayer = stageRef.current;
         const activeApp = appRef.current;
@@ -2328,7 +2373,8 @@ export function FarmPixiPrototype() {
         const pointerX = ((event.clientX - canvasBounds.left) * activeApp.screen.width) / canvasBounds.width;
         const pointerY = ((event.clientY - canvasBounds.top) * activeApp.screen.height) / canvasBounds.height;
         const hitPlotId = findHitPlotId(pointerX, pointerY, activePlotLayer, plotObjectsRef.current, activeLayout);
-        if (hitPlotId === null) {
+        const activePlotCount = plotStatesRef.current.length;
+        if (hitPlotId === null || hitPlotId < 0 || hitPlotId >= activePlotCount) {
           appendInteractionLog(null, 'PASS', 'outside_diamond');
           return;
         }
@@ -2356,8 +2402,9 @@ export function FarmPixiPrototype() {
 
         const activeHoveredPlotId = hoverEnabledRef.current ? hoveredPlotIdRef.current : null;
         const activePulsePhase = pulsePhaseRef.current;
+        const fallbackState: PlotVisualState = visualOnlyMode ? 'empty' : 'locked';
         for (const plot of plotObjectsRef.current) {
-          const state = plotStatesRef.current[plot.id] ?? 'locked';
+          const state = plotStatesRef.current[plot.id] ?? fallbackState;
           drawPlot(plot, state, activeHoveredPlotId === plot.id, activeLayout, hoverEnabledRef.current, activePulsePhase, pixi);
         }
         requestRender();
@@ -2374,24 +2421,30 @@ export function FarmPixiPrototype() {
       };
       pulseFrameIdRef.current = window.requestAnimationFrame(animatePulse);
 
-      const renderPlotsInOrder = PLOT_RENDER_ORDER.map((plotId) => {
+      const renderPlotIds = resolveRenderPlotIds(visualOnlyMode);
+      const renderPlotsInOrder = renderPlotIds.map((plotId) => {
         const container = new pixi.Container();
         const shape = new pixi.Graphics();
         const overlay = new pixi.Graphics();
         const lockOverlay = new pixi.Graphics();
 
-        shape.interactive = true;
-        shape.cursor = 'pointer';
-        shape.on('pointertap', () => {
-          handlePlotTap(plotId);
-        });
+        shape.interactive = !visualOnlyMode;
+        shape.cursor = visualOnlyMode ? 'default' : 'pointer';
+        if (!visualOnlyMode) {
+          shape.on('pointertap', () => {
+            if (plotId < 0 || plotId >= plotStatesRef.current.length) return;
+            handlePlotTap(plotId);
+          });
+        }
 
-        if (!coarsePointer) {
+        if (!coarsePointer && !visualOnlyMode) {
           shape.on('pointerover', () => {
+            if (plotId < 0 || plotId >= plotStatesRef.current.length) return;
             if ((plotStatesRef.current[plotId] ?? 'locked') === 'locked') return;
             setHoveredPlotId((current) => (current === plotId ? current : plotId));
           });
           shape.on('pointerout', () => {
+            if (plotId < 0 || plotId >= plotStatesRef.current.length) return;
             setHoveredPlotId((current) => (current === plotId ? null : current));
           });
         }
@@ -2422,21 +2475,22 @@ export function FarmPixiPrototype() {
         const nextLayout = resolveSceneLayout(nextWidth, nextHeight, nextBackdropLayout, visualOnlyMode);
         layoutRef.current = nextLayout;
 
-        drawSkyLayer(skyLayer, nextWidth, nextBackdropLayout);
-        drawFarMidLayer(farDecorationLayer, nextWidth, nextHeight, nextBackdropLayout);
+        drawSkyLayer(skyLayer, nextWidth, nextBackdropLayout, visualOnlyMode);
+        drawFarMidLayer(farDecorationLayer, nextWidth, nextHeight, nextBackdropLayout, visualOnlyMode);
         drawFrontDecorationLayer(
           foregroundDecorationLayer,
           nextWidth,
           nextHeight,
           nextBackdropLayout,
           nextLayout,
+          visualOnlyMode,
         );
 
         plotLayer.x = Math.round(nextWidth / 2);
         plotLayer.y = nextLayout.stageY;
 
         for (const plot of plotObjectsRef.current) {
-          const coordinate = resolvePlotCoordinate(plot.id, nextLayout);
+          const coordinate = resolvePlotCoordinate(plot.id, nextLayout, visualOnlyMode);
           plot.baseX = coordinate.x;
           plot.baseY = coordinate.y;
           plot.container.x = coordinate.x;
