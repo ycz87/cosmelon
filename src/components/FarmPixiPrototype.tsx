@@ -153,16 +153,16 @@ const DEFAULT_PLOT_STATES: PlotVisualState[] = [
   'locked',
 ];
 
-const VISUAL_ONLY_PLOT_STATES: PlotVisualState[] = ['mature', 'fruit', 'sprout', 'leaf', 'seed', 'empty', 'mature'];
+const VISUAL_ONLY_PLOT_STATES: PlotVisualState[] = ['fruit', 'empty', 'sprout', 'mature', 'empty', 'mature', 'sprout'];
 
 const VISUAL_ONLY_PLOT_LAYOUT: ReadonlyArray<{ x: number; y: number }> = [
-  { x: -1.15, y: -1.02 },
-  { x: 0.28, y: -0.82 },
-  { x: -1.92, y: -0.2 },
-  { x: -0.58, y: 0.02 },
-  { x: 0.88, y: 0.22 },
-  { x: -1.24, y: 0.92 },
-  { x: 0.34, y: 1.12 },
+  { x: 0, y: -1.32 },
+  { x: -1.06, y: -0.64 },
+  { x: 1.06, y: -0.64 },
+  { x: 0, y: 0.02 },
+  { x: -1.06, y: 0.7 },
+  { x: 1.06, y: 0.7 },
+  { x: 0, y: 1.34 },
 ];
 
 const PLOT_PALETTES: Record<PlotVisualState, PlotPalette> = {
@@ -1287,7 +1287,7 @@ function drawFrontDecorationLayer(
   const scale = backdropLayout.decorationScale;
   const depthScale = clamp((viewportHeight - sceneLayout.stageY) / 310, 0.92, 1.16);
   const nearScale = scale * depthScale;
-  const cornerScale = nearScale * (visualOnlyMode ? 1.27 : 1.14);
+  const cornerScale = nearScale * (visualOnlyMode ? 1.46 : 1.14);
   const frontSegmentWidth = Math.max(10, 15 * nearScale);
   const frontFenceSpan = 5 * frontSegmentWidth;
   const edgeOffset = Math.max(10, 15 * nearScale);
@@ -1299,7 +1299,11 @@ function drawFrontDecorationLayer(
     sceneLayout.shadowOffsetY;
   const frontGroundY = clamp(plotBottomY + 11 * scale, viewportHeight * 0.73, viewportHeight - 8);
   const bermTopY = clamp(plotBottomY + 1 * scale, frontGroundY - 25 * nearScale, frontGroundY - 8 * nearScale);
-  const leftCornerX = clamp(viewportWidth * 0.08, (visualOnlyMode ? 30 : 26) * cornerScale, (visualOnlyMode ? 90 : 82) * cornerScale);
+  const leftCornerX = clamp(
+    viewportWidth * (visualOnlyMode ? 0.17 : 0.08),
+    (visualOnlyMode ? 86 : 26) * cornerScale,
+    (visualOnlyMode ? 148 : 82) * cornerScale,
+  );
   const rightCornerX = viewportWidth - leftCornerX;
   const cornerGroundY = viewportHeight * 0.996;
 
@@ -1309,8 +1313,8 @@ function drawFrontDecorationLayer(
   frontLayer.drawEllipse(rightCornerX - 16 * cornerScale, cornerGroundY + 3 * cornerScale, 90 * cornerScale, 20 * cornerScale);
   frontLayer.endFill();
 
-  drawBarn(frontLayer, leftCornerX, cornerGroundY, (visualOnlyMode ? 1.17 : 1.04) * cornerScale);
-  drawCottage(frontLayer, rightCornerX, cornerGroundY, (visualOnlyMode ? 1.14 : 1.01) * cornerScale);
+  drawBarn(frontLayer, leftCornerX, cornerGroundY, (visualOnlyMode ? 1.32 : 1.04) * cornerScale);
+  drawCottage(frontLayer, rightCornerX, cornerGroundY, (visualOnlyMode ? 1.3 : 1.01) * cornerScale);
 
   frontLayer.lineStyle(0, 0x000000, 0);
   frontLayer.beginFill(0x304726, visualOnlyMode ? 0.2 : 0.24);
@@ -1371,8 +1375,12 @@ function drawFrontDecorationLayer(
     0.84 * nearScale,
   );
 
-  const cowX = clamp(viewportWidth * 0.22, 58 * nearScale, viewportWidth * 0.42);
-  const sheepX = clamp(viewportWidth * 0.78, viewportWidth * 0.58, viewportWidth - 54 * nearScale);
+  const cowX = visualOnlyMode
+    ? clamp(viewportWidth * 0.3, 82 * nearScale, viewportWidth * 0.44)
+    : clamp(viewportWidth * 0.22, 58 * nearScale, viewportWidth * 0.42);
+  const sheepX = visualOnlyMode
+    ? clamp(viewportWidth * 0.7, viewportWidth * 0.56, viewportWidth - 82 * nearScale)
+    : clamp(viewportWidth * 0.78, viewportWidth * 0.58, viewportWidth - 54 * nearScale);
   const cowHoofY = clamp(plotBottomY + 9 * nearScale, bermTopY + 11 * nearScale, frontGroundY - 8 * nearScale);
   const sheepHoofY = clamp(plotBottomY + 9.4 * nearScale, bermTopY + 11.4 * nearScale, frontGroundY - 8 * nearScale);
 
@@ -1386,8 +1394,8 @@ function drawFrontDecorationLayer(
   frontLayer.drawEllipse(sheepX - 2 * nearScale, sheepHoofY + 8 * nearScale, 21 * nearScale, 6.2 * nearScale);
   frontLayer.endFill();
 
-  drawCow(frontLayer, cowX, cowHoofY, (visualOnlyMode ? 0.95 : 0.86) * nearScale, false);
-  drawSheep(frontLayer, sheepX, sheepHoofY, (visualOnlyMode ? 0.93 : 0.84) * nearScale, true);
+  drawCow(frontLayer, cowX, cowHoofY, (visualOnlyMode ? 1.24 : 0.86) * nearScale, false);
+  drawSheep(frontLayer, sheepX, sheepHoofY, (visualOnlyMode ? 1.22 : 0.84) * nearScale, true);
 
   drawGrassTufts(frontLayer, 0, bermTopY + 12 * nearScale, viewportWidth, 28, 0.72 * nearScale, 0x6d9c40, 0.42);
   drawGrassTufts(frontLayer, 0, bermTopY + 14.6 * nearScale, viewportWidth, 22, 0.58 * nearScale, 0x4f7d2f, 0.3);
@@ -1922,6 +1930,7 @@ function drawPlot(
   layout: SceneLayout,
   hoverEnabled: boolean,
   pulsePhase: number,
+  visualOnlyMode: boolean,
   pixi: PixiModuleLike,
 ): void {
   const palette = PLOT_PALETTES[state];
@@ -1941,6 +1950,83 @@ function drawPlot(
   const overlay = plot.overlay;
   shape.clear();
   overlay.clear();
+
+  if (visualOnlyMode) {
+    const bedHalfWidth = halfWidth * 0.94;
+    const bedHalfHeight = halfHeight * 0.64;
+    const bedTopColor = hoverActive ? lightenColor(palette.top, 0.12) : lightenColor(palette.top, 0.06);
+    const bedBorderColor = hoverActive ? lightenColor(palette.edge, 0.14) : mixColor(palette.edge, 0x533321, 0.34);
+    const shadowY = bedHalfHeight + Math.max(6, layout.shadowHeight * 0.54);
+    const grainRadius = Math.max(0.7, halfWidth * 0.011);
+
+    plot.shape.cursor = 'default';
+    plot.container.y = plot.baseY;
+    plot.container.scale.set(1);
+
+    shape.hitArea = new pixi.Polygon([
+      -bedHalfWidth * 0.96, 0,
+      -bedHalfWidth * 0.72, -bedHalfHeight * 0.56,
+      0, -bedHalfHeight * 0.84,
+      bedHalfWidth * 0.72, -bedHalfHeight * 0.56,
+      bedHalfWidth * 0.96, 0,
+      bedHalfWidth * 0.72, bedHalfHeight * 0.56,
+      0, bedHalfHeight * 0.84,
+      -bedHalfWidth * 0.72, bedHalfHeight * 0.56,
+    ]);
+
+    shape.lineStyle(0, 0x000000, 0);
+    shape.beginFill(0x1c2f17, hoverActive ? 0.21 : 0.17);
+    shape.drawEllipse(0, shadowY, bedHalfWidth * 1.22, bedHalfHeight * 0.52);
+    shape.endFill();
+
+    shape.beginFill(0x10200d, hoverActive ? 0.14 : 0.11);
+    shape.drawEllipse(0, shadowY + bedHalfHeight * 0.11, bedHalfWidth * 0.82, bedHalfHeight * 0.28);
+    shape.endFill();
+
+    shape.lineStyle(hoverActive ? 2.2 : 1.9, bedBorderColor, 0.88);
+    shape.beginFill(bedTopColor, 1);
+    shape.drawEllipse(0, 0, bedHalfWidth, bedHalfHeight);
+    shape.endFill();
+
+    shape.lineStyle(0, 0x000000, 0);
+    shape.beginFill(lightenColor(bedTopColor, 0.22), hoverActive ? 0.24 : 0.2);
+    shape.drawEllipse(-bedHalfWidth * 0.2, -bedHalfHeight * 0.34, bedHalfWidth * 0.56, bedHalfHeight * 0.32);
+    shape.endFill();
+
+    shape.beginFill(mixColor(bedTopColor, palette.edge, 0.46), 0.12);
+    for (const point of SOIL_MICRO_POINTS) {
+      shape.drawCircle(
+        bedHalfWidth * point.x * 0.8,
+        bedHalfHeight * point.y * 0.9,
+        grainRadius * point.size,
+      );
+    }
+    shape.endFill();
+
+    shape.lineStyle(1, mixColor(palette.edge, 0x2c1d12, 0.6), 0.2);
+    for (const crack of SOIL_MICRO_CRACKS) {
+      shape.moveTo(bedHalfWidth * crack[0] * 0.66, bedHalfHeight * crack[1] * 0.78);
+      shape.lineTo(bedHalfWidth * crack[2] * 0.66, bedHalfHeight * crack[3] * 0.78);
+      shape.lineTo(bedHalfWidth * crack[4] * 0.66, bedHalfHeight * crack[5] * 0.78);
+    }
+
+    shape.lineStyle(1, lightenColor(bedBorderColor, 0.24), 0.34);
+    shape.drawEllipse(0, -bedHalfHeight * 0.05, bedHalfWidth * 0.9, bedHalfHeight * 0.58);
+
+    overlay.alpha = state === 'locked' ? 0 : 1;
+    if (state === 'empty') drawEmptyOverlay(overlay, layout);
+    if (state === 'seed') drawSeedOverlay(overlay, layout);
+    if (state === 'sprout') drawSproutOverlay(overlay, layout);
+    if (state === 'leaf') drawLeafOverlay(overlay, layout);
+    if (state === 'flower') drawFlowerOverlay(overlay, layout);
+    if (state === 'fruit') drawFruitOverlay(overlay, layout);
+    if (state === 'mature') drawMatureOverlay(overlay, layout, pulsePhase);
+    if (state === 'withered') drawWitheredOverlay(overlay, layout);
+
+    plot.lockOverlay.clear();
+    plot.lockOverlay.alpha = 0;
+    return;
+  }
 
   shape.hitArea = new pixi.Polygon([
     0, -halfHeight,
@@ -2405,7 +2491,16 @@ export function FarmPixiPrototype() {
         const fallbackState: PlotVisualState = visualOnlyMode ? 'empty' : 'locked';
         for (const plot of plotObjectsRef.current) {
           const state = plotStatesRef.current[plot.id] ?? fallbackState;
-          drawPlot(plot, state, activeHoveredPlotId === plot.id, activeLayout, hoverEnabledRef.current, activePulsePhase, pixi);
+          drawPlot(
+            plot,
+            state,
+            activeHoveredPlotId === plot.id,
+            activeLayout,
+            hoverEnabledRef.current,
+            activePulsePhase,
+            visualOnlyMode,
+            pixi,
+          );
         }
         requestRender();
       };
