@@ -39,10 +39,16 @@ interface GridLayout {
   plotSize: number;
 }
 
+const SMALL_MOBILE_BREAKPOINT = 420;
 const MOBILE_BREAKPOINT = 640;
 const TABLET_BREAKPOINT = 1024;
 const DESKTOP_VIEWPORT_WIDTH = 1024;
 const TOTAL_SLOTS = 7;
+
+const COMPACT_MOBILE_LAYOUT: GridLayout = {
+  gap: 5,
+  plotSize: 88,
+};
 
 const MOBILE_LAYOUT: GridLayout = {
   gap: 6,
@@ -67,6 +73,9 @@ function getViewportWidth(): number {
 }
 
 function getGridLayout(viewportWidth: number): GridLayout {
+  if (viewportWidth < SMALL_MOBILE_BREAKPOINT) {
+    return COMPACT_MOBILE_LAYOUT;
+  }
   if (viewportWidth < MOBILE_BREAKPOINT) {
     return MOBILE_LAYOUT;
   }
@@ -186,21 +195,29 @@ export function SimpleFarmGrid({
 
   const layout = useMemo(() => getGridLayout(viewportWidth), [viewportWidth]);
   const scenePalette = useMemo(() => buildScenePalette(theme), [theme]);
+  const isCompactMobile = viewportWidth < SMALL_MOBILE_BREAKPOINT;
+  const isMobile = viewportWidth < MOBILE_BREAKPOINT;
+  const safeSideInset = isCompactMobile ? 12 : isMobile ? 10 : 0;
   const sceneWidth = layout.plotSize * 3 + layout.gap * 2;
-  const sceneFrameMaxWidth = sceneWidth + (viewportWidth < MOBILE_BREAKPOINT ? 64 : 102);
-  // Camera framing only: push the cluster lower and slightly enlarge the subject area.
-  const sceneTopPadding = viewportWidth < MOBILE_BREAKPOINT
-    ? Math.round(layout.plotSize * 2.08)
-    : Math.round(layout.plotSize * 1.9);
-  const sceneBottomPadding = viewportWidth < MOBILE_BREAKPOINT
-    ? Math.round(layout.plotSize * 0.62)
-    : Math.round(layout.plotSize * 0.56);
+  const sceneFrameMaxWidth = sceneWidth + (isMobile ? 72 : 108);
+  // Responsive safe-area only: keep anchors fully visible on narrow screens.
+  const sceneTopPadding = isCompactMobile
+    ? Math.round(layout.plotSize * 1.98)
+    : isMobile
+      ? Math.round(layout.plotSize * 2.04)
+      : Math.round(layout.plotSize * 1.9);
+  const sceneBottomPadding = isCompactMobile
+    ? Math.round(layout.plotSize * 0.68)
+    : isMobile
+      ? Math.round(layout.plotSize * 0.64)
+      : Math.round(layout.plotSize * 0.56);
+  const slotOffsetScale = isCompactMobile ? 0.84 : isMobile ? 0.92 : 1;
 
   return (
     <div className="relative w-full overflow-visible" onClick={() => onActiveTooltipChange(null)}>
       <div
         className="relative mx-auto w-full overflow-visible"
-        style={{ maxWidth: sceneFrameMaxWidth }}
+        style={{ maxWidth: sceneFrameMaxWidth, paddingLeft: safeSideInset, paddingRight: safeSideInset }}
       >
         <div className="pointer-events-none absolute inset-0 overflow-hidden rounded-[var(--radius-container)]" aria-hidden="true">
           <svg
@@ -364,7 +381,7 @@ export function SimpleFarmGrid({
                     width: layout.plotSize,
                     gridColumnStart: placement.column,
                     gridRowStart: placement.row,
-                    transform: `translate(${placement.xOffset}px, ${placement.yOffset}px)`,
+                    transform: `translate(${Math.round(placement.xOffset * slotOffsetScale)}px, ${Math.round(placement.yOffset * slotOffsetScale)}px)`,
                   }}
                 >
                   <IsometricPlotShell size={layout.plotSize} state={plot ? plot.state : 'locked'}>
