@@ -45,17 +45,17 @@ const DESKTOP_VIEWPORT_WIDTH = 1024;
 const TOTAL_SLOTS = 7;
 
 const MOBILE_LAYOUT: GridLayout = {
-  gap: 8,
+  gap: 6,
   plotSize: 96,
 };
 
 const TABLET_LAYOUT: GridLayout = {
-  gap: 12,
+  gap: 10,
   plotSize: 110,
 };
 
 const DESKTOP_LAYOUT: GridLayout = {
-  gap: 14,
+  gap: 12,
   plotSize: 128,
 };
 
@@ -79,6 +79,8 @@ function getGridLayout(viewportWidth: number): GridLayout {
 interface SlotPlacement {
   column: 1 | 2 | 3;
   row: 1 | 2 | 3 | 4 | 5;
+  xOffset: number;
+  yOffset: number;
 }
 
 interface ScenePalette {
@@ -107,13 +109,13 @@ interface ScenePalette {
 }
 
 const PORTRAIT_SLOT_PLACEMENTS: SlotPlacement[] = [
-  { column: 2, row: 1 },
-  { column: 1, row: 2 },
-  { column: 3, row: 2 },
-  { column: 2, row: 3 },
-  { column: 1, row: 4 },
-  { column: 3, row: 4 },
-  { column: 2, row: 5 },
+  { column: 2, row: 1, xOffset: 0, yOffset: 0 },
+  { column: 1, row: 2, xOffset: 8, yOffset: -4 },
+  { column: 3, row: 2, xOffset: -8, yOffset: -4 },
+  { column: 2, row: 3, xOffset: 0, yOffset: -8 },
+  { column: 1, row: 4, xOffset: 14, yOffset: -12 },
+  { column: 3, row: 4, xOffset: -14, yOffset: -12 },
+  { column: 2, row: 5, xOffset: 0, yOffset: -18 },
 ];
 
 function buildScenePalette(theme: ThemeColors): ScenePalette {
@@ -362,6 +364,7 @@ export function SimpleFarmGrid({
                     width: layout.plotSize,
                     gridColumnStart: placement.column,
                     gridRowStart: placement.row,
+                    transform: `translate(${placement.xOffset}px, ${placement.yOffset}px)`,
                   }}
                 >
                   <IsometricPlotShell size={layout.plotSize} state={plot ? plot.state : 'locked'}>

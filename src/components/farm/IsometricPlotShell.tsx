@@ -122,9 +122,9 @@ export function IsometricPlotShell({ size, state, children }: IsometricPlotShell
   const gradientId = useId().replace(/:/g, '');
   const palette = PALETTES[state];
 
-  const topHeight = Math.round(size * 0.6);
+  const topHeight = Math.round(size * 0.56);
   const halfTopHeight = topHeight / 2;
-  const depth = Math.max(7, Math.round(size * 0.14));
+  const depth = Math.max(6, Math.round(size * 0.12));
   const shadowPad = Math.max(10, Math.round(size * 0.15));
   const shellHeight = topHeight + depth + shadowPad;
 
