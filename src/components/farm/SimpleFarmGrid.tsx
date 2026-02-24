@@ -46,22 +46,22 @@ const DESKTOP_VIEWPORT_WIDTH = 1024;
 const TOTAL_SLOTS = 7;
 
 const COMPACT_MOBILE_LAYOUT: GridLayout = {
-  gap: 5,
+  gap: 4,
   plotSize: 88,
 };
 
 const MOBILE_LAYOUT: GridLayout = {
-  gap: 6,
+  gap: 5,
   plotSize: 96,
 };
 
 const TABLET_LAYOUT: GridLayout = {
-  gap: 10,
+  gap: 8,
   plotSize: 110,
 };
 
 const DESKTOP_LAYOUT: GridLayout = {
-  gap: 12,
+  gap: 10,
   plotSize: 128,
 };
 
@@ -119,12 +119,12 @@ interface ScenePalette {
 
 const PORTRAIT_SLOT_PLACEMENTS: SlotPlacement[] = [
   { column: 2, row: 1, xOffset: 0, yOffset: 0 },
-  { column: 1, row: 2, xOffset: 8, yOffset: -4 },
-  { column: 3, row: 2, xOffset: -8, yOffset: -4 },
-  { column: 2, row: 3, xOffset: 0, yOffset: -8 },
-  { column: 1, row: 4, xOffset: 14, yOffset: -12 },
-  { column: 3, row: 4, xOffset: -14, yOffset: -12 },
-  { column: 2, row: 5, xOffset: 0, yOffset: -18 },
+  { column: 1, row: 2, xOffset: 12, yOffset: -8 },
+  { column: 3, row: 2, xOffset: -12, yOffset: -8 },
+  { column: 2, row: 3, xOffset: 0, yOffset: -14 },
+  { column: 1, row: 4, xOffset: 20, yOffset: -22 },
+  { column: 3, row: 4, xOffset: -20, yOffset: -22 },
+  { column: 2, row: 5, xOffset: 0, yOffset: -30 },
 ];
 
 function buildScenePalette(theme: ThemeColors): ScenePalette {
@@ -202,15 +202,15 @@ export function SimpleFarmGrid({
   const sceneFrameMaxWidth = sceneWidth + (isMobile ? 72 : 108);
   // Responsive safe-area only: keep anchors fully visible on narrow screens.
   const sceneTopPadding = isCompactMobile
-    ? Math.round(layout.plotSize * 1.98)
+    ? Math.round(layout.plotSize * 2.22)
     : isMobile
-      ? Math.round(layout.plotSize * 2.04)
-      : Math.round(layout.plotSize * 1.9);
+      ? Math.round(layout.plotSize * 2.26)
+      : Math.round(layout.plotSize * 2.08);
   const sceneBottomPadding = isCompactMobile
-    ? Math.round(layout.plotSize * 0.68)
+    ? Math.round(layout.plotSize * 0.62)
     : isMobile
-      ? Math.round(layout.plotSize * 0.64)
-      : Math.round(layout.plotSize * 0.56);
+      ? Math.round(layout.plotSize * 0.6)
+      : Math.round(layout.plotSize * 0.52);
   const slotOffsetScale = isCompactMobile ? 0.84 : isMobile ? 0.92 : 1;
 
   return (
