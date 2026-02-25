@@ -677,8 +677,32 @@ export interface FarmStorage {
   stolenRecords: StolenRecord[]; // 用于追回机制
 }
 
+const DEFAULT_SHOWCASE_PLOTS: Plot[] = Array.from({ length: 7 }, (_, id) => {
+  const base = createEmptyPlot(id);
+  if (id === 2 || id === 3 || id === 6) {
+    return {
+      ...base,
+      state: 'mature',
+      varietyId: 'jade-stripe',
+      seedQuality: 'normal',
+      progress: 1,
+    };
+  }
+  if (id === 1 || id === 5) {
+    return {
+      ...base,
+      state: 'growing',
+      varietyId: 'jade-stripe',
+      seedQuality: 'normal',
+      progress: 0.46,
+      accumulatedMinutes: 4600,
+    };
+  }
+  return base;
+});
+
 export const DEFAULT_FARM_STORAGE: FarmStorage = {
-  plots: [0, 1, 2, 3].map(createEmptyPlot),
+  plots: DEFAULT_SHOWCASE_PLOTS,
   collection: [],
   lastActiveDate: '',
   consecutiveInactiveDays: 0,
