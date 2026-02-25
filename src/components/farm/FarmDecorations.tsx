@@ -59,6 +59,62 @@ function BarnIcon({ className = 'h-[54px] w-[72px] sm:h-[64px] sm:w-[84px] md:h-
   );
 }
 
+function TopLeftHouseIcon({ className = 'h-[58px] w-[78px] sm:h-[70px] sm:w-[92px] md:h-[84px] md:w-[108px]' }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 176 152" className={className} strokeLinejoin="round" strokeLinecap="round">
+      <ellipse cx="86" cy="136" rx="56" ry="10" fill={SHADOW} />
+      <rect x="36" y="66" width="102" height="62" rx="14" fill="#f3b067" stroke={STROKE} strokeWidth={STROKE_MAIN_WIDTH} />
+      <rect x="56" y="46" width="66" height="34" rx="10" fill="#f7c384" stroke={STROKE} strokeWidth={STROKE_MAIN_WIDTH} />
+      <path d="M26 72 L88 30 L150 72 L142 82 L88 46 L34 82 Z" fill="#f0894f" stroke={STROKE} strokeWidth={STROKE_MAIN_WIDTH} />
+      <rect x="118" y="34" width="14" height="22" rx="3" fill="#9d6b4a" stroke={STROKE} strokeWidth={STROKE_DETAIL_WIDTH} />
+      <path d="M125 26 C122 21 123 16 128 12" fill="none" stroke="#e7d9c8" strokeWidth={STROKE_DETAIL_WIDTH} />
+      <rect x="74" y="84" width="24" height="44" rx="6" fill="#bd8254" stroke={STROKE} strokeWidth={STROKE_MAIN_WIDTH} />
+      <rect x="48" y="84" width="18" height="18" rx="4" fill="#d8edfb" stroke={STROKE} strokeWidth={STROKE_DETAIL_WIDTH} />
+      <rect x="110" y="84" width="18" height="18" rx="4" fill="#d8edfb" stroke={STROKE} strokeWidth={STROKE_DETAIL_WIDTH} />
+      <circle cx="94" cy="106" r="2" fill="#f9edd8" />
+    </svg>
+  );
+}
+
+function TopRightBarnIcon({ className = 'h-[60px] w-[80px] sm:h-[72px] sm:w-[94px] md:h-[86px] md:w-[112px]' }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 186 160" className={className} strokeLinejoin="round" strokeLinecap="round">
+      <ellipse cx="92" cy="142" rx="58" ry="10" fill={SHADOW} />
+      <path d="M30 88 C30 55 58 36 93 36 C128 36 156 55 156 88 L156 126 L30 126 Z" fill="#d75a4f" stroke={STROKE} strokeWidth={STROKE_MAIN_WIDTH} />
+      <path d="M40 88 C40 61 62 48 93 48 C124 48 146 61 146 88" fill="#c8483d" stroke={STROKE} strokeWidth={STROKE_MAIN_WIDTH} />
+      <rect x="80" y="82" width="26" height="44" rx="6" fill="#a5473f" stroke={STROKE} strokeWidth={STROKE_MAIN_WIDTH} />
+      <line x1="93" y1="82" x2="93" y2="126" stroke="#d78f88" strokeWidth={STROKE_DETAIL_WIDTH} />
+      <rect x="50" y="84" width="16" height="16" rx="4" fill="#f8ebc8" stroke={STROKE} strokeWidth={STROKE_DETAIL_WIDTH} />
+      <rect x="122" y="84" width="16" height="16" rx="4" fill="#f8ebc8" stroke={STROKE} strokeWidth={STROKE_DETAIL_WIDTH} />
+    </svg>
+  );
+}
+
+function CrateIcon({ className = 'h-[22px] w-[26px] sm:h-[26px] sm:w-[32px] md:h-[30px] md:w-[36px]' }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 90 82" className={className} strokeLinejoin="round" strokeLinecap="round">
+      <ellipse cx="45" cy="74" rx="24" ry="5" fill={SHADOW} />
+      <rect x="20" y="26" width="50" height="42" rx="6" fill="#c48b51" stroke={STROKE} strokeWidth={STROKE_DETAIL_WIDTH} />
+      <line x1="20" y1="40" x2="70" y2="40" stroke="#a87443" strokeWidth={STROKE_DETAIL_WIDTH} />
+      <line x1="35" y1="26" x2="35" y2="68" stroke="#a87443" strokeWidth={STROKE_DETAIL_WIDTH} />
+      <line x1="55" y1="26" x2="55" y2="68" stroke="#a87443" strokeWidth={STROKE_DETAIL_WIDTH} />
+    </svg>
+  );
+}
+
+function ChickIcon({ className = 'h-[20px] w-[22px] sm:h-[24px] sm:w-[26px] md:h-[28px] md:w-[30px]' }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 82 76" className={className} strokeLinejoin="round" strokeLinecap="round">
+      <ellipse cx="41" cy="68" rx="20" ry="5" fill={SHADOW} />
+      <circle cx="40" cy="42" r="18" fill="#ffd86a" stroke={STROKE} strokeWidth={STROKE_DETAIL_WIDTH} />
+      <circle cx="35" cy="38" r="2" fill="#5b463c" />
+      <circle cx="46" cy="38" r="2" fill="#5b463c" />
+      <path d="M37 47 Q40 50 43 47" stroke="#5b463c" strokeWidth={STROKE_DETAIL_WIDTH} fill="none" />
+      <path d="M58 44 L68 40 L58 36 Z" fill="#f59e0b" stroke={STROKE} strokeWidth="1" />
+    </svg>
+  );
+}
+
 interface FenceSegmentProps {
   mirrored?: boolean;
 }
@@ -171,11 +227,17 @@ export function FarmDecorations() {
         <FenceSegment mirrored />
       </div>
 
-      <div className="absolute left-[1.4%] top-[33.8%] z-[10] opacity-88 drop-shadow-[0_3px_6px_rgba(74,114,56,0.18)]">
-        <HouseIcon roof="red" />
+      <div className="absolute left-[1.2%] top-[32.4%] z-[10] opacity-90 drop-shadow-[0_3px_6px_rgba(74,114,56,0.18)]">
+        <TopLeftHouseIcon />
       </div>
-      <div className="absolute right-[1.4%] top-[33.4%] z-[10] opacity-88 drop-shadow-[0_3px_6px_rgba(74,114,56,0.18)]">
-        <BarnIcon />
+      <div className="absolute right-[1.2%] top-[32.2%] z-[10] opacity-90 drop-shadow-[0_3px_6px_rgba(74,114,56,0.18)]">
+        <TopRightBarnIcon />
+      </div>
+      <div className="absolute right-[9.8%] top-[39.6%] z-[11] opacity-86">
+        <CrateIcon />
+      </div>
+      <div className="absolute right-[7.4%] top-[41%] z-[12] opacity-90">
+        <ChickIcon />
       </div>
       <div className="absolute left-[2.6%] bottom-[3.2%] z-[11] opacity-74 drop-shadow-[0_3px_5px_rgba(74,114,56,0.16)]">
         <BarnIcon className="h-[42px] w-[56px] sm:h-[50px] sm:w-[66px] md:h-[60px] md:w-[78px]" />

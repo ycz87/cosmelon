@@ -69,7 +69,7 @@ function seedFarmStateScript(taskId) {
     const now = Date.UTC(2026, 1, 24, 12, 0, 0, 0);
     const day = new Date(now).toISOString().slice(0, 10);
     const plotCount = taskId === 'E-001-T11' ? 7 : 4;
-    const plots = Array.from({ length: plotCount }, (_, id) => ({
+    const basePlots = Array.from({ length: plotCount }, (_, id) => ({
       id,
       state: 'empty',
       progress: 0,
@@ -80,6 +80,35 @@ function seedFarmStateScript(taskId) {
       lastActivityTimestamp: 0,
       hasTracker: false,
     }));
+
+    const plots = taskId === 'E-001-T11'
+      ? basePlots.map((plot, index) => {
+        if (index === 0 || index === 3 || index === 6) {
+          return {
+            ...plot,
+            state: 'mature',
+            progress: 1,
+            varietyId: 'jade-stripe',
+            seedQuality: 'normal',
+            plantedDate: day,
+            lastUpdateDate: day,
+          };
+        }
+        if (index === 1 || index === 4) {
+          return {
+            ...plot,
+            state: 'growing',
+            progress: 0.45,
+            accumulatedMinutes: 4600,
+            varietyId: 'jade-stripe',
+            seedQuality: 'normal',
+            plantedDate: day,
+            lastUpdateDate: day,
+          };
+        }
+        return plot;
+      })
+      : basePlots;
 
     localStorage.clear();
     localStorage.setItem('pomodoro-guide-seen', '1');

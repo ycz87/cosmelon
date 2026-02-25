@@ -118,13 +118,13 @@ interface ScenePalette {
 }
 
 const PORTRAIT_SLOT_PLACEMENTS: SlotPlacement[] = [
-  { column: 2, row: 1, xOffset: 0, yOffset: 0 },
-  { column: 1, row: 2, xOffset: 18, yOffset: -12 },
-  { column: 3, row: 2, xOffset: -18, yOffset: -12 },
-  { column: 2, row: 3, xOffset: 0, yOffset: -22 },
-  { column: 1, row: 4, xOffset: 30, yOffset: -36 },
-  { column: 3, row: 4, xOffset: -30, yOffset: -36 },
-  { column: 2, row: 5, xOffset: 0, yOffset: -48 },
+  { column: 2, row: 1, xOffset: -5, yOffset: 0 },
+  { column: 1, row: 2, xOffset: 21, yOffset: -13 },
+  { column: 3, row: 2, xOffset: -15, yOffset: -10 },
+  { column: 2, row: 3, xOffset: 9, yOffset: -25 },
+  { column: 1, row: 4, xOffset: 34, yOffset: -38 },
+  { column: 3, row: 4, xOffset: -25, yOffset: -34 },
+  { column: 2, row: 5, xOffset: -8, yOffset: -52 },
 ];
 
 function buildScenePalette(theme: ThemeColors): ScenePalette {

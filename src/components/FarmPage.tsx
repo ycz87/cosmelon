@@ -984,7 +984,7 @@ export function PlotCard({ plot, weather, stolenRecord, nowTimestamp, theme, t, 
           >
             <div className="relative h-[3.15rem] w-[4.1rem]">
               <span
-                className="absolute left-[8%] top-[18%] text-[clamp(1.7rem,5.2vw,2.25rem)]"
+                className="absolute left-[4%] top-[20%] text-[clamp(1.5rem,4.7vw,2.05rem)]"
                 style={{
                   animation: 'farmMaturePulse 1.7s ease-in-out infinite',
                   filter: 'drop-shadow(0 2px 1px rgba(0,0,0,0.28))',
@@ -993,19 +993,28 @@ export function PlotCard({ plot, weather, stolenRecord, nowTimestamp, theme, t, 
                 {variety.emoji}
               </span>
               <span
-                className="absolute right-[8%] top-[18%] text-[clamp(1.7rem,5.2vw,2.25rem)]"
+                className="absolute right-[4%] top-[20%] text-[clamp(1.5rem,4.7vw,2.05rem)]"
                 style={{
-                  animation: 'farmMaturePulse 1.7s ease-in-out 140ms infinite',
+                  animation: 'farmMaturePulse 1.7s ease-in-out 120ms infinite',
                   filter: 'drop-shadow(0 2px 1px rgba(0,0,0,0.28))',
                 }}
               >
                 {variety.emoji}
               </span>
               <span
-                className="absolute left-1/2 top-[3%] -translate-x-1/2 text-[clamp(2.1rem,6.5vw,2.95rem)]"
+                className="absolute left-[19%] top-[2%] text-[clamp(1.6rem,5.1vw,2.2rem)]"
                 style={{
-                  animation: 'farmMaturePulse 1.45s ease-in-out infinite',
-                  filter: 'drop-shadow(0 3px 1px rgba(0,0,0,0.33))',
+                  animation: 'farmMaturePulse 1.55s ease-in-out 60ms infinite',
+                  filter: 'drop-shadow(0 3px 1px rgba(0,0,0,0.31))',
+                }}
+              >
+                {variety.emoji}
+              </span>
+              <span
+                className="absolute right-[19%] top-[2%] text-[clamp(1.6rem,5.1vw,2.2rem)]"
+                style={{
+                  animation: 'farmMaturePulse 1.55s ease-in-out 180ms infinite',
+                  filter: 'drop-shadow(0 3px 1px rgba(0,0,0,0.31))',
                 }}
               >
                 {variety.emoji}
