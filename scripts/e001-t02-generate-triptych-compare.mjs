@@ -83,7 +83,7 @@ function seedFarmStateScript(taskId) {
 
     const plots = taskId === 'E-001-T11'
       ? basePlots.map((plot, index) => {
-        if (index === 0 || index === 3 || index === 6) {
+        if (index === 1 || index === 4) {
           return {
             ...plot,
             state: 'mature',
@@ -94,7 +94,7 @@ function seedFarmStateScript(taskId) {
             lastUpdateDate: day,
           };
         }
-        if (index === 1 || index === 4) {
+        if (index === 0 || index === 3 || index === 6) {
           return {
             ...plot,
             state: 'growing',

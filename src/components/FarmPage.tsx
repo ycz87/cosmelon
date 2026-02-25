@@ -982,38 +982,38 @@ export function PlotCard({ plot, weather, stolenRecord, nowTimestamp, theme, t, 
             }}
             className="absolute inset-0 flex flex-col items-center justify-center px-3 py-3 text-center transition-all duration-200 ease-out hover:-translate-y-0.5"
           >
-            <div className="relative h-[3.15rem] w-[4.1rem]">
+            <div className="relative h-[3.4rem] w-[4.4rem]">
               <span
-                className="absolute left-[4%] top-[20%] text-[clamp(1.5rem,4.7vw,2.05rem)]"
+                className="absolute left-[3%] top-[2%] text-[clamp(1.55rem,4.8vw,2.1rem)]"
                 style={{
-                  animation: 'farmMaturePulse 1.7s ease-in-out infinite',
-                  filter: 'drop-shadow(0 2px 1px rgba(0,0,0,0.28))',
-                }}
-              >
-                {variety.emoji}
-              </span>
-              <span
-                className="absolute right-[4%] top-[20%] text-[clamp(1.5rem,4.7vw,2.05rem)]"
-                style={{
-                  animation: 'farmMaturePulse 1.7s ease-in-out 120ms infinite',
-                  filter: 'drop-shadow(0 2px 1px rgba(0,0,0,0.28))',
-                }}
-              >
-                {variety.emoji}
-              </span>
-              <span
-                className="absolute left-[19%] top-[2%] text-[clamp(1.6rem,5.1vw,2.2rem)]"
-                style={{
-                  animation: 'farmMaturePulse 1.55s ease-in-out 60ms infinite',
+                  animation: 'farmMaturePulse 1.65s ease-in-out infinite',
                   filter: 'drop-shadow(0 3px 1px rgba(0,0,0,0.31))',
                 }}
               >
                 {variety.emoji}
               </span>
               <span
-                className="absolute right-[19%] top-[2%] text-[clamp(1.6rem,5.1vw,2.2rem)]"
+                className="absolute right-[3%] top-[2%] text-[clamp(1.55rem,4.8vw,2.1rem)]"
                 style={{
-                  animation: 'farmMaturePulse 1.55s ease-in-out 180ms infinite',
+                  animation: 'farmMaturePulse 1.65s ease-in-out 120ms infinite',
+                  filter: 'drop-shadow(0 3px 1px rgba(0,0,0,0.31))',
+                }}
+              >
+                {variety.emoji}
+              </span>
+              <span
+                className="absolute left-[3%] bottom-[2%] text-[clamp(1.55rem,4.8vw,2.1rem)]"
+                style={{
+                  animation: 'farmMaturePulse 1.65s ease-in-out 60ms infinite',
+                  filter: 'drop-shadow(0 3px 1px rgba(0,0,0,0.31))',
+                }}
+              >
+                {variety.emoji}
+              </span>
+              <span
+                className="absolute right-[3%] bottom-[2%] text-[clamp(1.55rem,4.8vw,2.1rem)]"
+                style={{
+                  animation: 'farmMaturePulse 1.65s ease-in-out 180ms infinite',
                   filter: 'drop-shadow(0 3px 1px rgba(0,0,0,0.31))',
                 }}
               >

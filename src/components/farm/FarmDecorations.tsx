@@ -59,7 +59,7 @@ function BarnIcon({ className = 'h-[54px] w-[72px] sm:h-[64px] sm:w-[84px] md:h-
   );
 }
 
-function TopLeftHouseIcon({ className = 'h-[58px] w-[78px] sm:h-[70px] sm:w-[92px] md:h-[84px] md:w-[108px]' }: { className?: string }) {
+function TopLeftHouseIcon({ className = 'h-[74px] w-[98px] sm:h-[88px] sm:w-[116px] md:h-[108px] md:w-[140px]' }: { className?: string }) {
   return (
     <svg viewBox="0 0 176 152" className={className} strokeLinejoin="round" strokeLinecap="round">
       <ellipse cx="86" cy="136" rx="56" ry="10" fill={SHADOW} />
@@ -76,7 +76,7 @@ function TopLeftHouseIcon({ className = 'h-[58px] w-[78px] sm:h-[70px] sm:w-[92p
   );
 }
 
-function TopRightBarnIcon({ className = 'h-[60px] w-[80px] sm:h-[72px] sm:w-[94px] md:h-[86px] md:w-[112px]' }: { className?: string }) {
+function TopRightBarnIcon({ className = 'h-[76px] w-[100px] sm:h-[92px] sm:w-[118px] md:h-[110px] md:w-[144px]' }: { className?: string }) {
   return (
     <svg viewBox="0 0 186 160" className={className} strokeLinejoin="round" strokeLinecap="round">
       <ellipse cx="92" cy="142" rx="58" ry="10" fill={SHADOW} />
@@ -90,7 +90,7 @@ function TopRightBarnIcon({ className = 'h-[60px] w-[80px] sm:h-[72px] sm:w-[94p
   );
 }
 
-function CrateIcon({ className = 'h-[22px] w-[26px] sm:h-[26px] sm:w-[32px] md:h-[30px] md:w-[36px]' }: { className?: string }) {
+function CrateIcon({ className = 'h-[30px] w-[36px] sm:h-[36px] sm:w-[44px] md:h-[44px] md:w-[52px]' }: { className?: string }) {
   return (
     <svg viewBox="0 0 90 82" className={className} strokeLinejoin="round" strokeLinecap="round">
       <ellipse cx="45" cy="74" rx="24" ry="5" fill={SHADOW} />
@@ -102,7 +102,7 @@ function CrateIcon({ className = 'h-[22px] w-[26px] sm:h-[26px] sm:w-[32px] md:h
   );
 }
 
-function ChickIcon({ className = 'h-[20px] w-[22px] sm:h-[24px] sm:w-[26px] md:h-[28px] md:w-[30px]' }: { className?: string }) {
+function ChickIcon({ className = 'h-[28px] w-[32px] sm:h-[34px] sm:w-[38px] md:h-[40px] md:w-[46px]' }: { className?: string }) {
   return (
     <svg viewBox="0 0 82 76" className={className} strokeLinejoin="round" strokeLinecap="round">
       <ellipse cx="41" cy="68" rx="20" ry="5" fill={SHADOW} />
@@ -227,16 +227,16 @@ export function FarmDecorations() {
         <FenceSegment mirrored />
       </div>
 
-      <div className="absolute left-[1.2%] top-[32.4%] z-[10] opacity-90 drop-shadow-[0_3px_6px_rgba(74,114,56,0.18)]">
+      <div className="absolute left-[0.3%] top-[29.6%] z-[10] opacity-95 drop-shadow-[0_5px_8px_rgba(74,114,56,0.2)]">
         <TopLeftHouseIcon />
       </div>
-      <div className="absolute right-[1.2%] top-[32.2%] z-[10] opacity-90 drop-shadow-[0_3px_6px_rgba(74,114,56,0.18)]">
+      <div className="absolute right-[0.1%] top-[29.2%] z-[10] opacity-95 drop-shadow-[0_5px_8px_rgba(74,114,56,0.2)]">
         <TopRightBarnIcon />
       </div>
-      <div className="absolute right-[9.8%] top-[39.6%] z-[11] opacity-86">
+      <div className="absolute right-[10.6%] top-[40%] z-[12] opacity-95">
         <CrateIcon />
       </div>
-      <div className="absolute right-[7.4%] top-[41%] z-[12] opacity-90">
+      <div className="absolute right-[6.8%] top-[41.8%] z-[13] opacity-96">
         <ChickIcon />
       </div>
       <div className="absolute left-[2.6%] bottom-[3.2%] z-[11] opacity-74 drop-shadow-[0_3px_5px_rgba(74,114,56,0.16)]">
