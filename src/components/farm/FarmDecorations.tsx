@@ -213,7 +213,7 @@ function FlowerPatch({ className = 'h-[12px] w-[28px] sm:h-[14px] sm:w-[32px] md
 
 export function FarmDecorations() {
   return (
-    <div className="pointer-events-none absolute inset-0 z-[8] overflow-hidden" aria-hidden="true">
+    <div className="pointer-events-none absolute inset-0 z-[11] overflow-hidden" aria-hidden="true">
       {/* ── Fences (mid-field) ── */}
       <div className="absolute left-[4.6%] top-[46%] z-[9] opacity-78">
         <FenceSegment />
@@ -245,14 +245,14 @@ export function FarmDecorations() {
         <ChickIcon className="h-[34px] w-[40px] sm:h-[42px] sm:w-[48px] md:h-[50px] md:w-[58px]" />
       </div>
 
-      {/* ── Bottom corners: strong visible cut-edge framing (desktop priority) ── */}
-      <div className="absolute left-[-9%] sm:left-[-11%] md:left-[-13%] bottom-[3%] sm:bottom-[2%] md:bottom-[1%] z-[15] opacity-92 drop-shadow-[0_7px_13px_rgba(74,114,56,0.3)]">
-        <BarnIcon className="h-[132px] w-[174px] sm:h-[164px] sm:w-[216px] md:h-[246px] md:w-[324px]" />
+      {/* ── Bottom corners: aggressive cut-edge framing (desktop-first) ── */}
+      <div className="absolute left-[-4%] sm:left-[-6%] md:left-[-8%] bottom-[10%] sm:bottom-[8.8%] md:bottom-[7.4%] z-[16] opacity-94 drop-shadow-[0_8px_14px_rgba(74,114,56,0.32)]">
+        <BarnIcon className="h-[150px] w-[198px] sm:h-[184px] sm:w-[242px] md:h-[286px] md:w-[376px]" />
       </div>
-      <div className="absolute right-[-9%] sm:right-[-11%] md:right-[-13%] bottom-[3.2%] sm:bottom-[2.2%] md:bottom-[1.2%] z-[15] opacity-92 drop-shadow-[0_7px_13px_rgba(74,114,56,0.3)]">
+      <div className="absolute right-[-4%] sm:right-[-6%] md:right-[-8%] bottom-[10.2%] sm:bottom-[9%] md:bottom-[7.6%] z-[16] opacity-94 drop-shadow-[0_8px_14px_rgba(74,114,56,0.32)]">
         <HouseIcon
           roof="blue"
-          className="h-[126px] w-[166px] sm:h-[158px] sm:w-[206px] md:h-[236px] md:w-[310px]"
+          className="h-[144px] w-[190px] sm:h-[178px] sm:w-[234px] md:h-[276px] md:w-[362px]"
         />
       </div>
 
