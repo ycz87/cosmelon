@@ -882,66 +882,27 @@ export function PlotCard({ plot, weather: _weather, stolenRecord, nowTimestamp, 
             }}
             className="absolute inset-0 flex flex-col items-center justify-center px-3 py-3 text-center transition-all duration-200 ease-out hover:-translate-y-0.5"
           >
-            <div className="relative h-[5rem] w-full">
-              <span
-                className="absolute left-[9%] top-[8%] h-8 w-8 rounded-full"
-                style={{
-                  animation: 'farmMaturePulse 1.65s ease-in-out infinite',
-                  filter: 'drop-shadow(0 3px 2px rgba(0,0,0,0.24))',
-                  background: 'radial-gradient(circle at 32% 28%, #9be07a 0%, #4fae42 42%, #2f7c2f 100%)',
-                  border: '2px solid #2d6f2a',
-                }}
-              >
-                <span className="absolute inset-[20%] rounded-full opacity-55" style={{ background: 'repeating-linear-gradient(90deg, rgba(30,94,37,0.86) 0px, rgba(30,94,37,0.86) 2px, rgba(0,0,0,0) 2px, rgba(0,0,0,0) 6px)' }} />
-              </span>
-              <span
-                className="absolute right-[9%] top-[8%] h-8 w-8 rounded-full"
-                style={{
-                  animation: 'farmMaturePulse 1.65s ease-in-out 120ms infinite',
-                  filter: 'drop-shadow(0 3px 2px rgba(0,0,0,0.24))',
-                  background: 'radial-gradient(circle at 32% 28%, #9be07a 0%, #4fae42 42%, #2f7c2f 100%)',
-                  border: '2px solid #2d6f2a',
-                }}
-              >
-                <span className="absolute inset-[20%] rounded-full opacity-55" style={{ background: 'repeating-linear-gradient(90deg, rgba(30,94,37,0.86) 0px, rgba(30,94,37,0.86) 2px, rgba(0,0,0,0) 2px, rgba(0,0,0,0) 6px)' }} />
-              </span>
-              <span
-                className="absolute left-[9%] bottom-[8%] h-8 w-8 rounded-full"
-                style={{
-                  animation: 'farmMaturePulse 1.65s ease-in-out 60ms infinite',
-                  filter: 'drop-shadow(0 3px 2px rgba(0,0,0,0.24))',
-                  background: 'radial-gradient(circle at 32% 28%, #9be07a 0%, #4fae42 42%, #2f7c2f 100%)',
-                  border: '2px solid #2d6f2a',
-                }}
-              >
-                <span className="absolute inset-[20%] rounded-full opacity-55" style={{ background: 'repeating-linear-gradient(90deg, rgba(30,94,37,0.86) 0px, rgba(30,94,37,0.86) 2px, rgba(0,0,0,0) 2px, rgba(0,0,0,0) 6px)' }} />
-              </span>
-              <span
-                className="absolute right-[9%] bottom-[8%] h-8 w-8 rounded-full"
-                style={{
-                  animation: 'farmMaturePulse 1.65s ease-in-out 180ms infinite',
-                  filter: 'drop-shadow(0 3px 2px rgba(0,0,0,0.24))',
-                  background: 'radial-gradient(circle at 32% 28%, #9be07a 0%, #4fae42 42%, #2f7c2f 100%)',
-                  border: '2px solid #2d6f2a',
-                }}
-              >
-                <span className="absolute inset-[20%] rounded-full opacity-55" style={{ background: 'repeating-linear-gradient(90deg, rgba(30,94,37,0.86) 0px, rgba(30,94,37,0.86) 2px, rgba(0,0,0,0) 2px, rgba(0,0,0,0) 6px)' }} />
-              </span>
+            <div className="grid h-[4.6rem] w-[4.6rem] grid-cols-2 grid-rows-2 place-items-center gap-1">
+              {[0, 120, 60, 180].map((delayMs) => (
+                <span
+                  key={delayMs}
+                  className="relative h-8 w-8 rounded-full"
+                  style={{
+                    animation: `farmMaturePulse 1.65s ease-in-out ${delayMs}ms infinite`,
+                    filter: 'drop-shadow(0 3px 2px rgba(0,0,0,0.24))',
+                    background: 'radial-gradient(circle at 32% 28%, #9be07a 0%, #4fae42 42%, #2f7c2f 100%)',
+                    border: '2px solid #2d6f2a',
+                  }}
+                >
+                  <span className="absolute inset-[20%] rounded-full opacity-55" style={{ background: 'repeating-linear-gradient(90deg, rgba(30,94,37,0.86) 0px, rgba(30,94,37,0.86) 2px, rgba(0,0,0,0) 2px, rgba(0,0,0,0) 6px)' }} />
+                </span>
+              ))}
             </div>
             {negativeStatusText && (
               <span className="mt-1 text-[10px] font-medium leading-tight" style={{ color: '#ef4444' }}>
                 {negativeStatusText}
               </span>
             )}
-            <span
-              className="mt-1 text-[0.95rem] transition-all duration-200 ease-out"
-              style={{
-                color: '#6a4a2a',
-                transform: isHovered ? 'scale(1.06)' : 'scale(1)',
-              }}
-            >
-              ✋
-            </span>
           </button>
         )}
 

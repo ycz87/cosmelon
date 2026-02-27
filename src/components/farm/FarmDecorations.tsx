@@ -245,15 +245,15 @@ export function FarmDecorations() {
         <ChickIcon className="h-[34px] w-[40px] sm:h-[42px] sm:w-[48px] md:h-[50px] md:w-[58px]" />
       </div>
 
-      {/* ── Bottom-left barn (larger and slightly lower for edge framing) ── */}
-      <div className="absolute left-[-1.2%] bottom-[-0.8%] z-[11] opacity-84 drop-shadow-[0_4px_7px_rgba(74,114,56,0.2)]">
-        <BarnIcon className="h-[70px] w-[92px] sm:h-[82px] sm:w-[108px] md:h-[96px] md:w-[126px]" />
+      {/* ── Bottom-left barn (large cut-edge framing) ── */}
+      <div className="absolute left-[-7%] bottom-[-6%] z-[11] opacity-88 drop-shadow-[0_5px_9px_rgba(74,114,56,0.24)]">
+        <BarnIcon className="h-[96px] w-[126px] sm:h-[112px] sm:w-[148px] md:h-[128px] md:w-[168px]" />
       </div>
-      {/* ── Bottom-right house (larger and slightly lower for edge framing) ── */}
-      <div className="absolute right-[-1.2%] bottom-[-0.6%] z-[11] opacity-84 drop-shadow-[0_4px_7px_rgba(74,114,56,0.2)]">
+      {/* ── Bottom-right house (large cut-edge framing) ── */}
+      <div className="absolute right-[-7%] bottom-[-5.8%] z-[11] opacity-88 drop-shadow-[0_5px_9px_rgba(74,114,56,0.24)]">
         <HouseIcon
           roof="blue"
-          className="h-[68px] w-[90px] sm:h-[80px] sm:w-[104px] md:h-[94px] md:w-[122px]"
+          className="h-[92px] w-[122px] sm:h-[108px] sm:w-[142px] md:h-[124px] md:w-[162px]"
         />
       </div>
 
