@@ -16,30 +16,27 @@ export function FarmPlotBoardV2({ plots, compactMode = false }: FarmPlotBoardV2P
     [plots],
   );
 
-  const boardWidth = compactMode ? 'min(88vw, 360px)' : 'min(70vw, 560px)';
-  const boardGap = compactMode ? 8 : 10;
+  const boardWidth = compactMode ? 'min(92vw, 620px)' : 'min(76vw, 640px)';
+  const boardGap = compactMode ? 'clamp(8px, 1.2vw, 12px)' : 'clamp(10px, 1vw, 14px)';
+  const boardPaddingClass = compactMode
+    ? 'pt-[152px] pb-4 sm:pt-16 sm:pb-6'
+    : 'pt-12 pb-10 sm:pt-14 sm:pb-12';
 
   return (
     <div
       className="relative w-full overflow-hidden"
       style={{
-        minHeight: compactMode ? '100dvh' : 'min(100dvh, 740px)',
+        minHeight: compactMode ? '100dvh' : 'min(100dvh, 760px)',
         background: 'linear-gradient(180deg, #9bd8f6 0%, #a5e8ff 34%, #9ed07a 74%, #8bbd67 100%)',
       }}
     >
-      <div
-        className="mx-auto flex w-full justify-center px-3 sm:px-4"
-        style={{
-          paddingTop: compactMode ? 'clamp(18px, 8vh, 72px)' : 'clamp(20px, 6vh, 64px)',
-          paddingBottom: compactMode ? 'clamp(72px, 18vh, 160px)' : 'clamp(32px, 10vh, 110px)',
-        }}
-      >
+      <div className={`mx-auto flex w-full justify-center px-3 sm:px-4 ${boardPaddingClass}`}>
         <div
           className="grid grid-cols-3"
           data-testid="farm-plot-board-v2"
           style={{
             width: boardWidth,
-            gap: `${boardGap}px`,
+            gap: boardGap,
           }}
         >
           {displaySlots.map((plot, index) => (
