@@ -32,6 +32,7 @@ import { getGrowthStage, isVarietyRevealed } from '../farm/growth';
 import { CollectionPage } from './CollectionPage';
 import { GeneLabPage } from './GeneLabPage';
 import { SimpleFarmGrid } from './farm/SimpleFarmGrid';
+import { FarmPlotBoardV2 } from './farm-v2/FarmPlotBoardV2';
 
 interface FarmPageProps {
   farm: FarmStorage;
@@ -139,6 +140,10 @@ export function FarmPage({
   const [showFarmHelp, setShowFarmHelp] = useState(false);
   const [activeTooltipPlotId, setActiveTooltipPlotId] = useState<number | null>(null);
   const [nowTimestamp, setNowTimestamp] = useState(() => Date.now());
+  const useFarmPlotBoardV2 = useMemo(() => {
+    if (typeof window === 'undefined') return false;
+    return new URLSearchParams(window.location.search).get('farmBoard') === 'v2';
+  }, []);
 
   // 追踪已揭晓的地块（避免重复触发动画）
   const revealedRef = useRef<Set<number>>(new Set());
@@ -357,31 +362,35 @@ export function FarmPage({
         className={`farm-page ${compactShell ? 'pt-0' : 'pt-4'}`}
         style={compactShell ? { backgroundColor: '#5a8c3a' } : undefined}
       >
-          <SimpleFarmGrid
-            compactMode={compactShell}
-            plots={farm.plots}
-            weather={weather}
-            nowTimestamp={nowTimestamp}
-            activeTooltipPlotId={activeTooltipPlotId}
-            stolenRecordByPlotId={latestStolenRecordByPlotId}
-            mutationGunCount={mutationGunCount}
-            moonDewCount={moonDewCount}
-            nectarCount={nectarCount}
-            starTrackerCount={starTrackerCount}
-            trapNetCount={trapNetCount}
-            onActiveTooltipChange={setActiveTooltipPlotId}
-            onPlant={(plotId) => {
-              if (totalPlantableSeeds > 0) setPlantingPlotId(plotId);
-              else onGoWarehouse();
-            }}
-            onHarvest={handleHarvest}
-            onClear={onClear}
-            onUseMutationGun={onUseMutationGun}
-            onUseMoonDew={onUseMoonDew}
-            onUseNectar={onUseNectar}
-            onUseStarTracker={onUseStarTracker}
-            onUseTrapNet={onUseTrapNet}
-          />
+          {useFarmPlotBoardV2 ? (
+            <FarmPlotBoardV2 compactMode={compactShell} plots={farm.plots} />
+          ) : (
+            <SimpleFarmGrid
+              compactMode={compactShell}
+              plots={farm.plots}
+              weather={weather}
+              nowTimestamp={nowTimestamp}
+              activeTooltipPlotId={activeTooltipPlotId}
+              stolenRecordByPlotId={latestStolenRecordByPlotId}
+              mutationGunCount={mutationGunCount}
+              moonDewCount={moonDewCount}
+              nectarCount={nectarCount}
+              starTrackerCount={starTrackerCount}
+              trapNetCount={trapNetCount}
+              onActiveTooltipChange={setActiveTooltipPlotId}
+              onPlant={(plotId) => {
+                if (totalPlantableSeeds > 0) setPlantingPlotId(plotId);
+                else onGoWarehouse();
+              }}
+              onHarvest={handleHarvest}
+              onClear={onClear}
+              onUseMutationGun={onUseMutationGun}
+              onUseMoonDew={onUseMoonDew}
+              onUseNectar={onUseNectar}
+              onUseStarTracker={onUseStarTracker}
+              onUseTrapNet={onUseTrapNet}
+            />
+          )}
       </div>
 
       {/* 没有种子提示 */}

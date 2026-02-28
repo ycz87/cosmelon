@@ -71,7 +71,8 @@ function seedFarmStateScript(taskId) {
     const day = new Date(now).toISOString().slice(0, 10);
     const isT11 = taskId === 'E-001-T11';
     const isT12 = taskId === 'E-001-T12';
-    const plotCount = isT11 ? 7 : isT12 ? 9 : 4;
+    const isT13 = taskId === 'E-001-T13';
+    const plotCount = isT11 ? 7 : (isT12 || isT13) ? 9 : 4;
     const basePlots = Array.from({ length: plotCount }, (_, id) => ({
       id,
       state: 'empty',
@@ -184,7 +185,10 @@ async function captureCurrentScreenshots(outputDir, taskId) {
       const context = await browser.newContext({ viewport: { width: viewport.width, height: viewport.height } });
       const page = await context.newPage();
       await page.addInitScript(seedFarmStateScript(taskId));
-      await page.goto(`${DEV_SERVER_URL}/?farmReview=1`, { waitUntil: 'networkidle' });
+      const reviewUrl = taskId === 'E-001-T13'
+        ? `${DEV_SERVER_URL}/?farmReview=1&farmBoard=v2`
+        : `${DEV_SERVER_URL}/?farmReview=1`;
+      await page.goto(reviewUrl, { waitUntil: 'networkidle' });
 
       const farmPage = page.locator('.farm-page');
       const farmVisible = await farmPage.isVisible().catch(() => false);
@@ -206,7 +210,7 @@ function buildCompareHeaderSvg(width, headerHeight, viewportName, taskId) {
   const leftCenter = Math.round(width * 0.25);
   const rightCenter = Math.round(width * 0.75);
   const dividerX = Math.round(width / 2);
-  const referenceLabel = taskId === 'E-001-T12'
+  const referenceLabel = taskId === 'E-001-T12' || taskId === 'E-001-T13'
     ? 'Reference (E-001-T12 new style)'
     : 'Reference (E-001-T01 baseline)';
   return Buffer.from(`
@@ -221,7 +225,7 @@ function buildCompareHeaderSvg(width, headerHeight, viewportName, taskId) {
 }
 
 function buildChangeMarkersSvg(totalWidth, totalHeight, viewportName, taskId, headerHeight) {
-  if (taskId !== 'E-001-T11' && taskId !== 'E-001-T12') {
+  if (taskId !== 'E-001-T11' && taskId !== 'E-001-T12' && taskId !== 'E-001-T13') {
     return null;
   }
 
@@ -252,19 +256,25 @@ function buildChangeMarkersSvg(totalWidth, totalHeight, viewportName, taskId, he
         { id: 3, x: currentLeft + 214, y: headerHeight + 612 },
       ];
 
-  const points = taskId === 'E-001-T12' ? t12Points : t11Points;
+  const points = (taskId === 'E-001-T12' || taskId === 'E-001-T13') ? t12Points : t11Points;
   const legendWidth = viewportName === 'mobile' ? 260 : 350;
   const legendX = totalWidth - legendWidth - 14;
   const legendY = headerHeight + 16;
-  const line1 = taskId === 'E-001-T12'
-    ? '1. 3x3 board + 9 plots enabled'
-    : '1. Corner props enlarged + rebalanced';
-  const line2 = taskId === 'E-001-T12'
-    ? '2. New 2D reference composition aligned'
-    : '2. Compact review shell (header removed)';
-  const line3 = taskId === 'E-001-T12'
-    ? '3. Mobile-first density + readability tuned'
-    : '3. Ground contact blend strengthened';
+  const line1 = taskId === 'E-001-T13'
+    ? '1. V2 board mounted via minimal wiring'
+    : taskId === 'E-001-T12'
+      ? '1. 3x3 board + 9 plots enabled'
+      : '1. Corner props enlarged + rebalanced';
+  const line2 = taskId === 'E-001-T13'
+    ? '2. 3x3 empty skeleton rendered'
+    : taskId === 'E-001-T12'
+      ? '2. New 2D reference composition aligned'
+      : '2. Compact review shell (header removed)';
+  const line3 = taskId === 'E-001-T13'
+    ? '3. Legacy preserved, V2 runs in parallel'
+    : taskId === 'E-001-T12'
+      ? '3. Mobile-first density + readability tuned'
+      : '3. Ground contact blend strengthened';
 
   return Buffer.from(`
     <svg width="${totalWidth}" height="${totalHeight}" xmlns="http://www.w3.org/2000/svg">
@@ -347,13 +357,13 @@ async function generateCompareArtifacts(runId, taskId) {
     await captureCurrentScreenshots(outputDir, taskId);
 
     for (const viewport of viewports) {
-      const baselinePath = taskId === 'E-001-T12'
+      const baselinePath = taskId === 'E-001-T12' || taskId === 'E-001-T13'
         ? path.join(outputDir, `${taskId}-reference-${viewport.name}.png`)
         : path.join(BASELINE_DIR, `e001-t01-baseline-${viewport.name}.png`);
       const currentPath = path.join(outputDir, `${taskId}-current-${viewport.name}.png`);
       const outputPath = path.join(outputDir, `${taskId}-compare-${viewport.name}.png`);
 
-      if (taskId === 'E-001-T12') {
+      if (taskId === 'E-001-T12' || taskId === 'E-001-T13') {
         await sharp(E001_T12_REFERENCE_PATH)
           .resize(viewport.width, viewport.height, {
             fit: 'contain',
