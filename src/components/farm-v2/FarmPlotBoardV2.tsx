@@ -127,6 +127,14 @@ function FruitTree({
   return (
     <div className="absolute z-[7]" style={wrapperStyle}>
       <div
+        className="absolute left-1/2 bottom-[2px] -translate-x-1/2 rounded-full"
+        style={{
+          width: `${26 * scale}px`,
+          height: `${6 * scale}px`,
+          background: 'radial-gradient(circle at center, rgba(92,133,64,0.58) 0%, rgba(92,133,64,0.2) 60%, rgba(0,0,0,0) 100%)',
+        }}
+      />
+      <div
         className="absolute left-1/2 bottom-0 -translate-x-1/2 rounded-full"
         style={{
           width: `${8 * scale}px`,
@@ -178,6 +186,12 @@ function Cottage({ left, top }: { left: string; top: string }) {
   return (
     <div className="absolute z-[7]" style={{ left, top, width: '58px', height: '54px' }}>
       <div
+        className="absolute left-1/2 bottom-[1px] h-[7px] w-[28px] -translate-x-1/2 rounded-full"
+        style={{
+          background: 'radial-gradient(circle at center, rgba(97,136,67,0.58) 0%, rgba(97,136,67,0.2) 60%, rgba(0,0,0,0) 100%)',
+        }}
+      />
+      <div
         className="absolute left-1/2 top-0 h-[20px] w-[40px] -translate-x-1/2"
         style={{
           clipPath: 'polygon(0% 100%, 50% 0%, 100% 100%)',
@@ -203,17 +217,40 @@ function FarmBackdropV2({ compactMode }: { compactMode: boolean }) {
         className="absolute inset-x-0 top-0 z-[1]"
         style={{
           height: compactMode ? '28%' : '27%',
-          background: 'linear-gradient(180deg, #8fd4f6 0%, #b9e8fa 64%, #d8f3fb 100%)',
+          background: 'linear-gradient(180deg, #8ed3f5 0%, #b8e8fa 66%, #d9f4fb 100%)',
         }}
       />
 
-      {/* Midground layer */}
+      {/* Midground: continuous hill belt */}
       <div
         className="absolute inset-x-0 z-[2]"
         style={{
           top: compactMode ? '28%' : '27%',
           height: compactMode ? '16%' : '16%',
-          background: 'linear-gradient(180deg, #cde9c5 0%, #b6dca6 40%, #9fcb87 100%)',
+          background: 'linear-gradient(180deg, #d1ebc7 0%, #bbdea9 44%, #9fcc88 100%)',
+        }}
+      />
+
+      <div
+        className="absolute z-[4]"
+        style={{
+          left: compactMode ? '-8%' : '-6%',
+          right: compactMode ? '-8%' : '-6%',
+          top: compactMode ? '28.8%' : '28%',
+          height: compactMode ? '17.6%' : '17.2%',
+          borderRadius: '50% 50% 0 0 / 78% 78% 0 0',
+          background: 'linear-gradient(180deg, rgba(151,198,115,0.9) 0%, rgba(116,171,86,0.94) 100%)',
+        }}
+      />
+      <div
+        className="absolute z-[5]"
+        style={{
+          left: compactMode ? '10%' : '13%',
+          width: compactMode ? '76%' : '70%',
+          top: compactMode ? '30.2%' : '29.5%',
+          height: compactMode ? '13.6%' : '13.2%',
+          borderRadius: '54% 46% 0 0 / 100% 100% 0 0',
+          background: 'linear-gradient(180deg, rgba(171,212,132,0.86) 0%, rgba(126,182,94,0.88) 100%)',
         }}
       />
 
@@ -222,7 +259,7 @@ function FarmBackdropV2({ compactMode }: { compactMode: boolean }) {
         className="absolute inset-x-0 bottom-0 z-[1]"
         style={{
           top: compactMode ? '44%' : '43%',
-          background: 'linear-gradient(180deg, #a9df91 0%, #96d171 45%, #89c761 100%)',
+          background: 'linear-gradient(180deg, #a8de90 0%, #95d06f 45%, #89c761 100%)',
         }}
       />
 
@@ -255,53 +292,44 @@ function FarmBackdropV2({ compactMode }: { compactMode: boolean }) {
       <CloudCluster top="4%" right="6%" width="24%" height="11%" opacity={0.88} duration="14s" delay="-1.8s" />
 
       <div
-        className="absolute z-[4] rounded-full"
+        className="absolute z-[6]"
         style={{
-          left: compactMode ? '-6%' : '0%',
-          top: compactMode ? '29%' : '28%',
-          width: compactMode ? '50%' : '38%',
-          height: compactMode ? '15%' : '14%',
-          background: 'radial-gradient(circle at 55% 50%, rgba(151,199,117,0.76) 0%, rgba(112,165,82,0.86) 100%)',
-        }}
-      />
-      <div
-        className="absolute z-[4] rounded-full"
-        style={{
-          right: compactMode ? '-5%' : '3%',
-          top: compactMode ? '30%' : '29%',
-          width: compactMode ? '45%' : '32%',
-          height: compactMode ? '14%' : '13%',
-          background: 'radial-gradient(circle at 45% 50%, rgba(153,201,119,0.74) 0%, rgba(113,164,80,0.86) 100%)',
-        }}
-      />
-
-      <div
-        className="absolute z-[5]"
-        style={{
-          top: compactMode ? '31%' : '30.2%',
+          top: compactMode ? '31.2%' : '30.5%',
           left: '50%',
-          width: compactMode ? '42%' : '30%',
-          height: compactMode ? '12%' : '11%',
+          width: compactMode ? '38%' : '28%',
+          height: compactMode ? '11.5%' : '10.8%',
           transform: 'translateX(-50%)',
-          clipPath: 'polygon(46% 0%, 54% 0%, 80% 100%, 20% 100%)',
-          background: 'linear-gradient(180deg, rgba(231,206,148,0.78) 0%, rgba(193,148,100,0.8) 100%)',
+          clipPath: 'polygon(46% 0%, 54% 0%, 76% 100%, 24% 100%)',
+          background: 'linear-gradient(180deg, rgba(232,207,148,0.78) 0%, rgba(193,149,100,0.82) 100%)',
         }}
       />
 
-      <Cottage left={compactMode ? '2.5%' : '8%'} top={compactMode ? '31%' : '30.6%'} />
-      <FruitTree left={compactMode ? '74%' : '79%'} top={compactMode ? '30%' : '29.5%'} scale={compactMode ? 0.84 : 0.96} />
-      <FruitTree left={compactMode ? '84%' : '86%'} top={compactMode ? '31.2%' : '31%'} scale={compactMode ? 0.7 : 0.8} />
+      <Cottage left={compactMode ? '4.2%' : '10%'} top={compactMode ? '32.1%' : '31.5%'} />
+      <FruitTree left={compactMode ? '72%' : '77%'} top={compactMode ? '31.1%' : '30.8%'} scale={compactMode ? 0.88 : 0.98} />
+      <FruitTree left={compactMode ? '82.5%' : '86%'} top={compactMode ? '32.2%' : '31.8%'} scale={compactMode ? 0.76 : 0.84} />
 
+      {/* Clear fence: posts + 2 rails */}
       <div
-        className="absolute left-[8%] right-[8%] z-[7]"
-        style={{
-          top: compactMode ? '41.2%' : '40.2%',
-          height: compactMode ? '7px' : '8px',
-          opacity: 0.66,
-          background:
-            'repeating-linear-gradient(90deg, rgba(126,73,41,0.86) 0px, rgba(126,73,41,0.86) 5px, rgba(0,0,0,0) 5px, rgba(0,0,0,0) 14px)',
-        }}
-      />
+        className="absolute left-[7%] right-[7%] z-[8]"
+        style={{ top: compactMode ? '40.4%' : '39.5%', height: compactMode ? '14px' : '15px' }}
+      >
+        <div
+          className="absolute left-0 right-0 top-[1px] h-[3px] rounded-full"
+          style={{ backgroundColor: 'rgba(128,73,43,0.9)' }}
+        />
+        <div
+          className="absolute left-0 right-0 top-[7px] h-[3px] rounded-full"
+          style={{ backgroundColor: 'rgba(128,73,43,0.9)' }}
+        />
+        <div
+          className="absolute left-0 right-0 top-0 h-full"
+          style={{
+            opacity: 0.74,
+            background:
+              'repeating-linear-gradient(90deg, rgba(122,69,40,0.9) 0px, rgba(122,69,40,0.9) 3px, rgba(0,0,0,0) 3px, rgba(0,0,0,0) 12px)',
+          }}
+        />
+      </div>
 
       <div
         className="absolute inset-x-0 z-[2]"
@@ -369,7 +397,7 @@ export function FarmPlotBoardV2({
         className="relative z-20 mx-auto flex w-full justify-center px-0 sm:px-2"
         style={{
           paddingTop: compactMode ? 'clamp(168px, 31vh, 214px)' : 'clamp(146px, 22vh, 200px)',
-          paddingBottom: compactMode ? 'clamp(34px, 5vh, 56px)' : 'clamp(42px, 6vh, 70px)',
+          paddingBottom: compactMode ? 'clamp(10px, 1.8vh, 16px)' : 'clamp(12px, 2vh, 20px)',
         }}
       >
         <div className="relative" style={{ width: boardWidth }}>
