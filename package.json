@@ -28,6 +28,7 @@
     "compare:e001-t18": "node scripts/e001-t02-generate-triptych-compare.mjs --task-id=E-001-T18",
     "compare:e001-t19": "node scripts/e001-t02-generate-triptych-compare.mjs --task-id=E-001-T19",
     "compare:e001-t20": "node scripts/e001-t02-generate-triptych-compare.mjs --task-id=E-001-T20",
+    "compare:e001-t21": "node scripts/e001-t02-generate-triptych-compare.mjs --task-id=E-001-T21",
     "capture:e001-t17-entry": "node scripts/e001-t17-capture-entry-flow.mjs",
     "capture:e001-t20-motion": "node scripts/e001-t20-capture-motion.mjs"
   },

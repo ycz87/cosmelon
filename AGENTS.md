@@ -2,6 +2,16 @@
 
 > 本文件供 Codex CLI 自动加载，描述项目结构和编码约定。
 
+## 工具启动固定前置（强制）
+
+每次启动 `codex` / `claude` 子会话时，第一步先读取项目根目录下这 3 个文件：
+
+1. `PROJECT_FASTSTART.md`
+2. `CURRENT_STATE.md`
+3. `CHANGE_CONTEXT.md`
+
+读完后直接执行任务，不需要单独回执。
+
 ## 技术栈
 
 | 层 | 技术 | 版本 |

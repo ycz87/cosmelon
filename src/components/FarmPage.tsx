@@ -37,6 +37,7 @@ import { FarmPlotBoardV2 } from './farm-v2/FarmPlotBoardV2';
 interface FarmPageProps {
   farm: FarmStorage;
   geneInventory: GeneInventory;
+  coinBalance: number;
   seeds: SeedCounts;
   items: Record<ItemId, number>;
   injectedSeeds: InjectedSeed[];
@@ -74,6 +75,7 @@ interface FarmPageProps {
   onUseTrapNet: (plotId: number) => void;
   mutationDoctorSignal: number;
   onGoWarehouse: () => void;
+  onGoMarket: () => void;
   compactShell?: boolean;
 }
 
@@ -97,6 +99,7 @@ const REVEAL_RARE_PLUS_MIN_STARS = 2;
 export function FarmPage({
   farm,
   geneInventory,
+  coinBalance,
   seeds,
   items,
   injectedSeeds,
@@ -104,7 +107,7 @@ export function FarmPage({
   prismaticSeeds,
   darkMatterSeeds,
   weather,
-  todayFocusMinutes: _todayFocusMinutes,
+  todayFocusMinutes,
   todayKey,
   addSeeds,
   onPlant,
@@ -128,6 +131,7 @@ export function FarmPage({
   onUseTrapNet,
   mutationDoctorSignal: _mutationDoctorSignal,
   onGoWarehouse,
+  onGoMarket,
   compactShell = false,
 }: FarmPageProps) {
   const theme = useTheme();
@@ -178,6 +182,10 @@ export function FarmPage({
 
   const totalBaseSeeds = seeds.normal + seeds.epic + seeds.legendary;
   const totalPlantableSeeds = totalBaseSeeds + injectedSeeds.length + hybridSeeds.length + prismaticSeeds.length + darkMatterSeeds.length;
+  const harvestablePlotCount = useMemo(
+    () => farm.plots.filter((plot) => plot.state === 'mature').length,
+    [farm.plots],
+  );
   const mutationGunCount = (items as Record<string, number>)['mutation-gun'] ?? 0;
   const moonDewCount = (items as Record<string, number>)['moon-dew'] ?? 0;
   const nectarCount = (items as Record<string, number>)['nectar'] ?? 0;
@@ -338,11 +346,39 @@ export function FarmPage({
 
       {/* 农场场景 */}
       <div
-        className={`farm-page ${compactShell ? 'pt-0' : gentleV2Layout ? 'pt-1' : 'pt-4'}`}
+        className={`farm-page min-h-0 flex-1 ${compactShell ? 'pt-0' : gentleV2Layout ? 'pt-1' : 'pt-4'}`}
         style={compactShell ? { backgroundColor: '#5a8c3a' } : undefined}
       >
           {useFarmPlotBoardV2 ? (
-            <FarmPlotBoardV2 compactMode={compactShell} plots={farm.plots} />
+            <FarmPlotBoardV2
+              compactMode={compactShell}
+              plots={farm.plots}
+              todayFocusMinutes={todayFocusMinutes}
+              coinBalance={coinBalance}
+              plantableSeedCount={totalPlantableSeeds}
+              harvestablePlotCount={harvestablePlotCount}
+              navLabels={{
+                shed: t.tabWarehouse,
+                collection: t.farmCollectionTab,
+                lab: t.farmTabLab,
+                market: t.tabMarket,
+              }}
+              onNavigate={(target) => {
+                if (target === 'shed') {
+                  onGoWarehouse();
+                  return;
+                }
+                if (target === 'collection') {
+                  setSubTab('collection');
+                  return;
+                }
+                if (target === 'lab') {
+                  setSubTab('lab');
+                  return;
+                }
+                onGoMarket();
+              }}
+            />
           ) : (
             <SimpleFarmGrid
               compactMode={compactShell}

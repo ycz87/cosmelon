@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Step 6 VisualOnly Compare</title>
+  <style>
+    body { margin: 0; padding: 16px; background: #071028; color: #dbeafe; font-family: Arial, sans-serif; }
+    .title { font-size: 28px; font-weight: 800; margin-bottom: 8px; }
+    .sub { font-size: 15px; color: #9fb3d4; margin-bottom: 14px; }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; max-width: 1200px; }
+    .card { background: #101f3a; border: 1px solid #33507a; border-radius: 12px; padding: 10px; }
+    .label { font-size: 15px; margin-bottom: 8px; }
+    .frame { width: 100%; aspect-ratio: 1 / 1; overflow: hidden; border-radius: 10px; border: 2px solid #5fa8ff; position: relative; background: #0b1530; }
+    .frame img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .reference img { object-position: 50% 56%; }
+    .current img { object-position: 50% 51%; }
+    .dot {
+      position: absolute; width: 26px; height: 26px; border-radius: 50%; transform: translate(-50%, -50%);
+      background: #ef4444; color: #fff; display: flex; align-items: center; justify-content: center;
+      font-size: 14px; font-weight: 700; border: 2px solid #fff; box-shadow: 0 0 0 2px rgba(0,0,0,.25);
+    }
+    .legend { max-width: 1200px; margin-top: 12px; display: grid; grid-template-columns: repeat(5, minmax(140px, 1fr)); gap: 8px; }
+    .legend div { background: #13284a; border: 1px solid #355988; border-radius: 7px; padding: 7px 9px; font-size: 13px; }
+  </style>
+</head>
+<body>
+  <div class="title">Step 6 Final - VisualOnly Side-by-Side Compare</div>
+  <div class="sub">Same-size square crop + same anchor set for acceptance review.</div>
+
+  <div class="grid">
+    <div class="card">
+      <div class="label">Reference</div>
+      <div class="frame reference">
+        <img src="farm-step6-reference-base.jpg" alt="reference" />
+        <span class="dot" style="left:14%; top:17%;">1</span>
+        <span class="dot" style="left:56%; top:19%;">2</span>
+        <span class="dot" style="left:17%; top:64%;">3</span>
+        <span class="dot" style="left:84%; top:64%;">4</span>
+        <span class="dot" style="left:50%; top:70%;">5</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="label">Current (visualOnly=1, commit 3d047f0)</div>
+      <div class="frame current">
+        <img src="farm-step6-visualonly-full-3d047f0.png" alt="current" />
+        <span class="dot" style="left:14%; top:17%;">1</span>
+        <span class="dot" style="left:56%; top:19%;">2</span>
+        <span class="dot" style="left:17%; top:64%;">3</span>
+        <span class="dot" style="left:84%; top:64%;">4</span>
+        <span class="dot" style="left:50%; top:70%;">5</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="legend">
+    <div>1: Sun</div>
+    <div>2: Main cloud</div>
+    <div>3: Left house</div>
+    <div>4: Right barn</div>
+    <div>5: Plot cluster center</div>
+  </div>
+</body>
+</html>

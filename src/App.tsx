@@ -1757,6 +1757,7 @@ function App() {
             compactShell={farmReviewMode}
             farm={farm}
             geneInventory={geneInventory}
+            coinBalance={balance}
             seeds={shed.seeds}
             items={shed.items}
             injectedSeeds={shed.injectedSeeds}
@@ -1788,6 +1789,7 @@ function App() {
             harvestedHybridVarietyCount={harvestedHybridVarietyCount}
             fusionHistory={fusionHistory}
             onGoWarehouse={() => setActiveTab('warehouse')}
+            onGoMarket={() => setActiveTab('market')}
           />
         )}
 

@@ -2,21 +2,55 @@ import { useMemo } from 'react';
 import type { Plot } from '../../types/farm';
 import { FarmPlotTileV2, mapPlotStateToTileState } from './FarmPlotTileV2';
 
+type FarmBoardNavTarget = 'shed' | 'collection' | 'lab' | 'market';
+
+interface FarmBoardNavLabels {
+  shed: string;
+  collection: string;
+  lab: string;
+  market: string;
+}
+
 interface FarmPlotBoardV2Props {
   plots: Plot[];
   compactMode?: boolean;
+  todayFocusMinutes: number;
+  coinBalance: number;
+  plantableSeedCount: number;
+  harvestablePlotCount: number;
+  navLabels?: FarmBoardNavLabels;
+  onNavigate?: (target: FarmBoardNavTarget) => void;
 }
 
 const GRID_SIDE = 3;
 const TOTAL_PLOTS = GRID_SIDE * GRID_SIDE;
 const MOTION_CLASS = 'farm-v2-motion';
 
-function FarmHudV2({ compactMode }: { compactMode: boolean }) {
+const DEFAULT_NAV_LABELS: FarmBoardNavLabels = {
+  shed: '瓜棚',
+  collection: '图鉴',
+  lab: '实验室',
+  market: '商城',
+};
+
+function FarmHudV2({
+  compactMode,
+  todayFocusMinutes,
+  coinBalance,
+  plantableSeedCount,
+  harvestablePlotCount,
+}: {
+  compactMode: boolean;
+  todayFocusMinutes: number;
+  coinBalance: number;
+  plantableSeedCount: number;
+  harvestablePlotCount: number;
+}) {
   const badgeItems = [
-    { icon: '🏅', label: compactMode ? 'Lv12' : 'Level 12' },
-    { icon: '🪙', label: '1,580' },
-    { icon: '💎', label: '75' },
-    { icon: '❤️', label: compactMode ? '4' : 'Life 4' },
+    { icon: '⏱', label: `今日专注 ${todayFocusMinutes}m` },
+    { icon: '🪙', label: `瓜币 ${coinBalance.toLocaleString()}` },
+    { icon: '🌱', label: `可种 ${plantableSeedCount}` },
+    { icon: '🍉', label: `可收 ${harvestablePlotCount}` },
   ];
 
   return (
@@ -24,7 +58,7 @@ function FarmHudV2({ compactMode }: { compactMode: boolean }) {
       <div
         className="mx-auto flex h-10 w-full items-center justify-center gap-1.5 px-2 sm:h-11 sm:gap-2 sm:px-4"
         style={{
-          maxWidth: compactMode ? '100%' : '920px',
+          maxWidth: compactMode ? '100%' : '940px',
           borderBottom: '1px solid rgba(103,146,177,0.2)',
           background: 'linear-gradient(180deg, rgba(171,220,244,0.42) 0%, rgba(171,220,244,0.08) 100%)',
         }}
@@ -49,14 +83,21 @@ function FarmHudV2({ compactMode }: { compactMode: boolean }) {
   );
 }
 
-function FarmBottomBarV2({ compactMode }: { compactMode: boolean }) {
-  const toolButtons = [
-    { icon: '💧', label: 'Water' },
-    { icon: '🌱', label: 'Seed' },
-    { icon: '🧤', label: 'Care' },
-    { icon: '🧺', label: 'Bag' },
+function FarmBottomBarV2({
+  compactMode,
+  labels,
+  onNavigate,
+}: {
+  compactMode: boolean;
+  labels: FarmBoardNavLabels;
+  onNavigate?: (target: FarmBoardNavTarget) => void;
+}) {
+  const navButtons: Array<{ id: FarmBoardNavTarget; icon: string; label: string }> = [
+    { id: 'shed', icon: '🏠', label: labels.shed },
+    { id: 'collection', icon: '📖', label: labels.collection },
+    { id: 'lab', icon: '🧪', label: labels.lab },
+    { id: 'market', icon: '🏪', label: labels.market },
   ];
-  const navButtons = ['Shop', 'Bag', 'Tasks', 'Social'];
 
   return (
     <div className="absolute inset-x-0 bottom-0 z-40 px-2 pb-2 sm:px-4 sm:pb-3">
@@ -69,42 +110,22 @@ function FarmBottomBarV2({ compactMode }: { compactMode: boolean }) {
           boxShadow: '0 -1px 0 rgba(255,255,255,0.24) inset, 0 3px 12px rgba(47,27,12,0.2)',
         }}
       >
-        <div
-          className="flex items-center justify-center gap-1.5 px-2 py-2 sm:gap-2"
-          style={{
-            borderBottom: '2px solid rgba(126,74,42,0.58)',
-            background: 'linear-gradient(180deg, rgba(247,209,156,0.46) 0%, rgba(221,155,101,0.3) 100%)',
-          }}
-        >
-          {toolButtons.map((button) => (
-            <div
-              key={`farm-v2-tool-${button.label}`}
-              className="grid h-9 w-9 place-items-center rounded-[10px] border text-xs sm:h-10 sm:w-10"
-              style={{
-                borderColor: '#9b6037',
-                color: '#5a361a',
-                background: 'linear-gradient(180deg, #f7e8c4 0%, #edd2a2 100%)',
-              }}
-            >
-              <span>{button.icon}</span>
-            </div>
-          ))}
-        </div>
         <div className="grid grid-cols-4 gap-1 px-1.5 py-1.5">
-          {navButtons.map((label, index) => (
-            <div
-              key={`farm-v2-nav-${label}`}
-              className="rounded-[8px] border px-1 py-1 text-center text-[10px] font-semibold sm:text-xs"
+          {navButtons.map((button) => (
+            <button
+              key={`farm-v2-nav-${button.id}`}
+              type="button"
+              className="rounded-[8px] border px-1 py-1 text-center text-[10px] font-semibold transition-transform duration-150 active:scale-95 sm:text-xs"
               style={{
                 borderColor: '#8f5732',
-                color: index === 0 ? '#5d3117' : '#6f4829',
-                background: index === 0
-                  ? 'linear-gradient(180deg, #f7df99 0%, #f0c46a 100%)'
-                  : 'linear-gradient(180deg, #f0ce9f 0%, #dfae75 100%)',
+                color: '#5d3117',
+                background: 'linear-gradient(180deg, #f7df99 0%, #f0c46a 100%)',
               }}
+              onClick={() => onNavigate?.(button.id)}
             >
-              {label}
-            </div>
+              <span className="mr-1">{button.icon}</span>
+              {button.label}
+            </button>
           ))}
         </div>
       </div>
@@ -153,27 +174,41 @@ function CloudCluster({
 }
 
 function FarmBackdropV2({ compactMode }: { compactMode: boolean }) {
+  const skyHeight = compactMode ? '26%' : '25%';
+  const middleTop = compactMode ? '26%' : '25%';
+  const middleHeight = compactMode ? '15%' : '15%';
+  const fieldTop = compactMode ? '41%' : '40%';
+
   return (
     <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden">
       <div
         className="absolute inset-x-0 top-0 z-[1]"
         style={{
-          height: compactMode ? '62%' : '58%',
-          background: 'linear-gradient(180deg, #88cef2 0%, #a6e1f7 52%, #c7edf8 100%)',
+          height: skyHeight,
+          background: 'linear-gradient(180deg, #8bcff2 0%, #b0e5f8 58%, #caeef8 100%)',
+        }}
+      />
+      <div
+        className="absolute inset-x-0 z-[2]"
+        style={{
+          top: middleTop,
+          height: middleHeight,
+          background:
+            'linear-gradient(180deg, rgba(176,215,165,0.66) 0%, rgba(157,198,136,0.76) 100%), radial-gradient(circle at 18% 88%, rgba(118,173,89,0.64) 0%, rgba(0,0,0,0) 54%), radial-gradient(circle at 82% 86%, rgba(109,164,79,0.62) 0%, rgba(0,0,0,0) 54%)',
         }}
       />
       <div
         className="absolute inset-x-0 bottom-0 z-[1]"
         style={{
-          height: compactMode ? '52%' : '54%',
-          background: 'linear-gradient(180deg, #afe39f 0%, #99d477 42%, #89c760 100%)',
+          top: fieldTop,
+          background: 'linear-gradient(180deg, #aee39f 0%, #98d374 46%, #89c760 100%)',
         }}
       />
 
       <div
         className={`absolute z-[6] rounded-full ${MOTION_CLASS}`}
         style={{
-          top: compactMode ? '7.8%' : '7%',
+          top: compactMode ? '4.8%' : '4.4%',
           right: compactMode ? '11%' : '13%',
           width: compactMode ? '78px' : '96px',
           height: compactMode ? '78px' : '96px',
@@ -184,7 +219,7 @@ function FarmBackdropV2({ compactMode }: { compactMode: boolean }) {
       <div
         className={`absolute z-[7] rounded-full ${MOTION_CLASS}`}
         style={{
-          top: compactMode ? '9.6%' : '8.8%',
+          top: compactMode ? '6.6%' : '6.2%',
           right: compactMode ? '13.2%' : '14.8%',
           width: compactMode ? '44px' : '54px',
           height: compactMode ? '44px' : '54px',
@@ -194,26 +229,17 @@ function FarmBackdropV2({ compactMode }: { compactMode: boolean }) {
         }}
       />
 
-      <CloudCluster top="6%" left="7%" width="22%" height="11%" opacity={0.88} duration="13s" delay="-0.8s" />
-      <CloudCluster top="11%" left="31%" width="20%" height="10%" opacity={0.82} duration="16s" delay="-2.4s" />
-      <CloudCluster top="8%" right="7%" width="24%" height="12%" opacity={0.86} duration="14s" delay="-1.8s" />
+      <CloudCluster top="3%" left="6%" width="22%" height="10%" opacity={0.88} duration="13s" delay="-0.8s" />
+      <CloudCluster top="8%" left="32%" width="20%" height="10%" opacity={0.82} duration="16s" delay="-2.4s" />
+      <CloudCluster top="4%" right="6%" width="24%" height="11%" opacity={0.86} duration="14s" delay="-1.8s" />
 
-      <div
-        className="absolute inset-x-0 z-[3]"
-        style={{
-          top: compactMode ? '23%' : '21%',
-          height: compactMode ? '23%' : '20%',
-          background:
-            'linear-gradient(180deg, rgba(170,221,188,0.16) 0%, rgba(154,204,136,0.42) 100%), radial-gradient(circle at 17% 88%, rgba(117,171,87,0.54) 0%, rgba(0,0,0,0) 52%), radial-gradient(circle at 83% 86%, rgba(107,162,79,0.52) 0%, rgba(0,0,0,0) 52%)',
-        }}
-      />
       <div
         className="absolute z-[4] rounded-full"
         style={{
           left: compactMode ? '-4%' : '2%',
-          top: compactMode ? '28%' : '26%',
+          top: compactMode ? '24%' : '23%',
           width: compactMode ? '48%' : '34%',
-          height: compactMode ? '17%' : '14%',
+          height: compactMode ? '13%' : '11%',
           background: 'radial-gradient(circle at 55% 50%, rgba(153,194,116,0.62) 0%, rgba(110,159,82,0.78) 100%)',
         }}
       />
@@ -221,9 +247,9 @@ function FarmBackdropV2({ compactMode }: { compactMode: boolean }) {
         className="absolute z-[4] rounded-full"
         style={{
           right: compactMode ? '-5%' : '4%',
-          top: compactMode ? '29%' : '27%',
+          top: compactMode ? '25%' : '24%',
           width: compactMode ? '44%' : '30%',
-          height: compactMode ? '16%' : '13%',
+          height: compactMode ? '13%' : '10%',
           background: 'radial-gradient(circle at 45% 50%, rgba(155,199,118,0.6) 0%, rgba(113,162,80,0.78) 100%)',
         }}
       />
@@ -231,10 +257,10 @@ function FarmBackdropV2({ compactMode }: { compactMode: boolean }) {
       <div
         className="absolute z-[5]"
         style={{
-          top: compactMode ? '31.2%' : '28.8%',
+          top: compactMode ? '27%' : '26%',
           left: '50%',
           width: compactMode ? '48%' : '34%',
-          height: compactMode ? '18%' : '16%',
+          height: compactMode ? '13%' : '12%',
           transform: 'translateX(-50%)',
           clipPath: 'polygon(45% 0%, 55% 0%, 81% 100%, 19% 100%)',
           background: 'linear-gradient(180deg, rgba(230,202,141,0.78) 0%, rgba(191,145,96,0.78) 100%)',
@@ -244,7 +270,7 @@ function FarmBackdropV2({ compactMode }: { compactMode: boolean }) {
       <div
         className="absolute left-[7%] right-[7%] z-[6] rounded-full"
         style={{
-          top: compactMode ? '43.6%' : '40.3%',
+          top: compactMode ? '38.8%' : '38%',
           height: compactMode ? '14px' : '16px',
           background: 'linear-gradient(180deg, rgba(207,149,99,0.46) 0%, rgba(167,111,68,0.52) 100%)',
         }}
@@ -252,7 +278,7 @@ function FarmBackdropV2({ compactMode }: { compactMode: boolean }) {
       <div
         className="absolute left-[8%] right-[8%] z-[7]"
         style={{
-          top: compactMode ? '44.3%' : '41.2%',
+          top: compactMode ? '39.5%' : '38.9%',
           height: compactMode ? '6px' : '7px',
           opacity: 0.62,
           background:
@@ -263,7 +289,7 @@ function FarmBackdropV2({ compactMode }: { compactMode: boolean }) {
       <div
         className="absolute z-[7] rounded-[12px]"
         style={{
-          top: compactMode ? '37.3%' : '34.6%',
+          top: compactMode ? '33.4%' : '32.8%',
           left: '6%',
           width: compactMode ? '48px' : '60px',
           height: compactMode ? '34px' : '42px',
@@ -275,7 +301,7 @@ function FarmBackdropV2({ compactMode }: { compactMode: boolean }) {
       <div
         className="absolute z-[7] rounded-full"
         style={{
-          top: compactMode ? '35.2%' : '31.8%',
+          top: compactMode ? '31.2%' : '30.4%',
           right: '7%',
           width: compactMode ? '70px' : '84px',
           height: compactMode ? '58px' : '68px',
@@ -287,16 +313,16 @@ function FarmBackdropV2({ compactMode }: { compactMode: boolean }) {
       <div
         className="absolute inset-x-0 z-[2]"
         style={{
-          top: compactMode ? '46%' : '42.8%',
-          height: compactMode ? '25%' : '23%',
+          top: compactMode ? '52%' : '50%',
+          height: compactMode ? '18%' : '20%',
           background: 'linear-gradient(180deg, rgba(182,223,156,0.5) 0%, rgba(141,199,104,0.44) 100%)',
         }}
       />
       <div
         className="absolute inset-x-0 z-[2]"
         style={{
-          top: compactMode ? '57%' : '53%',
-          height: compactMode ? '43%' : '47%',
+          top: compactMode ? '62%' : '60%',
+          height: compactMode ? '38%' : '40%',
           background:
             'linear-gradient(180deg, rgba(158,212,119,0.3) 0%, rgba(131,194,86,0.5) 100%), repeating-linear-gradient(0deg, rgba(123,182,78,0.08) 0px, rgba(123,182,78,0.08) 22px, rgba(0,0,0,0) 22px, rgba(0,0,0,0) 56px)',
         }}
@@ -363,15 +389,24 @@ function FarmBoardSceneDecorV2({ compactMode }: { compactMode: boolean }) {
   );
 }
 
-export function FarmPlotBoardV2({ plots, compactMode = false }: FarmPlotBoardV2Props) {
+export function FarmPlotBoardV2({
+  plots,
+  compactMode = false,
+  todayFocusMinutes,
+  coinBalance,
+  plantableSeedCount,
+  harvestablePlotCount,
+  navLabels,
+  onNavigate,
+}: FarmPlotBoardV2Props) {
   const displaySlots = useMemo(
     () => Array.from({ length: TOTAL_PLOTS }, (_, index) => plots[index] ?? null),
     [plots],
   );
 
   const boardWidth = compactMode
-    ? 'min(100vw, calc(100dvh - 260px), 446px)'
-    : 'min(91vw, 840px)';
+    ? 'min(96vw, 480px)'
+    : 'min(90vw, 860px)';
   const boardGap = compactMode ? 'clamp(6px, 1vw, 9px)' : 'clamp(8px, 0.8vw, 11px)';
 
   return (
@@ -384,13 +419,19 @@ export function FarmPlotBoardV2({ plots, compactMode = false }: FarmPlotBoardV2P
       }}
     >
       <FarmBackdropV2 compactMode={compactMode} />
-      <FarmHudV2 compactMode={compactMode} />
+      <FarmHudV2
+        compactMode={compactMode}
+        todayFocusMinutes={todayFocusMinutes}
+        coinBalance={coinBalance}
+        plantableSeedCount={plantableSeedCount}
+        harvestablePlotCount={harvestablePlotCount}
+      />
 
       <div
         className="relative z-20 mx-auto flex w-full justify-center px-0 sm:px-2"
         style={{
-          paddingTop: compactMode ? 'clamp(146px, 30vh, 184px)' : 'clamp(94px, 15vh, 134px)',
-          paddingBottom: compactMode ? 'clamp(100px, 14vh, 124px)' : 'clamp(100px, 12vh, 128px)',
+          paddingTop: compactMode ? 'clamp(166px, 31vh, 210px)' : 'clamp(150px, 23vh, 206px)',
+          paddingBottom: compactMode ? 'clamp(106px, 15vh, 132px)' : 'clamp(104px, 13vh, 132px)',
         }}
       >
         <div className="relative" style={{ width: boardWidth }}>
@@ -401,11 +442,20 @@ export function FarmPlotBoardV2({ plots, compactMode = false }: FarmPlotBoardV2P
             style={{
               width: '100%',
               gap: boardGap,
-              filter: 'drop-shadow(0 10px 12px rgba(46,72,27,0.24))',
+              transform: compactMode
+                ? 'perspective(1100px) rotateX(7deg)'
+                : 'perspective(1400px) rotateX(8deg)',
+              transformOrigin: '50% 28%',
+              filter: 'drop-shadow(0 11px 14px rgba(46,72,27,0.24))',
             }}
           >
             {displaySlots.map((plot, index) => (
-              <div key={`farm-v2-slot-${plot?.id ?? index}`}>
+              <div
+                key={`farm-v2-slot-${plot?.id ?? index}`}
+                style={{
+                  transform: `translateY(${Math.floor(index / GRID_SIDE) * (compactMode ? 1.5 : 2.2)}px)`,
+                }}
+              >
                 <FarmPlotTileV2 state={mapPlotStateToTileState(plot)} />
               </div>
             ))}
@@ -413,7 +463,11 @@ export function FarmPlotBoardV2({ plots, compactMode = false }: FarmPlotBoardV2P
         </div>
       </div>
 
-      <FarmBottomBarV2 compactMode={compactMode} />
+      <FarmBottomBarV2
+        compactMode={compactMode}
+        labels={navLabels ?? DEFAULT_NAV_LABELS}
+        onNavigate={onNavigate}
+      />
     </div>
   );
 }

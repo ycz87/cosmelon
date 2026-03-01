@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App'
 import { FarmPixiPrototype } from './components/FarmPixiPrototype'
+import { FarmPixiPhase0Prototype } from './components/FarmPixiPhase0Prototype'
 import { ErrorBoundary, installGlobalErrorHandlers } from './components/ErrorBoundary'
 import { Capacitor } from '@capacitor/core'
 import { StatusBar, Style } from '@capacitor/status-bar'
@@ -17,11 +18,15 @@ if (Capacitor.isNativePlatform()) {
 }
 
 const query = new URLSearchParams(window.location.search);
-const isPixiPrototypeMode = query.get('prototype') === 'pixi' || window.location.hash === '#pixi-prototype';
+const prototypeMode = query.get('prototype');
+const isLegacyPixiPrototypeMode = prototypeMode === 'pixi' || window.location.hash === '#pixi-prototype';
+const isFarmV3Phase0Mode = prototypeMode === 'farm-v3-phase0' || window.location.hash === '#farm-v3-phase0';
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    {isPixiPrototypeMode ? (
+    {isFarmV3Phase0Mode ? (
+      <FarmPixiPhase0Prototype />
+    ) : isLegacyPixiPrototypeMode ? (
       <FarmPixiPrototype />
     ) : (
       <ErrorBoundary>

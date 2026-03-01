@@ -1,0 +1,11 @@
+{
+  "taskId": "E-001-T11",
+  "runId": "20260226-144816Z",
+  "outputDir": "/home/ycz87/.openclaw/workspace-coder/cosmelon/artifacts/e-001-t11/20260226-144816Z",
+  "compareFiles": [
+    "E-001-T11-compare-desktop.png",
+    "E-001-T11-compare-mobile.png",
+    "E-001-T11-compare-detail.png"
+  ],
+  "generatedAt": "2026-02-26T14:48:22.374Z"
+}

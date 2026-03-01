@@ -1,0 +1,10 @@
+{
+  "taskId": "E-001-T20",
+  "durationMs": 12000,
+  "outputDir": "/home/ycz87/.openclaw/workspace-coder/cosmelon/artifacts/e-001-t20/20260301-025524Z",
+  "motionFiles": [
+    "E-001-T20-motion-desktop.webm",
+    "E-001-T20-motion-mobile.webm"
+  ],
+  "generatedAt": "2026-03-01T02:56:17.689Z"
+}
