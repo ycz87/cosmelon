@@ -75,7 +75,6 @@ interface FarmPageProps {
   onUseTrapNet: (plotId: number) => void;
   mutationDoctorSignal: number;
   onGoWarehouse: () => void;
-  onGoMarket: () => void;
   compactShell?: boolean;
 }
 
@@ -131,7 +130,6 @@ export function FarmPage({
   onUseTrapNet,
   mutationDoctorSignal: _mutationDoctorSignal,
   onGoWarehouse,
-  onGoMarket,
   compactShell = false,
 }: FarmPageProps) {
   const theme = useTheme();
@@ -357,27 +355,6 @@ export function FarmPage({
               coinBalance={coinBalance}
               plantableSeedCount={totalPlantableSeeds}
               harvestablePlotCount={harvestablePlotCount}
-              navLabels={{
-                shed: t.tabWarehouse,
-                collection: t.farmCollectionTab,
-                lab: t.farmTabLab,
-                market: t.tabMarket,
-              }}
-              onNavigate={(target) => {
-                if (target === 'shed') {
-                  onGoWarehouse();
-                  return;
-                }
-                if (target === 'collection') {
-                  setSubTab('collection');
-                  return;
-                }
-                if (target === 'lab') {
-                  setSubTab('lab');
-                  return;
-                }
-                onGoMarket();
-              }}
             />
           ) : (
             <SimpleFarmGrid

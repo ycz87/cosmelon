@@ -2,15 +2,6 @@ import { useMemo } from 'react';
 import type { Plot } from '../../types/farm';
 import { FarmPlotTileV2, mapPlotStateToTileState } from './FarmPlotTileV2';
 
-type FarmBoardNavTarget = 'shed' | 'collection' | 'lab' | 'market';
-
-interface FarmBoardNavLabels {
-  shed: string;
-  collection: string;
-  lab: string;
-  market: string;
-}
-
 interface FarmPlotBoardV2Props {
   plots: Plot[];
   compactMode?: boolean;
@@ -18,20 +9,11 @@ interface FarmPlotBoardV2Props {
   coinBalance: number;
   plantableSeedCount: number;
   harvestablePlotCount: number;
-  navLabels?: FarmBoardNavLabels;
-  onNavigate?: (target: FarmBoardNavTarget) => void;
 }
 
 const GRID_SIDE = 3;
 const TOTAL_PLOTS = GRID_SIDE * GRID_SIDE;
 const MOTION_CLASS = 'farm-v2-motion';
-
-const DEFAULT_NAV_LABELS: FarmBoardNavLabels = {
-  shed: '瓜棚',
-  collection: '图鉴',
-  lab: '实验室',
-  market: '商城',
-};
 
 function FarmHudV2({
   compactMode,
@@ -59,8 +41,8 @@ function FarmHudV2({
         className="mx-auto flex h-10 w-full items-center justify-center gap-1.5 px-2 sm:h-11 sm:gap-2 sm:px-4"
         style={{
           maxWidth: compactMode ? '100%' : '940px',
-          borderBottom: '1px solid rgba(103,146,177,0.2)',
-          background: 'linear-gradient(180deg, rgba(171,220,244,0.42) 0%, rgba(171,220,244,0.08) 100%)',
+          borderBottom: '1px solid rgba(100,145,175,0.22)',
+          background: 'linear-gradient(180deg, rgba(167,217,242,0.42) 0%, rgba(167,217,242,0.08) 100%)',
         }}
       >
         {badgeItems.map((badge) => (
@@ -68,9 +50,9 @@ function FarmHudV2({
             key={`farm-v2-hud-${badge.label}`}
             className="flex items-center gap-1 rounded-full border px-2 py-[3px] text-[11px] font-semibold sm:px-3 sm:text-xs"
             style={{
-              borderColor: '#b17d49',
+              borderColor: '#b57d4a',
               color: '#5d3a1f',
-              background: 'linear-gradient(180deg, rgba(255,244,216,0.94) 0%, rgba(247,226,188,0.9) 100%)',
+              background: 'linear-gradient(180deg, rgba(255,244,216,0.95) 0%, rgba(247,226,188,0.9) 100%)',
               boxShadow: '0 1px 0 rgba(255,255,255,0.34) inset',
             }}
           >
@@ -78,56 +60,6 @@ function FarmHudV2({
             <span>{badge.label}</span>
           </div>
         ))}
-      </div>
-    </div>
-  );
-}
-
-function FarmBottomBarV2({
-  compactMode,
-  labels,
-  onNavigate,
-}: {
-  compactMode: boolean;
-  labels: FarmBoardNavLabels;
-  onNavigate?: (target: FarmBoardNavTarget) => void;
-}) {
-  const navButtons: Array<{ id: FarmBoardNavTarget; icon: string; label: string }> = [
-    { id: 'shed', icon: '🏠', label: labels.shed },
-    { id: 'collection', icon: '📖', label: labels.collection },
-    { id: 'lab', icon: '🧪', label: labels.lab },
-    { id: 'market', icon: '🏪', label: labels.market },
-  ];
-
-  return (
-    <div className="absolute inset-x-0 bottom-0 z-40 px-2 pb-2 sm:px-4 sm:pb-3">
-      <div
-        className="mx-auto overflow-hidden rounded-[14px] border-[2px]"
-        style={{
-          width: compactMode ? 'min(96vw, 420px)' : 'min(72vw, 620px)',
-          borderColor: '#8f5a34',
-          background: 'linear-gradient(180deg, #d89c67 0%, #c07845 100%)',
-          boxShadow: '0 -1px 0 rgba(255,255,255,0.24) inset, 0 3px 12px rgba(47,27,12,0.2)',
-        }}
-      >
-        <div className="grid grid-cols-4 gap-1 px-1.5 py-1.5">
-          {navButtons.map((button) => (
-            <button
-              key={`farm-v2-nav-${button.id}`}
-              type="button"
-              className="rounded-[8px] border px-1 py-1 text-center text-[10px] font-semibold transition-transform duration-150 active:scale-95 sm:text-xs"
-              style={{
-                borderColor: '#8f5732',
-                color: '#5d3117',
-                background: 'linear-gradient(180deg, #f7df99 0%, #f0c46a 100%)',
-              }}
-              onClick={() => onNavigate?.(button.id)}
-            >
-              <span className="mr-1">{button.icon}</span>
-              {button.label}
-            </button>
-          ))}
-        </div>
       </div>
     </div>
   );
@@ -165,53 +97,142 @@ function CloudCluster({
         animation: `farmV2CloudDrift ${duration} ease-in-out ${delay} infinite`,
       }}
     >
-      <div className="absolute inset-x-[8%] bottom-[6%] top-[32%] rounded-full bg-white/68" />
-      <div className="absolute left-[2%] top-[30%] h-[48%] w-[38%] rounded-full bg-white/76" />
-      <div className="absolute right-[4%] top-[16%] h-[56%] w-[46%] rounded-full bg-white/78" />
-      <div className="absolute left-[32%] top-[2%] h-[54%] w-[40%] rounded-full bg-white/82" />
+      <div className="absolute inset-x-[8%] bottom-[6%] top-[32%] rounded-full bg-white/70" />
+      <div className="absolute left-[2%] top-[30%] h-[48%] w-[38%] rounded-full bg-white/78" />
+      <div className="absolute right-[4%] top-[16%] h-[56%] w-[46%] rounded-full bg-white/82" />
+      <div className="absolute left-[32%] top-[2%] h-[54%] w-[40%] rounded-full bg-white/84" />
+    </div>
+  );
+}
+
+function FruitTree({
+  left,
+  right,
+  top,
+  scale = 1,
+}: {
+  left?: string;
+  right?: string;
+  top: string;
+  scale?: number;
+}) {
+  const wrapperStyle = {
+    left,
+    right,
+    top,
+    width: `${62 * scale}px`,
+    height: `${70 * scale}px`,
+  };
+
+  return (
+    <div className="absolute z-[7]" style={wrapperStyle}>
+      <div
+        className="absolute left-1/2 bottom-0 -translate-x-1/2 rounded-full"
+        style={{
+          width: `${8 * scale}px`,
+          height: `${28 * scale}px`,
+          background: 'linear-gradient(180deg, #93613e 0%, #74482d 100%)',
+        }}
+      />
+      <div
+        className="absolute left-[8%] top-[16%] rounded-full"
+        style={{
+          width: `${30 * scale}px`,
+          height: `${26 * scale}px`,
+          background: 'radial-gradient(circle at 35% 30%, #98d26e 0%, #72b84f 100%)',
+        }}
+      />
+      <div
+        className="absolute right-[8%] top-[18%] rounded-full"
+        style={{
+          width: `${28 * scale}px`,
+          height: `${24 * scale}px`,
+          background: 'radial-gradient(circle at 30% 30%, #93cd67 0%, #6ab148 100%)',
+        }}
+      />
+      <div
+        className="absolute left-[26%] top-0 rounded-full"
+        style={{
+          width: `${30 * scale}px`,
+          height: `${26 * scale}px`,
+          background: 'radial-gradient(circle at 40% 30%, #9bda70 0%, #74bd52 100%)',
+        }}
+      />
+      <div
+        className="absolute"
+        style={{ left: `${13 * scale}px`, top: `${18 * scale}px`, width: `${7 * scale}px`, height: `${7 * scale}px`, borderRadius: '999px', backgroundColor: '#ffbe55' }}
+      />
+      <div
+        className="absolute"
+        style={{ left: `${36 * scale}px`, top: `${12 * scale}px`, width: `${7 * scale}px`, height: `${7 * scale}px`, borderRadius: '999px', backgroundColor: '#ffbe55' }}
+      />
+      <div
+        className="absolute"
+        style={{ left: `${28 * scale}px`, top: `${28 * scale}px`, width: `${7 * scale}px`, height: `${7 * scale}px`, borderRadius: '999px', backgroundColor: '#ffbe55' }}
+      />
+    </div>
+  );
+}
+
+function Cottage({ left, top }: { left: string; top: string }) {
+  return (
+    <div className="absolute z-[7]" style={{ left, top, width: '58px', height: '54px' }}>
+      <div
+        className="absolute left-1/2 top-0 h-[20px] w-[40px] -translate-x-1/2"
+        style={{
+          clipPath: 'polygon(0% 100%, 50% 0%, 100% 100%)',
+          background: 'linear-gradient(180deg, #cb7f53 0%, #a85f38 100%)',
+        }}
+      />
+      <div
+        className="absolute bottom-0 left-1/2 h-[34px] w-[44px] -translate-x-1/2 rounded-[7px]"
+        style={{ background: 'linear-gradient(180deg, #efd6ae 0%, #ddb682 100%)', border: '1px solid rgba(135,86,54,0.55)' }}
+      />
+      <div className="absolute bottom-[2px] left-1/2 h-[16px] w-[10px] -translate-x-1/2 rounded-[4px] bg-[#9a663f]" />
+      <div className="absolute left-[13px] top-[24px] h-[8px] w-[8px] rounded-[3px] bg-[#a8d8f7]" />
+      <div className="absolute right-[13px] top-[24px] h-[8px] w-[8px] rounded-[3px] bg-[#a8d8f7]" />
     </div>
   );
 }
 
 function FarmBackdropV2({ compactMode }: { compactMode: boolean }) {
-  const skyHeight = compactMode ? '26%' : '25%';
-  const middleTop = compactMode ? '26%' : '25%';
-  const middleHeight = compactMode ? '15%' : '15%';
-  const fieldTop = compactMode ? '41%' : '40%';
-
   return (
     <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden">
+      {/* Sky layer */}
       <div
         className="absolute inset-x-0 top-0 z-[1]"
         style={{
-          height: skyHeight,
-          background: 'linear-gradient(180deg, #8bcff2 0%, #b0e5f8 58%, #caeef8 100%)',
+          height: compactMode ? '28%' : '27%',
+          background: 'linear-gradient(180deg, #8fd4f6 0%, #b9e8fa 64%, #d8f3fb 100%)',
         }}
       />
+
+      {/* Midground layer */}
       <div
         className="absolute inset-x-0 z-[2]"
         style={{
-          top: middleTop,
-          height: middleHeight,
-          background:
-            'linear-gradient(180deg, rgba(176,215,165,0.66) 0%, rgba(157,198,136,0.76) 100%), radial-gradient(circle at 18% 88%, rgba(118,173,89,0.64) 0%, rgba(0,0,0,0) 54%), radial-gradient(circle at 82% 86%, rgba(109,164,79,0.62) 0%, rgba(0,0,0,0) 54%)',
+          top: compactMode ? '28%' : '27%',
+          height: compactMode ? '16%' : '16%',
+          background: 'linear-gradient(180deg, #cde9c5 0%, #b6dca6 40%, #9fcb87 100%)',
         }}
       />
+
+      {/* Grass field layer */}
       <div
         className="absolute inset-x-0 bottom-0 z-[1]"
         style={{
-          top: fieldTop,
-          background: 'linear-gradient(180deg, #aee39f 0%, #98d374 46%, #89c760 100%)',
+          top: compactMode ? '44%' : '43%',
+          background: 'linear-gradient(180deg, #a9df91 0%, #96d171 45%, #89c761 100%)',
         }}
       />
 
       <div
         className={`absolute z-[6] rounded-full ${MOTION_CLASS}`}
         style={{
-          top: compactMode ? '4.8%' : '4.4%',
-          right: compactMode ? '11%' : '13%',
-          width: compactMode ? '78px' : '96px',
-          height: compactMode ? '78px' : '96px',
+          top: compactMode ? '5%' : '4.5%',
+          right: compactMode ? '12%' : '14%',
+          width: compactMode ? '84px' : '98px',
+          height: compactMode ? '84px' : '98px',
           background: 'radial-gradient(circle at 50% 50%, rgba(255,243,178,0.2) 0%, rgba(255,209,106,0.34) 48%, rgba(255,179,80,0) 100%)',
           animation: 'farmV2SunHalo 5.6s ease-in-out -0.8s infinite',
         }}
@@ -219,112 +240,76 @@ function FarmBackdropV2({ compactMode }: { compactMode: boolean }) {
       <div
         className={`absolute z-[7] rounded-full ${MOTION_CLASS}`}
         style={{
-          top: compactMode ? '6.6%' : '6.2%',
-          right: compactMode ? '13.2%' : '14.8%',
-          width: compactMode ? '44px' : '54px',
-          height: compactMode ? '44px' : '54px',
+          top: compactMode ? '7.2%' : '6.8%',
+          right: compactMode ? '14.4%' : '16%',
+          width: compactMode ? '46px' : '56px',
+          height: compactMode ? '46px' : '56px',
           background: 'radial-gradient(circle at 35% 30%, #fff2b0 0%, #ffd56f 60%, #f0a640 100%)',
           boxShadow: '0 0 0 2px rgba(255,215,124,0.34), 0 0 22px rgba(255,202,94,0.46)',
           animation: 'farmV2SunFloat 7.8s ease-in-out -1.2s infinite',
         }}
       />
 
-      <CloudCluster top="3%" left="6%" width="22%" height="10%" opacity={0.88} duration="13s" delay="-0.8s" />
-      <CloudCluster top="8%" left="32%" width="20%" height="10%" opacity={0.82} duration="16s" delay="-2.4s" />
-      <CloudCluster top="4%" right="6%" width="24%" height="11%" opacity={0.86} duration="14s" delay="-1.8s" />
+      <CloudCluster top="3%" left="6%" width="22%" height="10%" opacity={0.9} duration="13s" delay="-0.8s" />
+      <CloudCluster top="8%" left="34%" width="20%" height="10%" opacity={0.84} duration="16s" delay="-2.4s" />
+      <CloudCluster top="4%" right="6%" width="24%" height="11%" opacity={0.88} duration="14s" delay="-1.8s" />
 
       <div
         className="absolute z-[4] rounded-full"
         style={{
-          left: compactMode ? '-4%' : '2%',
-          top: compactMode ? '24%' : '23%',
-          width: compactMode ? '48%' : '34%',
-          height: compactMode ? '13%' : '11%',
-          background: 'radial-gradient(circle at 55% 50%, rgba(153,194,116,0.62) 0%, rgba(110,159,82,0.78) 100%)',
+          left: compactMode ? '-6%' : '0%',
+          top: compactMode ? '29%' : '28%',
+          width: compactMode ? '50%' : '38%',
+          height: compactMode ? '15%' : '14%',
+          background: 'radial-gradient(circle at 55% 50%, rgba(151,199,117,0.76) 0%, rgba(112,165,82,0.86) 100%)',
         }}
       />
       <div
         className="absolute z-[4] rounded-full"
         style={{
-          right: compactMode ? '-5%' : '4%',
-          top: compactMode ? '25%' : '24%',
-          width: compactMode ? '44%' : '30%',
-          height: compactMode ? '13%' : '10%',
-          background: 'radial-gradient(circle at 45% 50%, rgba(155,199,118,0.6) 0%, rgba(113,162,80,0.78) 100%)',
+          right: compactMode ? '-5%' : '3%',
+          top: compactMode ? '30%' : '29%',
+          width: compactMode ? '45%' : '32%',
+          height: compactMode ? '14%' : '13%',
+          background: 'radial-gradient(circle at 45% 50%, rgba(153,201,119,0.74) 0%, rgba(113,164,80,0.86) 100%)',
         }}
       />
 
       <div
         className="absolute z-[5]"
         style={{
-          top: compactMode ? '27%' : '26%',
+          top: compactMode ? '31%' : '30.2%',
           left: '50%',
-          width: compactMode ? '48%' : '34%',
-          height: compactMode ? '13%' : '12%',
+          width: compactMode ? '42%' : '30%',
+          height: compactMode ? '12%' : '11%',
           transform: 'translateX(-50%)',
-          clipPath: 'polygon(45% 0%, 55% 0%, 81% 100%, 19% 100%)',
-          background: 'linear-gradient(180deg, rgba(230,202,141,0.78) 0%, rgba(191,145,96,0.78) 100%)',
+          clipPath: 'polygon(46% 0%, 54% 0%, 80% 100%, 20% 100%)',
+          background: 'linear-gradient(180deg, rgba(231,206,148,0.78) 0%, rgba(193,148,100,0.8) 100%)',
         }}
       />
 
-      <div
-        className="absolute left-[7%] right-[7%] z-[6] rounded-full"
-        style={{
-          top: compactMode ? '38.8%' : '38%',
-          height: compactMode ? '14px' : '16px',
-          background: 'linear-gradient(180deg, rgba(207,149,99,0.46) 0%, rgba(167,111,68,0.52) 100%)',
-        }}
-      />
+      <Cottage left={compactMode ? '2.5%' : '8%'} top={compactMode ? '31%' : '30.6%'} />
+      <FruitTree left={compactMode ? '74%' : '79%'} top={compactMode ? '30%' : '29.5%'} scale={compactMode ? 0.84 : 0.96} />
+      <FruitTree left={compactMode ? '84%' : '86%'} top={compactMode ? '31.2%' : '31%'} scale={compactMode ? 0.7 : 0.8} />
+
       <div
         className="absolute left-[8%] right-[8%] z-[7]"
         style={{
-          top: compactMode ? '39.5%' : '38.9%',
-          height: compactMode ? '6px' : '7px',
-          opacity: 0.62,
+          top: compactMode ? '41.2%' : '40.2%',
+          height: compactMode ? '7px' : '8px',
+          opacity: 0.66,
           background:
-            'repeating-linear-gradient(90deg, rgba(126,73,41,0.84) 0px, rgba(126,73,41,0.84) 5px, rgba(0,0,0,0) 5px, rgba(0,0,0,0) 14px)',
-        }}
-      />
-
-      <div
-        className="absolute z-[7] rounded-[12px]"
-        style={{
-          top: compactMode ? '33.4%' : '32.8%',
-          left: '6%',
-          width: compactMode ? '48px' : '60px',
-          height: compactMode ? '34px' : '42px',
-          opacity: 0.78,
-          background: 'linear-gradient(180deg, rgba(212,155,104,0.66) 0%, rgba(188,121,75,0.75) 100%)',
-          border: '1px solid rgba(136,84,51,0.62)',
-        }}
-      />
-      <div
-        className="absolute z-[7] rounded-full"
-        style={{
-          top: compactMode ? '31.2%' : '30.4%',
-          right: '7%',
-          width: compactMode ? '70px' : '84px',
-          height: compactMode ? '58px' : '68px',
-          opacity: 0.76,
-          background: 'radial-gradient(circle at 40% 45%, rgba(125,194,88,0.86) 0%, rgba(87,150,63,0.94) 100%)',
+            'repeating-linear-gradient(90deg, rgba(126,73,41,0.86) 0px, rgba(126,73,41,0.86) 5px, rgba(0,0,0,0) 5px, rgba(0,0,0,0) 14px)',
         }}
       />
 
       <div
         className="absolute inset-x-0 z-[2]"
         style={{
-          top: compactMode ? '52%' : '50%',
-          height: compactMode ? '18%' : '20%',
-          background: 'linear-gradient(180deg, rgba(182,223,156,0.5) 0%, rgba(141,199,104,0.44) 100%)',
-        }}
-      />
-      <div
-        className="absolute inset-x-0 z-[2]"
-        style={{
-          top: compactMode ? '62%' : '60%',
-          height: compactMode ? '38%' : '40%',
+          top: compactMode ? '56%' : '54%',
+          height: compactMode ? '44%' : '46%',
           background:
-            'linear-gradient(180deg, rgba(158,212,119,0.3) 0%, rgba(131,194,86,0.5) 100%), repeating-linear-gradient(0deg, rgba(123,182,78,0.08) 0px, rgba(123,182,78,0.08) 22px, rgba(0,0,0,0) 22px, rgba(0,0,0,0) 56px)',
+            'linear-gradient(180deg, rgba(161,215,124,0.34) 0%, rgba(130,194,86,0.54) 100%), repeating-linear-gradient(0deg, rgba(123,182,78,0.08) 0px, rgba(123,182,78,0.08) 22px, rgba(0,0,0,0) 22px, rgba(0,0,0,0) 56px)',
         }}
       />
     </div>
@@ -333,59 +318,14 @@ function FarmBackdropV2({ compactMode }: { compactMode: boolean }) {
 
 function FarmBoardSceneDecorV2({ compactMode }: { compactMode: boolean }) {
   return (
-    <>
-      <div
-        className="pointer-events-none absolute z-0 rounded-[12px] border"
-        style={{
-          top: compactMode ? '10px' : '2px',
-          left: compactMode ? '-10px' : '-32px',
-          width: compactMode ? '50px' : '62px',
-          height: compactMode ? '36px' : '42px',
-          opacity: 0.72,
-          borderColor: 'rgba(131,81,48,0.62)',
-          background: 'linear-gradient(180deg, rgba(243,211,158,0.72) 0%, rgba(206,149,99,0.78) 100%)',
-        }}
-      >
-        <div
-          className="absolute left-1/2 -translate-x-1/2"
-          style={{
-            top: compactMode ? '-15px' : '-18px',
-            width: compactMode ? '34px' : '42px',
-            height: compactMode ? '18px' : '22px',
-            clipPath: 'polygon(0% 100%, 50% 0%, 100% 100%)',
-            background: 'linear-gradient(180deg, rgba(204,121,80,0.85) 0%, rgba(165,77,45,0.88) 100%)',
-          }}
-        />
-      </div>
-
-      <div
-        className="pointer-events-none absolute z-0"
-        style={{
-          top: compactMode ? '-8px' : '-12px',
-          right: compactMode ? '-10px' : '-30px',
-          width: compactMode ? '56px' : '66px',
-          height: compactMode ? '56px' : '66px',
-          opacity: 0.78,
-        }}
-      >
-        <div
-          className="absolute bottom-0 left-1/2 h-4 w-2 -translate-x-1/2 rounded-full"
-          style={{ backgroundColor: '#7c5635' }}
-        />
-        <div className="absolute left-0 top-2 h-7 w-7 rounded-full bg-[#85c364]" />
-        <div className="absolute right-0 top-3 h-7 w-7 rounded-full bg-[#78b856]" />
-        <div className="absolute left-[12px] top-[18px] h-8 w-8 rounded-full bg-[#69a54a]" />
-      </div>
-
-      <div
-        className="pointer-events-none absolute left-1/2 z-10 h-10 -translate-x-1/2 rounded-[999px]"
-        style={{
-          bottom: compactMode ? '-18px' : '-20px',
-          width: compactMode ? 'calc(100% + 40px)' : 'calc(100% + 120px)',
-          background: 'radial-gradient(circle at center, rgba(88,128,54,0.58) 0%, rgba(88,128,54,0.2) 56%, rgba(88,128,54,0) 100%)',
-        }}
-      />
-    </>
+    <div
+      className="pointer-events-none absolute left-1/2 z-10 h-10 -translate-x-1/2 rounded-[999px]"
+      style={{
+        bottom: compactMode ? '-18px' : '-20px',
+        width: compactMode ? 'calc(100% + 56px)' : 'calc(100% + 140px)',
+        background: 'radial-gradient(circle at center, rgba(83,128,55,0.58) 0%, rgba(88,128,54,0.22) 56%, rgba(88,128,54,0) 100%)',
+      }}
+    />
   );
 }
 
@@ -396,8 +336,6 @@ export function FarmPlotBoardV2({
   coinBalance,
   plantableSeedCount,
   harvestablePlotCount,
-  navLabels,
-  onNavigate,
 }: FarmPlotBoardV2Props) {
   const displaySlots = useMemo(
     () => Array.from({ length: TOTAL_PLOTS }, (_, index) => plots[index] ?? null),
@@ -405,8 +343,8 @@ export function FarmPlotBoardV2({
   );
 
   const boardWidth = compactMode
-    ? 'min(96vw, 480px)'
-    : 'min(90vw, 860px)';
+    ? 'min(96vw, 500px)'
+    : 'min(92vw, 900px)';
   const boardGap = compactMode ? 'clamp(6px, 1vw, 9px)' : 'clamp(8px, 0.8vw, 11px)';
 
   return (
@@ -415,7 +353,7 @@ export function FarmPlotBoardV2({
       style={{
         minHeight: compactMode ? '100dvh' : 'min(100dvh, 760px)',
         isolation: 'isolate',
-        background: 'linear-gradient(180deg, #8dd1f3 0%, #a8e3f8 34%, #b2e8a5 56%, #99d376 78%, #8bc665 100%)',
+        background: 'linear-gradient(180deg, #90d6f6 0%, #bdeafd 38%, #b4e8a6 58%, #9ad577 80%, #8cc764 100%)',
       }}
     >
       <FarmBackdropV2 compactMode={compactMode} />
@@ -430,8 +368,8 @@ export function FarmPlotBoardV2({
       <div
         className="relative z-20 mx-auto flex w-full justify-center px-0 sm:px-2"
         style={{
-          paddingTop: compactMode ? 'clamp(166px, 31vh, 210px)' : 'clamp(150px, 23vh, 206px)',
-          paddingBottom: compactMode ? 'clamp(106px, 15vh, 132px)' : 'clamp(104px, 13vh, 132px)',
+          paddingTop: compactMode ? 'clamp(168px, 31vh, 214px)' : 'clamp(146px, 22vh, 200px)',
+          paddingBottom: compactMode ? 'clamp(34px, 5vh, 56px)' : 'clamp(42px, 6vh, 70px)',
         }}
       >
         <div className="relative" style={{ width: boardWidth }}>
@@ -453,7 +391,7 @@ export function FarmPlotBoardV2({
               <div
                 key={`farm-v2-slot-${plot?.id ?? index}`}
                 style={{
-                  transform: `translateY(${Math.floor(index / GRID_SIDE) * (compactMode ? 1.5 : 2.2)}px)`,
+                  transform: `translateY(${Math.floor(index / GRID_SIDE) * (compactMode ? 2.4 : 3.2)}px)`,
                 }}
               >
                 <FarmPlotTileV2 state={mapPlotStateToTileState(plot)} />
@@ -462,12 +400,6 @@ export function FarmPlotBoardV2({
           </div>
         </div>
       </div>
-
-      <FarmBottomBarV2
-        compactMode={compactMode}
-        labels={navLabels ?? DEFAULT_NAV_LABELS}
-        onNavigate={onNavigate}
-      />
     </div>
   );
 }

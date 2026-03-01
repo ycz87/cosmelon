@@ -1789,7 +1789,6 @@ function App() {
             harvestedHybridVarietyCount={harvestedHybridVarietyCount}
             fusionHistory={fusionHistory}
             onGoWarehouse={() => setActiveTab('warehouse')}
-            onGoMarket={() => setActiveTab('market')}
           />
         )}
 
