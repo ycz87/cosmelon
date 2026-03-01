@@ -145,6 +145,7 @@ export function FarmPage({
     const forcedBoard = new URLSearchParams(window.location.search).get('farmBoard');
     return forcedBoard !== 'legacy';
   }, []);
+  const gentleV2Layout = useFarmPlotBoardV2 && !compactShell;
 
   // 追踪已揭晓的地块（避免重复触发动画）
   const revealedRef = useRef<Set<number>>(new Set());
@@ -251,7 +252,7 @@ export function FarmPage({
       <div className="flex-1 flex flex-col w-full pt-4 pb-6 gap-4">
         {/* Sub-tab header */}
         <div className="px-4">
-          <SubTabHeader subTab={subTab} setSubTab={setSubTab} theme={theme} t={t} />
+          <SubTabHeader subTab={subTab} setSubTab={setSubTab} theme={theme} t={t} gentle={useFarmPlotBoardV2} />
         </div>
         <CollectionPage collection={farm.collection} />
       </div>
@@ -263,7 +264,7 @@ export function FarmPage({
       <div className="flex-1 flex flex-col w-full pt-4 pb-6 gap-4">
         {/* Sub-tab header */}
         <div className="px-4">
-          <SubTabHeader subTab={subTab} setSubTab={setSubTab} theme={theme} t={t} />
+          <SubTabHeader subTab={subTab} setSubTab={setSubTab} theme={theme} t={t} gentle={useFarmPlotBoardV2} />
         </div>
         <GeneLabPage
           geneInventory={geneInventory}
@@ -285,12 +286,17 @@ export function FarmPage({
 
   return (
     <div
-      className={`flex-1 flex flex-col w-full ${compactShell ? 'px-0 pt-0 pb-0 gap-0' : 'px-4 pt-4 pb-6 gap-4'}`}
+      className={`flex-1 flex flex-col w-full ${compactShell ? 'px-0 pt-0 pb-0 gap-0' : gentleV2Layout ? 'px-3 sm:px-4 pt-2 pb-3 gap-2' : 'px-4 pt-4 pb-6 gap-4'}`}
+      style={gentleV2Layout
+        ? {
+          background: 'linear-gradient(180deg, #9ad7f4 0%, #a6def2 28%, #a8d993 56%, #94cf73 100%)',
+        }
+        : undefined}
     >
       {!compactShell && (
         <>
           {/* Sub-tab header */}
-          <SubTabHeader subTab={subTab} setSubTab={setSubTab} theme={theme} t={t} />
+          <SubTabHeader subTab={subTab} setSubTab={setSubTab} theme={theme} t={t} gentle={useFarmPlotBoardV2} />
 
           {/* 道具快捷栏 */}
           <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1">
@@ -332,7 +338,7 @@ export function FarmPage({
 
       {/* 农场场景 */}
       <div
-        className={`farm-page ${compactShell ? 'pt-0' : 'pt-4'}`}
+        className={`farm-page ${compactShell ? 'pt-0' : gentleV2Layout ? 'pt-1' : 'pt-4'}`}
         style={compactShell ? { backgroundColor: '#5a8c3a' } : undefined}
       >
           {useFarmPlotBoardV2 ? (
@@ -431,11 +437,12 @@ export function FarmPage({
 }
 
 // ─── Sub-tab header ───
-function SubTabHeader({ subTab, setSubTab, theme, t }: {
+function SubTabHeader({ subTab, setSubTab, theme, t, gentle = false }: {
   subTab: SubTab;
   setSubTab: (t: SubTab) => void;
   theme: ReturnType<typeof useTheme>;
   t: ReturnType<typeof useI18n>;
+  gentle?: boolean;
 }) {
   const subTabIndex: Record<SubTab, number> = {
     plots: 0,
@@ -443,14 +450,36 @@ function SubTabHeader({ subTab, setSubTab, theme, t }: {
     lab: 2,
   };
 
+  const wrapperStyle = gentle
+    ? {
+      backgroundColor: 'rgba(244,231,198,0.28)',
+      border: '1px solid rgba(178,138,96,0.34)',
+      boxShadow: '0 1px 0 rgba(255,255,255,0.28) inset',
+      backdropFilter: 'blur(5px)',
+      WebkitBackdropFilter: 'blur(5px)',
+    }
+    : { backgroundColor: theme.inputBg };
+
+  const indicatorStyle = gentle
+    ? {
+      background: 'linear-gradient(180deg, rgba(232,157,112,0.34) 0%, rgba(211,121,78,0.26) 100%)',
+      opacity: 1,
+    }
+    : {
+      backgroundColor: theme.accent,
+      opacity: 0.16,
+    };
+
+  const activeTextColor = gentle ? '#5c371f' : theme.text;
+  const inactiveTextColor = gentle ? 'rgba(90,60,37,0.75)' : theme.textMuted;
+
   return (
     <div className="w-full">
-      <div className="relative flex items-center rounded-full p-[3px]" style={{ backgroundColor: theme.inputBg }}>
+      <div className="relative flex items-center rounded-full p-[3px]" style={wrapperStyle}>
         <div
           className="absolute top-[3px] bottom-[3px] rounded-full transition-all duration-200 ease-in-out"
           style={{
-            backgroundColor: theme.accent,
-            opacity: 0.16,
+            ...indicatorStyle,
             width: 'calc((100% - 6px) / 3)',
             left: '3px',
             transform: `translateX(${subTabIndex[subTab] * 100}%)`,
@@ -458,27 +487,27 @@ function SubTabHeader({ subTab, setSubTab, theme, t }: {
         />
         <button
           onClick={() => setSubTab('plots')}
-          className="relative z-10 px-4 py-2 rounded-full text-xs font-medium transition-all duration-200 ease-in-out cursor-pointer flex-1"
+          className="relative z-10 px-4 py-2 rounded-full text-xs font-semibold transition-all duration-200 ease-in-out cursor-pointer flex-1"
           style={{
-            color: subTab === 'plots' ? theme.text : theme.textMuted,
+            color: subTab === 'plots' ? activeTextColor : inactiveTextColor,
           }}
         >
           🌱 {t.farmPlotsTab}
         </button>
         <button
           onClick={() => setSubTab('collection')}
-          className="relative z-10 px-4 py-2 rounded-full text-xs font-medium transition-all duration-200 ease-in-out cursor-pointer flex-1"
+          className="relative z-10 px-4 py-2 rounded-full text-xs font-semibold transition-all duration-200 ease-in-out cursor-pointer flex-1"
           style={{
-            color: subTab === 'collection' ? theme.text : theme.textMuted,
+            color: subTab === 'collection' ? activeTextColor : inactiveTextColor,
           }}
         >
           📖 {t.farmCollectionTab}
         </button>
         <button
           onClick={() => setSubTab('lab')}
-          className="relative z-10 px-4 py-2 rounded-full text-xs font-medium transition-all duration-200 ease-in-out cursor-pointer flex-1"
+          className="relative z-10 px-4 py-2 rounded-full text-xs font-semibold transition-all duration-200 ease-in-out cursor-pointer flex-1"
           style={{
-            color: subTab === 'lab' ? theme.text : theme.textMuted,
+            color: subTab === 'lab' ? activeTextColor : inactiveTextColor,
           }}
         >
           🧪 {t.farmTabLab}

@@ -63,16 +63,16 @@ function FarmBottomBarV2({ compactMode }: { compactMode: boolean }) {
         className="mx-auto overflow-hidden rounded-[14px] border-[2px]"
         style={{
           width: compactMode ? 'min(96vw, 420px)' : 'min(72vw, 620px)',
-          borderColor: '#8c5833',
-          background: 'linear-gradient(180deg, #d48a57 0%, #b96f3d 100%)',
-          boxShadow: '0 -1px 0 rgba(255,255,255,0.35) inset, 0 4px 16px rgba(47,27,12,0.28)',
+          borderColor: '#8f5a34',
+          background: 'linear-gradient(180deg, #d89c67 0%, #c07845 100%)',
+          boxShadow: '0 -1px 0 rgba(255,255,255,0.24) inset, 0 3px 12px rgba(47,27,12,0.2)',
         }}
       >
         <div
           className="flex items-center justify-center gap-1.5 px-2 py-2 sm:gap-2"
           style={{
-            borderBottom: '2px solid rgba(126,74,42,0.75)',
-            background: 'linear-gradient(180deg, rgba(248,205,152,0.62) 0%, rgba(223,158,106,0.44) 100%)',
+            borderBottom: '2px solid rgba(126,74,42,0.58)',
+            background: 'linear-gradient(180deg, rgba(247,209,156,0.46) 0%, rgba(221,155,101,0.3) 100%)',
           }}
         >
           {toolButtons.map((button) => (
@@ -82,7 +82,7 @@ function FarmBottomBarV2({ compactMode }: { compactMode: boolean }) {
               style={{
                 borderColor: '#9b6037',
                 color: '#5a361a',
-                background: 'linear-gradient(180deg, #f7e4ba 0%, #ebc98f 100%)',
+                background: 'linear-gradient(180deg, #f7e8c4 0%, #edd2a2 100%)',
               }}
             >
               <span>{button.icon}</span>
@@ -98,8 +98,8 @@ function FarmBottomBarV2({ compactMode }: { compactMode: boolean }) {
                 borderColor: '#8f5732',
                 color: index === 0 ? '#5d3117' : '#6f4829',
                 background: index === 0
-                  ? 'linear-gradient(180deg, #f6dd94 0%, #efbf5a 100%)'
-                  : 'linear-gradient(180deg, #f0c98f 0%, #dca266 100%)',
+                  ? 'linear-gradient(180deg, #f7df99 0%, #f0c46a 100%)'
+                  : 'linear-gradient(180deg, #f0ce9f 0%, #dfae75 100%)',
               }}
             >
               {label}
@@ -114,68 +114,91 @@ function FarmBottomBarV2({ compactMode }: { compactMode: boolean }) {
 function FarmBackdropV2({ compactMode }: { compactMode: boolean }) {
   return (
     <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden">
-      <div className="absolute -top-4 left-[6%] h-9 w-20 rounded-full bg-white/55 blur-[0.4px]" />
-      <div className="absolute top-4 left-[13%] h-7 w-16 rounded-full bg-white/75" />
-      <div className="absolute top-6 right-[10%] h-8 w-20 rounded-full bg-white/70" />
-      <div className="absolute top-2 right-[16%] h-6 w-14 rounded-full bg-white/50" />
+      <div className="absolute -top-3 left-[7%] h-9 w-20 rounded-full bg-white/60" />
+      <div className="absolute top-4 left-[14%] h-7 w-16 rounded-full bg-white/76" />
+      <div className="absolute top-5 right-[10%] h-9 w-20 rounded-full bg-white/70" />
+      <div className="absolute top-1 right-[16%] h-6 w-14 rounded-full bg-white/52" />
+
+      <div
+        className="absolute rounded-full"
+        style={{
+          top: compactMode ? '16%' : '14%',
+          right: compactMode ? '18%' : '20%',
+          width: compactMode ? '58px' : '72px',
+          height: compactMode ? '58px' : '72px',
+          background: 'radial-gradient(circle at 35% 35%, #ffe79a 0%, #f8c35a 64%, #e39a3f 100%)',
+          boxShadow: '0 0 0 10px rgba(248,212,118,0.14)',
+        }}
+      />
+
+      <div
+        className="absolute inset-x-0"
+        style={{
+          top: compactMode ? '26%' : '24%',
+          height: compactMode ? '20%' : '18%',
+          background:
+            'linear-gradient(180deg, rgba(177,213,152,0.46) 0%, rgba(142,192,112,0.38) 100%), radial-gradient(circle at 18% 86%, rgba(110,168,83,0.42) 0%, rgba(0,0,0,0) 48%), radial-gradient(circle at 80% 90%, rgba(98,154,74,0.38) 0%, rgba(0,0,0,0) 50%)',
+        }}
+      />
 
       <div
         className="absolute left-[6%] right-[6%] z-[3] rounded-full"
         style={{
-          top: compactMode ? '35.5%' : '32.5%',
+          top: compactMode ? '41.5%' : '39%',
           height: compactMode ? '14px' : '16px',
-          background: 'linear-gradient(180deg, rgba(204,148,95,0.38) 0%, rgba(165,110,66,0.48) 100%)',
+          background: 'linear-gradient(180deg, rgba(206,151,102,0.42) 0%, rgba(167,112,70,0.5) 100%)',
         }}
       />
       <div
         className="absolute left-[8%] right-[8%] z-[4]"
         style={{
-          top: compactMode ? '36.3%' : '33.3%',
+          top: compactMode ? '42.1%' : '39.7%',
           height: compactMode ? '6px' : '7px',
-          opacity: 0.62,
+          opacity: 0.6,
           background:
-            'repeating-linear-gradient(90deg, rgba(124,73,41,0.85) 0px, rgba(124,73,41,0.85) 5px, rgba(0,0,0,0) 5px, rgba(0,0,0,0) 14px)',
+            'repeating-linear-gradient(90deg, rgba(128,75,43,0.84) 0px, rgba(128,75,43,0.84) 5px, rgba(0,0,0,0) 5px, rgba(0,0,0,0) 14px)',
         }}
       />
 
       <div
         className="absolute z-[2] rounded-[12px]"
         style={{
-          top: compactMode ? '30.5%' : '27.8%',
+          top: compactMode ? '35.5%' : '33%',
           left: '6%',
           width: compactMode ? '48px' : '60px',
           height: compactMode ? '34px' : '42px',
           opacity: 0.78,
-          background: 'linear-gradient(180deg, rgba(209,151,102,0.65) 0%, rgba(184,119,74,0.74) 100%)',
-          border: '1px solid rgba(136,84,51,0.6)',
+          background: 'linear-gradient(180deg, rgba(211,154,104,0.66) 0%, rgba(187,121,75,0.75) 100%)',
+          border: '1px solid rgba(136,84,51,0.62)',
         }}
       />
       <div
         className="absolute z-[2] rounded-full"
         style={{
-          top: compactMode ? '28%' : '25.2%',
+          top: compactMode ? '33%' : '30%',
           right: '7%',
-          width: compactMode ? '64px' : '78px',
-          height: compactMode ? '52px' : '64px',
-          opacity: 0.72,
-          background: 'radial-gradient(circle at 40% 45%, rgba(121,187,84,0.82) 0%, rgba(85,149,62,0.92) 100%)',
+          width: compactMode ? '68px' : '82px',
+          height: compactMode ? '56px' : '66px',
+          opacity: 0.76,
+          background: 'radial-gradient(circle at 40% 45%, rgba(124,191,86,0.86) 0%, rgba(88,151,64,0.94) 100%)',
         }}
       />
 
       <div
         className="absolute inset-x-0"
         style={{
-          top: compactMode ? '36%' : '33%',
-          height: compactMode ? '20%' : '18%',
-          background: 'linear-gradient(180deg, rgba(180,217,146,0.52) 0%, rgba(137,195,102,0.44) 100%)',
+          top: compactMode ? '44%' : '41.2%',
+          height: compactMode ? '24%' : '22%',
+          background: 'linear-gradient(180deg, rgba(181,222,155,0.5) 0%, rgba(141,199,104,0.44) 100%)',
         }}
       />
       <div
         className="absolute inset-x-0"
         style={{
-          top: compactMode ? '42%' : '39%',
-          height: compactMode ? '58%' : '61%',
-          background: 'linear-gradient(180deg, rgba(151,204,111,0.22) 0%, rgba(126,188,84,0.42) 100%)',
+          top: compactMode ? '55%' : '52%',
+          height: compactMode ? '45%' : '48%',
+          background:
+            'linear-gradient(180deg, rgba(157,211,118,0.28) 0%, rgba(130,194,86,0.46) 100%), repeating-linear-gradient(0deg, rgba(124,184,79,0.08) 0px, rgba(124,184,79,0.08) 22px, rgba(0,0,0,0) 22px, rgba(0,0,0,0) 56px)',
         }}
       />
     </div>
@@ -248,8 +271,8 @@ export function FarmPlotBoardV2({ plots, compactMode = false }: FarmPlotBoardV2P
 
   const boardWidth = compactMode
     ? 'min(100vw, calc(100dvh - 260px), 446px)'
-    : 'min(86vw, 760px)';
-  const boardGap = compactMode ? 'clamp(6px, 1vw, 9px)' : 'clamp(8px, 0.9vw, 12px)';
+    : 'min(90vw, 820px)';
+  const boardGap = compactMode ? 'clamp(6px, 1vw, 9px)' : 'clamp(8px, 0.85vw, 11px)';
 
   return (
     <div
@@ -265,8 +288,8 @@ export function FarmPlotBoardV2({ plots, compactMode = false }: FarmPlotBoardV2P
       <div
         className="relative z-20 mx-auto flex w-full justify-center px-0 sm:px-2"
         style={{
-          paddingTop: compactMode ? 'clamp(146px, 30vh, 184px)' : 'clamp(108px, 17vh, 156px)',
-          paddingBottom: compactMode ? 'clamp(100px, 14vh, 124px)' : 'clamp(116px, 15vh, 144px)',
+          paddingTop: compactMode ? 'clamp(146px, 30vh, 184px)' : 'clamp(92px, 15vh, 136px)',
+          paddingBottom: compactMode ? 'clamp(100px, 14vh, 124px)' : 'clamp(104px, 13vh, 132px)',
         }}
       >
         <div className="relative" style={{ width: boardWidth }}>
