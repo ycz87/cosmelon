@@ -375,16 +375,18 @@ export function FarmPlotBoardV2({
   const isNarrowScreen = typeof window !== 'undefined' && window.innerWidth < 640;
   const useTightMobileSpacing = isNarrowScreen && !compactMode;
 
-  const boardWidth = compactMode || useTightMobileSpacing
+  const boardWidth = compactMode
     ? 'min(96vw, 500px)'
-    : 'min(92vw, 900px)';
+    : useTightMobileSpacing
+      ? 'min(calc(100% - 4px), 500px)'
+      : 'min(92vw, 900px)';
   const boardGap = compactMode || useTightMobileSpacing
     ? 'clamp(6px, 1vw, 9px)'
     : 'clamp(8px, 0.8vw, 11px)';
 
   return (
     <div
-      className="relative w-full overflow-hidden"
+      className={`relative w-full ${useTightMobileSpacing ? 'overflow-visible' : 'overflow-hidden'}`}
       style={{
         minHeight: compactMode
           ? 'min(100dvh, 630px)'
@@ -405,16 +407,18 @@ export function FarmPlotBoardV2({
       />
 
       <div
-        className="relative z-20 mx-auto flex w-full justify-center px-0 sm:px-2"
+        className={`relative z-20 mx-auto flex w-full justify-center ${useTightMobileSpacing ? 'px-1 sm:px-2' : 'px-0 sm:px-2'}`}
         style={{
           paddingTop: compactMode
             ? 'clamp(168px, 31vh, 214px)'
             : useTightMobileSpacing
               ? 'clamp(150px, 22vh, 182px)'
               : 'clamp(146px, 22vh, 200px)',
-          paddingBottom: compactMode || useTightMobileSpacing
+          paddingBottom: compactMode
             ? 'clamp(6px, 1.1vh, 10px)'
-            : 'clamp(12px, 2vh, 20px)',
+            : useTightMobileSpacing
+              ? 'clamp(8px, 1.3vh, 12px)'
+              : 'clamp(12px, 2vh, 20px)',
         }}
       >
         <div className="relative" style={{ width: boardWidth }}>

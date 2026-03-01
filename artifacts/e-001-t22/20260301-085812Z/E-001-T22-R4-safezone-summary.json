@@ -1,0 +1,41 @@
+{
+  "generatedAt": "2026-03-01T09:00:01.008Z",
+  "checks": [
+    {
+      "viewport": {
+        "width": 390,
+        "height": 844,
+        "name": "mobile-390x844"
+      },
+      "minLeft": 0.6,
+      "maxRight": 389.4,
+      "maxBottom": 683.5,
+      "leftSafe": true,
+      "rightSafe": true,
+      "bottomSafe": true,
+      "pass": true,
+      "files": {
+        "screenshot": "E-001-T22-R4-mobile-390x844.png",
+        "annotation": "E-001-T22-R4-safezone-mobile-390x844.png"
+      }
+    },
+    {
+      "viewport": {
+        "width": 360,
+        "height": 800,
+        "name": "narrow-360x800"
+      },
+      "minLeft": 1.4,
+      "maxRight": 358.6,
+      "maxBottom": 646.6,
+      "leftSafe": true,
+      "rightSafe": true,
+      "bottomSafe": true,
+      "pass": true,
+      "files": {
+        "screenshot": "E-001-T22-R4-narrow-360x800.png",
+        "annotation": "E-001-T22-R4-safezone-narrow-360x800.png"
+      }
+    }
+  ]
+}

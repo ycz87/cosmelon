@@ -391,7 +391,7 @@ export function FarmPage({
 
       {/* 农场场景 */}
       <div
-        className={`farm-page min-h-0 ${useFarmPlotBoardV2 && !compactShell ? 'flex-none sm:flex-1' : 'flex-1'} ${compactShell ? 'pt-0' : gentleV2Layout ? 'pt-1' : 'pt-4'}`}
+        className={`farm-page min-h-0 ${useFarmPlotBoardV2 && !compactShell ? 'flex-none -mx-3 sm:mx-0 sm:flex-1' : 'flex-1'} ${compactShell ? 'pt-0' : gentleV2Layout ? 'pt-1' : 'pt-4'}`}
         style={compactShell ? { backgroundColor: '#5a8c3a' } : undefined}
       >
           {useFarmPlotBoardV2 ? (
