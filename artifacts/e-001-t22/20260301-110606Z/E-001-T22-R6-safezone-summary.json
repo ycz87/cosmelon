@@ -1,0 +1,45 @@
+{
+  "generatedAt": "2026-03-01T11:07:06.234Z",
+  "checks": [
+    {
+      "viewport": {
+        "width": 390,
+        "height": 844,
+        "name": "mobile-390x844"
+      },
+      "bottomGap": 13.3,
+      "minLeft": 0.6,
+      "maxRight": 389.4,
+      "maxBottom": 830.7,
+      "leftSafe": true,
+      "rightSafe": true,
+      "bottomSafe": true,
+      "gapRangeCheck": true,
+      "pass": true,
+      "files": {
+        "screenshot": "E-001-T22-R6-mobile-390x844.png",
+        "annotation": "E-001-T22-R6-safezone-mobile-390x844.png"
+      }
+    },
+    {
+      "viewport": {
+        "width": 360,
+        "height": 800,
+        "name": "narrow-360x800"
+      },
+      "bottomGap": 9.4,
+      "minLeft": 1.4,
+      "maxRight": 358.6,
+      "maxBottom": 790.6,
+      "leftSafe": true,
+      "rightSafe": true,
+      "bottomSafe": true,
+      "gapRangeCheck": true,
+      "pass": true,
+      "files": {
+        "screenshot": "E-001-T22-R6-narrow-360x800.png",
+        "annotation": "E-001-T22-R6-safezone-narrow-360x800.png"
+      }
+    }
+  ]
+}
