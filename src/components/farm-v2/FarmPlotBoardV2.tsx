@@ -231,7 +231,7 @@ function FarmBackdropV2({ compactMode }: { compactMode: boolean }) {
       <div
         className="absolute inset-x-0 z-[2]"
         style={{
-          top: compactMode ? '28%' : '27%',
+          top: compactMode ? '28%' : useTightBackdrop ? '35%' : '27%',
           height: compactMode ? '16%' : '16%',
           background: 'linear-gradient(180deg, #d1ebc7 0%, #bbdea9 44%, #9fcc88 100%)',
         }}
@@ -242,7 +242,7 @@ function FarmBackdropV2({ compactMode }: { compactMode: boolean }) {
         style={{
           left: compactMode ? '-8%' : '-6%',
           right: compactMode ? '-8%' : '-6%',
-          top: compactMode ? '28.8%' : '28%',
+          top: compactMode ? '28.8%' : useTightBackdrop ? '35.6%' : '28%',
           height: compactMode ? '17.6%' : '17.2%',
           borderRadius: '50% 50% 0 0 / 78% 78% 0 0',
           background: 'linear-gradient(180deg, rgba(151,198,115,0.9) 0%, rgba(116,171,86,0.94) 100%)',
@@ -253,7 +253,7 @@ function FarmBackdropV2({ compactMode }: { compactMode: boolean }) {
         style={{
           left: compactMode ? '10%' : '13%',
           width: compactMode ? '76%' : '70%',
-          top: compactMode ? '30.2%' : '29.5%',
+          top: compactMode ? '30.2%' : useTightBackdrop ? '37%' : '29.5%',
           height: compactMode ? '13.6%' : '13.2%',
           borderRadius: '54% 46% 0 0 / 100% 100% 0 0',
           background: 'linear-gradient(180deg, rgba(171,212,132,0.86) 0%, rgba(126,182,94,0.88) 100%)',
@@ -264,7 +264,7 @@ function FarmBackdropV2({ compactMode }: { compactMode: boolean }) {
       <div
         className="absolute inset-x-0 bottom-0 z-[1]"
         style={{
-          top: compactMode ? '44%' : '43%',
+          top: compactMode ? '44%' : useTightBackdrop ? '51%' : '43%',
           background: 'linear-gradient(180deg, #a8de90 0%, #95d06f 45%, #89c761 100%)',
         }}
       />
@@ -300,7 +300,7 @@ function FarmBackdropV2({ compactMode }: { compactMode: boolean }) {
       <div
         className="absolute z-[6]"
         style={{
-          top: compactMode ? '30.8%' : useTightBackdrop ? '30.2%' : '29.8%',
+          top: compactMode ? '30.8%' : useTightBackdrop ? '38.2%' : '29.8%',
           left: '50%',
           width: compactMode ? '38%' : '28%',
           height: compactMode ? '11.5%' : '10.8%',
@@ -312,17 +312,17 @@ function FarmBackdropV2({ compactMode }: { compactMode: boolean }) {
 
       <FruitTree
         left={compactMode ? '8.2%' : useTightBackdrop ? '8%' : '9.2%'}
-        top={compactMode ? '30.5%' : useTightBackdrop ? '30.2%' : '29.8%'}
+        top={compactMode ? '30.5%' : useTightBackdrop ? '38.2%' : '29.8%'}
         scale={compactMode ? 0.84 : useTightBackdrop ? 0.9 : 0.94}
         testId="farm-v2-tree-left"
       />
       <Cottage
         left={compactMode ? '18%' : useTightBackdrop ? '20%' : '23.5%'}
-        top={compactMode ? '31%' : useTightBackdrop ? '30.6%' : '30.2%'}
+        top={compactMode ? '31%' : useTightBackdrop ? '38.6%' : '30.2%'}
       />
       <FruitTree
         right={compactMode ? '7.8%' : useTightBackdrop ? '7.2%' : '8.8%'}
-        top={compactMode ? '30.6%' : useTightBackdrop ? '30.3%' : '29.9%'}
+        top={compactMode ? '30.6%' : useTightBackdrop ? '38.3%' : '29.9%'}
         scale={compactMode ? 0.86 : useTightBackdrop ? 0.92 : 0.98}
         testId="farm-v2-tree-right"
       />
@@ -330,7 +330,7 @@ function FarmBackdropV2({ compactMode }: { compactMode: boolean }) {
       {/* Clear fence: posts + 2 rails */}
       <div
         className="absolute left-[7%] right-[7%] z-[8]"
-        style={{ top: compactMode ? '39.3%' : useTightBackdrop ? '38.5%' : '38.2%', height: compactMode ? '14px' : '15px' }}
+        style={{ top: compactMode ? '39.3%' : useTightBackdrop ? '47.8%' : '38.2%', height: compactMode ? '14px' : '15px' }}
       >
         <div
           className="absolute left-0 right-0 top-[1px] h-[3px] rounded-full"
@@ -353,7 +353,7 @@ function FarmBackdropV2({ compactMode }: { compactMode: boolean }) {
       <div
         className="absolute inset-x-0 z-[2]"
         style={{
-          top: compactMode ? '56%' : '54%',
+          top: compactMode ? '56%' : useTightBackdrop ? '62%' : '54%',
           height: compactMode ? '44%' : '46%',
           background:
             'linear-gradient(180deg, rgba(161,215,124,0.34) 0%, rgba(130,194,86,0.54) 100%), repeating-linear-gradient(0deg, rgba(123,182,78,0.08) 0px, rgba(123,182,78,0.08) 22px, rgba(0,0,0,0) 22px, rgba(0,0,0,0) 56px)',
