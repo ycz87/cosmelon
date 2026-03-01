@@ -1,0 +1,29 @@
+{
+  "generatedAt": "2026-03-01T23:42:00.688Z",
+  "task": "E-001-T22 Step A R7",
+  "scope": "fix seam band between sky and hill/cottage layer",
+  "checks": [
+    {
+      "viewport": "390x844",
+      "bottomGap": 15,
+      "maxBottom": 829,
+      "files": {
+        "before": "E-001-T22-R6-mobile-390x844.png",
+        "current": "E-001-T22-R7-current-mobile-390x844.png",
+        "compare": "E-001-T22-R7-compare-mobile-390x844.png",
+        "seamAnnotation": "E-001-T22-R7-seam-annotation-mobile-390x844.png"
+      }
+    },
+    {
+      "viewport": "360x800",
+      "bottomGap": 18.3,
+      "maxBottom": 781.7,
+      "files": {
+        "before": "E-001-T22-R6-narrow-360x800.png",
+        "current": "E-001-T22-R7-current-narrow-360x800.png",
+        "compare": "E-001-T22-R7-compare-narrow-360x800.png",
+        "seamAnnotation": "E-001-T22-R7-seam-annotation-narrow-360x800.png"
+      }
+    }
+  ]
+}

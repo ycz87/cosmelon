@@ -222,8 +222,10 @@ function FarmBackdropV2({ compactMode }: { compactMode: boolean }) {
       <div
         className="absolute inset-x-0 top-0 z-[1]"
         style={{
-          height: compactMode ? '28%' : '27%',
-          background: 'linear-gradient(180deg, #8ed3f5 0%, #b8e8fa 66%, #d9f4fb 100%)',
+          height: compactMode ? '28%' : useTightBackdrop ? '35%' : '27%',
+          background: useTightBackdrop
+            ? 'linear-gradient(180deg, #8ed3f5 0%, #b8e8fa 58%, #d1ebc7 100%)'
+            : 'linear-gradient(180deg, #8ed3f5 0%, #b8e8fa 66%, #d9f4fb 100%)',
         }}
       />
 
