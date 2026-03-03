@@ -399,7 +399,7 @@ export function FarmPlotBoardV2({
     ? 'min(96vw, 500px)'
     : useTightMobileSpacing
       ? 'min(calc(100% - 4px), 500px)'
-      : 'min(92vw, 900px)';
+      : 'min(82vw, calc(100dvh - 290px), 620px)';
   const boardGap = compactMode || useTightMobileSpacing
     ? 'clamp(6px, 1vw, 9px)'
     : 'clamp(8px, 0.8vw, 11px)';
@@ -412,7 +412,7 @@ export function FarmPlotBoardV2({
           ? 'min(100dvh, 630px)'
           : useTightMobileSpacing
             ? 'min(100dvh, 556px)'
-            : 'min(100dvh, 760px)',
+            : 'min(76dvh, 660px)',
         isolation: 'isolate',
         background: 'linear-gradient(180deg, #90d6f6 0%, #bdeafd 38%, #b4e8a6 58%, #9ad577 80%, #8cc764 100%)',
       }}
@@ -433,12 +433,12 @@ export function FarmPlotBoardV2({
             ? 'clamp(168px, 31vh, 214px)'
             : useTightMobileSpacing
               ? 'clamp(132px, 19vh, 164px)'
-              : 'clamp(132px, 20vh, 186px)',
+              : 'clamp(96px, 14.5vh, 132px)',
           paddingBottom: compactMode
             ? 'clamp(6px, 1.1vh, 10px)'
             : useTightMobileSpacing
               ? 'clamp(8px, 1.3vh, 12px)'
-              : 'clamp(12px, 2vh, 20px)',
+              : 'clamp(18px, 2.5vh, 28px)',
           transform: useTightMobileSpacing ? 'translateY(clamp(156px, calc(26.7vw + 63px), 170px))' : undefined,
         }}
       >

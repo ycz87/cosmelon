@@ -1,0 +1,29 @@
+{
+  "metrics": [
+    {
+      "viewport": 900,
+      "pixelBottomMargin": 61,
+      "boardBottom": 831.581787109375,
+      "boardTop": 210.486083984375,
+      "farmBottom": 888,
+      "farmTop": 112
+    },
+    {
+      "viewport": 720,
+      "pixelBottomMargin": 85,
+      "boardBottom": 624.7387542724609,
+      "boardTop": 190.58201599121094,
+      "farmBottom": 708,
+      "farmTop": 112
+    },
+    {
+      "viewport": 844,
+      "pixelBottomMargin": 12,
+      "boardBottom": 822.335205078125,
+      "boardTop": 441.6106872558594,
+      "farmBottom": 668,
+      "farmTop": 108
+    }
+  ],
+  "generatedAt": "2026-03-03T15:55:27.531Z"
+}

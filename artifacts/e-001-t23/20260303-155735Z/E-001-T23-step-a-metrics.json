@@ -1,0 +1,64 @@
+{
+  "taskId": "E-001-T23",
+  "scope": "Step A Desktop first-screen visual convergence",
+  "generatedAt": "2026-03-03T15:57:57.576Z",
+  "outputDir": "/home/ycz87/.openclaw/workspace-coder/cosmelon/artifacts/e-001-t23/20260303-155735Z",
+  "metrics": [
+    {
+      "viewport": "desktop-1440x900",
+      "boardLeftPx": 401.0755615234375,
+      "boardRightPx": 1038.9244384765625,
+      "boardTopPx": 210.486083984375,
+      "boardBottomPx": 831.581787109375,
+      "boardWidthPx": 637.848876953125,
+      "boardHeightPx": 621.095703125,
+      "viewportWidthPx": 1440,
+      "viewportHeightPx": 900,
+      "bottomSafeMarginPx": 68.418212890625,
+      "leftSafeMarginPx": 401.0755615234375,
+      "rightSafeMarginPx": 401.0755615234375
+    },
+    {
+      "viewport": "desktop-1280x720",
+      "boardLeftPx": 418.17254638671875,
+      "boardRightPx": 861.8274536132812,
+      "boardTopPx": 190.58201599121094,
+      "boardBottomPx": 624.7387542724609,
+      "boardWidthPx": 443.6549072265625,
+      "boardHeightPx": 434.15673828125,
+      "viewportWidthPx": 1280,
+      "viewportHeightPx": 720,
+      "bottomSafeMarginPx": 95.26124572753906,
+      "leftSafeMarginPx": 418.17254638671875,
+      "rightSafeMarginPx": 418.17254638671875
+    },
+    {
+      "viewport": "mobile-390x844",
+      "boardLeftPx": 0.7443652153015137,
+      "boardRightPx": 389.25565671920776,
+      "boardTopPx": 441.6106872558594,
+      "boardBottomPx": 822.335205078125,
+      "boardWidthPx": 388.51129150390625,
+      "boardHeightPx": 380.7245178222656,
+      "viewportWidthPx": 390,
+      "viewportHeightPx": 844,
+      "bottomSafeMarginPx": 21.664794921875,
+      "leftSafeMarginPx": 0.7443652153015137,
+      "rightSafeMarginPx": 0.7443432807922363
+    },
+    {
+      "viewport": "mobile-360x800",
+      "boardLeftPx": 1.5552978515625,
+      "boardRightPx": 358.4447021484375,
+      "boardTopPx": 424.99395751953125,
+      "boardBottomPx": 775.0196533203125,
+      "boardWidthPx": 356.889404296875,
+      "boardHeightPx": 350.02569580078125,
+      "viewportWidthPx": 360,
+      "viewportHeightPx": 800,
+      "bottomSafeMarginPx": 24.9803466796875,
+      "leftSafeMarginPx": 1.5552978515625,
+      "rightSafeMarginPx": 1.5552978515625
+    }
+  ]
+}
